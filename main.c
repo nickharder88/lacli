@@ -3,59 +3,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
-    int* data;
-} Matrix;
+#include "matrix.h"
 
-typedef struct Packet {
-    void* data;
-    char error[80];
-} Packet;
-
-typedef struct Node {
-    int data;
-    struct Node* next;
-    struct Node* prev;
-} Node;
-
-void AppendToMatrix(Node** matrixEnd, int num);
-Packet* GetMatrixFromUser(void);
-void PrintMatrix(Node* head);
-Packet* CreatePacket(void);
-Node* CreateNode(void);
-Node* CreateNodeAfter(Node* head);
-void FreeNodes(Node* head);
 char GetNextNonspace(void);
 
 int main(int argc, char** argv) {
-    Packet* packet = GetMatrixFromUser();
+    Matrix m = GetMatrixFromUser();
 
-    if(packet->data == NULL) {
-        printf("%s", packet->error);
-        return 1;
-    }
+    // errno
 
-    Node* matrixHead = (Node*)packet->data;
-    PrintMatrix(matrixHead);
+    PrintMatrix(head);
 
-    FreeNodes(matrixHead);
-    free(packet);
-
+    FreeNodes(head);
     return 0;
 }
 
-Packet* GetMatrixFromUser(void) {
-    Packet* packet = CreatePacket();
-
+Matrix GetMatrixFromUser(void) {
     int c = GetNextNonspace();
     if(c != '[') {
-        strcpy(packet->error, "invalid syntax: matrix must start with a [\n");
-        return packet;
+        // strcpy(packet->error, "invalid syntax: matrix must start with a [\n");
+        // errno
+        return NULL;
     }
-
-    Node* matrixEnd;
-    Node* head;
-    matrixEnd = head = NULL;
 
     int num = 0;
     while((c = GetNextNonspace())) {
@@ -77,14 +46,12 @@ Packet* GetMatrixFromUser(void) {
 
             break;
         } else {
-            strcpy(packet->error, "invalid syntax: matrix must contain only digits, commas, and spaces. matrix must end with a ].\n");
-            return packet;
+            // strcpy(packet->error, "invalid syntax: matrix must contain only digits, commas, and spaces. matrix must end with a ].\n");
+            return NULL;
         }
     }
 
-    packet->data = head;
-
-    return packet;
+    return head;
 }
 
 void AppendToMatrix(Node** matrixEnd, int num) {
@@ -118,12 +85,6 @@ void PrintMatrix(Node* head) {
     }
 
     printf("%d]\n", head->data);
-}
-
-Packet* CreatePacket(void) {
-    Packet* packet = (Packet*)malloc(sizeof(Packet));
-    packet->data = NULL;
-    return packet;
 }
 
 Node* CreateNode(void) {
