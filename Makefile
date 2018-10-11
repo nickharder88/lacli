@@ -1,8 +1,8 @@
 CFLAGS := -g -Wall
 CC := cc
 
-OBJDIR := .../obj
-SRCDIR := .../src
+OBJDIR := obj
+SRCDIR := src
 
 SRCFILES := $(wildcard $(SRCDIR)/*.c)
 OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCFILES))

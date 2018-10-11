@@ -2,23 +2,70 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "defs.h"
 #include "matrix.h"
 
-int main(int argc, char** argv) {
-    Matrix matrix;
-    char line[200];
+void promptf(char* print, int n) {
+    if(n == 0) {
+        printf("==> ");
+        return;
+    }
 
-    do {
-        printf("Enter matrix:\n");
-        fgets(line, 200, stdin);
-        matrix = matrix_parse(line);
-        if(matrix == NULL) {
-            break;
+    printf("%s\n==> ", print);
+}
+
+int get_command(char* command, char* line) {
+    int i;
+    for(i = 0; i < MAXIDENTIFIER - 1; i++) {
+        if(isalnum(*line)) {
+            command[i] = line[i];
+            continue;
         }
 
-        matrix_print(matrix, stdout);
-        matrix_destroy(matrix);
-    } while(1);
+        break;
+    }
+    command[i] = '\0';
+    return i;
+}
 
+int main(int argc, char** argv) {
+    /* Allocated buffer size */
+    ssize_t numchar;
+    char *line = NULL, *ptr;
+    char command[MAXIDENTIFIER];
+    size_t len = 0;
+
+    Matrix matrix;
+
+    while(1) {
+        promptf("", 0);
+        if((numchar = getline(&line, &len, stdin)) == -1) {
+            continue;
+        }
+
+        numchar = get_command(command, line);
+        /* move pointer */
+        line += numchar;
+
+        /* skip whitespace */
+        for(ptr = line; *ptr == ' ' || *ptr == '\t'; ptr++);
+
+        switch(*line) {
+            case '\n':
+            case '\0':
+                // matrix = dict_get(command);
+                // matrix_print(matrix, stdout);
+                break;
+            case '=':
+                matrix = matrix_parse(command, line);
+                break;
+            default:
+                printf("Invalid input\n");
+                free(line);
+                return 1;
+        }
+    }
+
+    free(line);
     return 0;
 }

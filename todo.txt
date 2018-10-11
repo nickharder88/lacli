@@ -1,0 +1,5 @@
+1. Continuous prompt to user
+2. Storage of matrices
+3. Vector objects
+4. Algorithms on matrices
+5. Unit testing
