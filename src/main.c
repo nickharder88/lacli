@@ -4,6 +4,7 @@
 
 #include "defs.h"
 #include "matrix.h"
+#include "dict.h"
 
 void promptf(char* print, int n) {
     if(n == 0) {
@@ -47,17 +48,18 @@ int main(int argc, char** argv) {
         /* move pointer */
         line += numchar;
 
-        /* skip whitespace */
+        /* skip whitespace after identifier */
         for(ptr = line; *ptr == ' ' || *ptr == '\t'; ptr++);
 
         switch(*line) {
             case '\n':
             case '\0':
-                // matrix = dict_get(command);
-                // matrix_print(matrix, stdout);
+                matrix = dict_get(command);
+                matrix_print(matrix, stdout);
                 break;
             case '=':
                 matrix = matrix_parse(command, line);
+                dict_add(command, matrix);
                 break;
             default:
                 printf("Invalid input\n");
@@ -65,6 +67,8 @@ int main(int argc, char** argv) {
                 return 1;
         }
     }
+
+    /* free each matrix in dict */
 
     free(line);
     return 0;
