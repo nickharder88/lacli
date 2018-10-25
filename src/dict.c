@@ -20,6 +20,41 @@ struct nlist {
 #define HASHSIZE 101
 static nlist dict[HASHSIZE];
 
+
+Matrix _dict_next(char restart) {
+    static unsigned i = 0;
+    static nlist np = NULL;
+    Matrix m;
+
+    if(restart) {
+        i = 0;
+        np = NULL;
+        return NULL;
+    }
+
+    while(np == NULL && i < HASHSIZE) {
+        i++;
+        np = dict[i];
+    }
+
+    /* need to restart iterator */
+    if(i == HASHSIZE) {
+        return NULL;
+    }
+
+    m = np->matrix;
+    np = np->next;
+    return m;
+}
+
+void dict_iter_begin(void) {
+    _dict_next(1);
+}
+
+Matrix dict_next(void) {
+    return _dict_next(0);
+}
+
 unsigned hash(char* s) {
     unsigned hashval;
     for(hashval = 0; *s != '\0'; s++)

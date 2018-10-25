@@ -98,13 +98,9 @@ void matrix_destroy(Matrix m) {
 }
 
 Matrix matrix_parse(char* identifier, char* line) {
-    char *c;
+    char *c = line;
     Row r;
     Matrix matrix = matrix_create(identifier);
-
-    while(*line == ' ')
-        line++;
-    c = line;
 
     if(*c++ != '[') {
         printf("Error: matrix must start with a [\n");
@@ -134,6 +130,21 @@ Matrix matrix_parse(char* identifier, char* line) {
 
     matrix->ncols = r->len;
     matrix->nrows = 1;
+
+    return matrix;
+}
+
+Matrix matrix_evaluate(char* identifier, char* line) {
+    Matrix matrix;
+
+    // TODO 
+    // C = A + B
+    // C = A * B
+    // C = A - B
+    
+    // gets the variables and adds them together.
+    // first support 2 matrix, then infinite?
+    
 
     return matrix;
 }
