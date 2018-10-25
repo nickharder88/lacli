@@ -25,13 +25,13 @@ void row_destroy(Row r) {
 Row row_parse(char* line) {
     char c;
     unsigned len = 0;
-    int *vals, dig, size = 1;
+    int *vals, dig = 0, size = 1;
 
     Row row = (Row) malloc(sizeof(Row));
     row->len = 0;
     vals = row->vals = (int*)malloc(size * sizeof(int));
 
-    if((c = getchar()) != '[') {
+    if((c = *line++) != '[') {
         printf("Error: Row must start with a [\n");
         row_destroy(row);
         return NULL;
@@ -71,23 +71,21 @@ struct Matrix {
     char* name;
     unsigned nrows;
     unsigned ncols;
-    Row* rows;
+    Row rows;
 };
 
 /*
  * Returns rows by cols Matrix without a name
  */
 Matrix matrix_create(char* identifier) {
-    int i;
-    int* row;
     Matrix matrix;
 
     matrix = (Matrix)malloc(sizeof(struct Matrix));
 
     matrix->rows = NULL;
     matrix->name = strdup(identifier);
-    matrix->nrows = USHRT_MAX;
-    matrix->ncols = USHRT_MAX;
+    matrix->nrows = 0;
+    matrix->ncols = 0;
 
     return matrix;
 }
@@ -100,12 +98,13 @@ void matrix_destroy(Matrix m) {
 }
 
 Matrix matrix_parse(char* identifier, char* line) {
-    char *c = line;
+    char *c;
     Row r;
     Matrix matrix = matrix_create(identifier);
 
-    while(*c == ' ')
-        c++;
+    while(*line == ' ')
+        line++;
+    c = line;
 
     if(*c++ != '[') {
         printf("Error: matrix must start with a [\n");
@@ -123,46 +122,40 @@ Matrix matrix_parse(char* identifier, char* line) {
         if((r = row_parse(line)) == NULL) {
             matrix_destroy(matrix);
             return NULL;
-        } else
-            matrix->rows = &r;
+        } else {
+            matrix->rows = (Row) malloc(sizeof(struct Row));
+            matrix->rows[0] = *r;
+        }
     } else {
         printf("Error: Invalid character in matrix: %c\n", *line);
         matrix_destroy(matrix);
         return NULL;
     }
 
+    matrix->ncols = r->len;
+    matrix->nrows = 1;
+
     return matrix;
 }
 
-struct Matrix {
-    char* name;
-    unsigned nrows;
-    unsigned ncols;
-    Row* rows;
-};
-
-
-void matrix_print(Matrix m, FILE* ofile) {
-    unsigned i;
-    Row r;
+void matrix_print(Matrix m) {
+    unsigned i, j;
+    Row row;
 
     if(m == NULL) {
         printf("Error: cannot print matrix. Matrix does not exist.\n");
         return;
     }
 
-    fprintf(ofile, "%s:", m->name);
-
+    printf("%s\n", m->name);
+    printf("[\n");
     for(i = 0; i < m->nrows; i++) {
-        // TODO finish printing matrixes
+        row = m->rows + i;
+        putchar('\t');
+        for(j = 0; j < row->len - 1; j++) {
+            printf("%d\t", row->vals[j]);
+        }
+        printf("%d\n", row->vals[row->len-1]);
     }
+    printf("]\n");
 }
-
-
-
-
-
-
-
-
-

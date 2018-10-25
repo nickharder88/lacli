@@ -18,7 +18,7 @@ void promptf(char* print, int n) {
 int get_command(char* command, char* line) {
     int i;
     for(i = 0; i < MAXIDENTIFIER - 1; i++) {
-        if(isalnum(*line)) {
+        if(isalnum(line[i])) {
             command[i] = line[i];
             continue;
         }
@@ -45,20 +45,24 @@ int main(int argc, char** argv) {
         }
 
         numchar = get_command(command, line);
-        /* move pointer */
-        line += numchar;
 
         /* skip whitespace after identifier */
-        for(ptr = line; *ptr == ' ' || *ptr == '\t'; ptr++);
+        for(ptr = line + numchar; *ptr == ' ' || *ptr == '\t'; ptr++);
 
-        switch(*line) {
+        switch(*ptr) {
             case '\n':
             case '\0':
                 matrix = dict_get(command);
-                matrix_print(matrix, stdout);
+                if(matrix == NULL) {
+                    printf("Error: Invalid identifer. No matrix %s\n", command);
+                    continue;
+                }
+                matrix_print(matrix);
                 break;
             case '=':
-                matrix = matrix_parse(command, line);
+                /* skip the = */
+                ptr++;
+                matrix = matrix_parse(command, ptr);
                 dict_add(command, matrix);
                 break;
             default:

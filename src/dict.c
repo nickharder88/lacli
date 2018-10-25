@@ -17,32 +17,32 @@ struct nlist {
     Matrix matrix;
 };
 
+#define HASHSIZE 101
+static nlist dict[HASHSIZE];
+
 unsigned hash(char* s) {
     unsigned hashval;
     for(hashval = 0; *s != '\0'; s++)
         hashval = *s + 31 * hashval;
-    return hashval;
+    return hashval % HASHSIZE;
 }
 
 nlist dict_lookup(char* key) {
-    nlist np;
-
-    for(np = dict[hash(key)]; np != NULL; np = np->next)
+    for(nlist np = dict[hash(key)]; np != NULL; np = np->next)
         if(strcmp(key, np->key) == 0)
             return np; /* found */
     return NULL; /* not found */
 }
 
 Matrix dict_get(char* key) {
-    nlist np;
-    np = dict_lookup(key);
+    nlist np = dict_lookup(key);
     if(np == NULL)
         return NULL;
     return np->matrix;
 }
 
 void *dict_add(char* key, Matrix val) {
-    nlist np;
+    nlist np, next;
     unsigned hashval;
 
     if((np = dict_lookup(key)) == NULL) {
@@ -51,13 +51,22 @@ void *dict_add(char* key, Matrix val) {
             free(np);
             return NULL;
         }
+        np->matrix = val;
+
         hashval = hash(key);
-        np->next = dict[hashval];
+        next = dict[hashval];
+        np->next = next;
         np->prev = NULL;
-        dict[hashval]->prev = np;
+        if(next != NULL)
+            next->prev = np;
         dict[hashval] = np;
-    } else
+    } else {
+        /* Already have this key
+         * Destroy old matrix and put in new one 
+         */
         matrix_destroy(np->matrix);
+        np->matrix = val;
+    }
 
     /* if strdup fails */
     if((np->key = strdup(key)) == NULL) {
