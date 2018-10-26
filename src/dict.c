@@ -4,26 +4,20 @@
 #include "dict.h"
 #include "matrix.h"
 
-struct pair {
-    char *key;
-    Matrix matrix;
-};
-typedef struct pair* pair;
-
-struct nlist {
+typedef struct nlist {
     struct nlist* next;
     struct nlist* prev;
     char* key;
-    Matrix matrix;
-};
+    Matrix* matrix;
+} nlist;
 
 #define HASHSIZE 101
-static nlist dict[HASHSIZE];
+static nlist* dict[HASHSIZE];
 
-Matrix _dict_next(char restart) {
+Matrix* _dict_next(char restart) {
     static unsigned i = 0;
-    static nlist np = NULL;
-    Matrix m;
+    static nlist *np = NULL;
+    Matrix* m;
 
     if(restart) {
         i = 0;
@@ -50,7 +44,7 @@ void dict_iter_begin(void) {
     _dict_next(1);
 }
 
-Matrix dict_next(void) {
+Matrix* dict_next(void) {
     return _dict_next(0);
 }
 
@@ -61,22 +55,22 @@ unsigned hash(char* s) {
     return hashval % HASHSIZE;
 }
 
-nlist dict_lookup(char* key) {
-    for(nlist np = dict[hash(key)]; np != NULL; np = np->next)
+nlist* dict_lookup(char* key) {
+    for(nlist* np = dict[hash(key)]; np != NULL; np = np->next)
         if(strcmp(key, np->key) == 0)
             return np; /* found */
     return NULL; /* not found */
 }
 
-Matrix dict_get(char* key) {
-    nlist np = dict_lookup(key);
+Matrix* dict_get(char* key) {
+    nlist* np = dict_lookup(key);
     if(np == NULL)
         return NULL;
     return np->matrix;
 }
 
-void *dict_add(char* key, Matrix val) {
-    nlist np, next;
+void *dict_add(char* key, Matrix* val) {
+    nlist *np, *next;
     unsigned hashval;
 
     if((np = dict_lookup(key)) == NULL) {
@@ -111,10 +105,10 @@ void *dict_add(char* key, Matrix val) {
     return np;
 }
 
-Matrix dict_remove(char* key) {
-    nlist np, prev, next;
+Matrix* dict_remove(char* key) {
+    nlist *np, *prev, *next;
     unsigned hashval;
-    Matrix m;
+    Matrix* m;
 
     /* not in dict */
     if((np = dict_lookup(key)) == NULL) {

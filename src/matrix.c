@@ -11,59 +11,72 @@
 /*
  * internal_matrix represented as a 2D array
  */
-typedef struct Row {
+struct Row {
     unsigned len;
     int *vals;
-} Row;
+};
 
 void row_destroy(Row *r) {
     free(r->vals);
-    free(r);
 }
 
 // A = [[1,2,3],[4,5,6]]
-Row* row_parse(char* line) {
-    char c;
-    unsigned len = 0;
-    int *vals, dig = 0, size = 1;
+Row* row_parse(char** line) {
+    char c, *ptr = *line;
+    int dig = 0, size = 1, *vals;
 
-    Row* row = (Row*) malloc(sizeof(Row));
+    Row* row = malloc(sizeof(Row));
     row->len = 0;
-    vals = row->vals = (int*)malloc(size * sizeof(int));
+    row->vals = malloc(size * sizeof(int));
 
-    if((c = *line++) != '[') {
+    if((c = *ptr++) != '[') {
         printf("Error: Row must start with a [\n");
         row_destroy(row);
+        free(row);
         return NULL;
     }
 
-    while((c = *line++) != '\0') {
+    while((c = *ptr++) != '\0') {
         if(c == ']') {
-            vals[len++] = dig;
+            row->vals[row->len++] = dig;
             break;
         } else if(c == ',') {
-            vals[len++] = dig;
-            if(len >= size) {
+            if(row->len >= size) {
                 size *= 2;
-                vals = (int *)realloc(vals, size);
+                if((vals = realloc(row->vals, size)) == NULL) {
+                    printf("Error: could not allocate memory. Try again.\n");
+                    row_destroy(row);
+                    free(row);
+                    return NULL;
+                }
+                row->vals = vals;
             }
+            row->vals[row->len++] = dig;
             dig = 0;
         } else if(isdigit(c)) {
             dig = dig * 10 + c - '0';
         } else if(!isspace(c)) {
             printf("Error: Invalid character in matrix defintion : %c\n", c);
             row_destroy(row);
+            free(row);
             return NULL;
         }
     }
 
     if(c == '\0') {
         row_destroy(row);
+        free(row);
         return NULL;
     }
 
-    vals = (int*)realloc(vals, len);
-    row->len = len;
+    if((vals = realloc(row->vals, row->len)) == NULL) {
+        printf("Error: could not allocate memory. Try again.\n");
+        row_destroy(row);
+        free(row);
+        return NULL;
+    }
+    row->vals = vals;
+    *line = ptr;
     return row;
 }
 
@@ -73,15 +86,14 @@ struct Matrix {
     unsigned ncols;
     Row* rows;
 };
-typedef struct Matrix* Matrix;
 
 /*
  * Returns rows by cols Matrix without a name
  */
-Matrix matrix_create(char* identifier) {
-    Matrix matrix;
+Matrix* matrix_create(char* identifier) {
+    Matrix* matrix;
 
-    matrix = (Matrix)malloc(sizeof(struct Matrix));
+    matrix = (Matrix*)malloc(sizeof(Matrix));
 
     matrix->rows = NULL;
     matrix->name = strdup(identifier);
@@ -91,17 +103,25 @@ Matrix matrix_create(char* identifier) {
     return matrix;
 }
 
-void matrix_destroy(Matrix m) {
-    if(m->rows != NULL)
+void matrix_destroy(Matrix* m) {
+    unsigned i;
+    if(m->rows != NULL) {
+        for(i = 0; i < m->nrows; i++)
+            row_destroy((m->rows + i));
         free(m->rows);
+    }
     free(m->name);
     free(m);
 }
 
-Matrix matrix_parse(char* identifier, char* line) {
+Matrix* matrix_parse(char* identifier, char* line) {
+    unsigned row_check = 0, size = 1;
     char *c = line;
-    Row *r;
-    Matrix matrix = matrix_create(identifier);
+    Row *r, *rows;
+    Matrix* matrix = matrix_create(identifier);
+
+    matrix->rows = (Row*)malloc(sizeof(Row));
+    matrix->nrows = 0;
 
     if(*c++ != '[') {
         printf("Error: matrix must start with a [\n");
@@ -112,31 +132,75 @@ Matrix matrix_parse(char* identifier, char* line) {
     while(*c == ' ')
         c++;
 
-    if(*c == '[')
-        row_parse(c);
+    if(*c == '[') {
+        do {
+            if((r = row_parse(&c)) == NULL) {
+                matrix_destroy(matrix);
+                return NULL;
+            }
+
+            if(row_check == 0)
+                row_check = r->len;
+            else if(r->len != row_check) {
+                printf("Error: matrix rows must have same length\n");
+                matrix_destroy(matrix);
+                row_destroy(r);
+                free(r);
+                return NULL;
+            }
+
+            if(matrix->nrows >= size) {
+                size *= 2;
+                if((rows = realloc(matrix->rows, size)) == NULL) {
+                    printf("Error: could not allocate memory. Try again.\n");
+                    matrix_destroy(matrix);
+                    row_destroy(r);
+                    free(r);
+                    return NULL;
+                }
+                matrix->rows = rows;
+            }
+            matrix->rows[matrix->nrows++] = *r;
+
+            /* skip spaces, commas, and deal with end of matrix */
+            while(*c == ' ')
+                c++;
+            if(*c == ']')
+                break;
+            if(*c == ',')
+                c++;
+            while(*c == ' ')
+                c++;
+        } while(*c == '[');
+    }
     else if(isdigit(*c)) {
         /* this matrix is just a vector */
-        if((r = row_parse(line)) == NULL) {
+        if((r = row_parse(&line)) == NULL) {
             matrix_destroy(matrix);
             return NULL;
-        } else {
-            matrix->rows = (Row*) malloc(sizeof(Row));
-            matrix->rows[0] = *r;
-        }
+        } else
+            matrix->rows[matrix->nrows++] = *r;
     } else {
         printf("Error: Invalid character in matrix: %c\n", *line);
         matrix_destroy(matrix);
         return NULL;
     }
 
-    matrix->ncols = r->len;
-    matrix->nrows = 1;
+    if(matrix->nrows < size) {
+        if((rows = realloc(matrix->rows, matrix->nrows)) == NULL) {
+            printf("Error: could not allocate memory. Try again.\n");
+            matrix_destroy(matrix);
+            return NULL;
+        }
+        matrix->rows = rows;
+    }
+    matrix->ncols = row_check;
 
     return matrix;
 }
 
-Matrix matrix_add(char* identifier, Matrix a, Matrix b) {
-    Matrix m;
+Matrix* matrix_add(char* identifier, Matrix* a, Matrix* b) {
+    Matrix* m;
     Row *row;
     unsigned row_i, col_i;
 
@@ -166,11 +230,11 @@ Matrix matrix_add(char* identifier, Matrix a, Matrix b) {
     return m;
 }
 
-Matrix matrix_evaluate(char* identifier, char* line) {
+Matrix* matrix_evaluate(char* identifier, char* line) {
     char id[MAXIDENTIFIER];
     unsigned short i = 0, id_i = 0;
-    Matrix matrix;
-    Matrix *matrices = (Matrix*)malloc(2*sizeof(Matrix));
+    Matrix* matrix;
+    Matrix** matrices = (Matrix**)malloc(2*sizeof(Matrix*));
 
     struct {
         unsigned int addition : 1;
@@ -230,7 +294,7 @@ Matrix matrix_evaluate(char* identifier, char* line) {
     return matrix;
 }
 
-void matrix_print(Matrix m) {
+void matrix_print(Matrix* m) {
     unsigned i, j;
     Row row;
 
