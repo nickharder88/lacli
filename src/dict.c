@@ -20,7 +20,6 @@ struct nlist {
 #define HASHSIZE 101
 static nlist dict[HASHSIZE];
 
-
 Matrix _dict_next(char restart) {
     static unsigned i = 0;
     static nlist np = NULL;

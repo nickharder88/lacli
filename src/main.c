@@ -17,9 +17,6 @@ void promptf(char* print, int n) {
     printf("%s\n==> ", print);
 }
 
-char* getword() {
-}
-
 int get_command(char* command, char* line) {
     int i;
     for(i = 0; i < MAXIDENTIFIER - 1; i++) {
@@ -57,6 +54,12 @@ int main(int argc, char** argv) {
         switch(*ptr) {
             case '\n':
             case '\0':
+                /* Exit the program */
+                if(strcmp(ptr, QUIT) == 0) {
+                    quit = 1;
+                    break;
+                }
+
                 matrix = dict_get(command);
                 if(matrix == NULL) {
                     printf("No matrix %s\n", command);
@@ -79,11 +82,6 @@ int main(int argc, char** argv) {
 
                 break;
             default:
-                /* Exit the program */
-                if(strcmp(ptr, QUIT) == 0) {
-                    quit = 1;
-                    break;
-                }
                 printf("Invalid input\n");
                 free(line);
                 return 1;
