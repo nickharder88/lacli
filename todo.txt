@@ -3,3 +3,15 @@
 3. Vector objects
 4. Algorithms on matrices
 5. Unit testing
+
+Be able to parse
+
+a = [1,2]
+b = [2,3]
+a = [1,2] + b
+c = [[1,2,3],[1,2,3]]
+d = [[3],[4]]
+e = c * d
+rref(e)
+det(e)
+null(e)

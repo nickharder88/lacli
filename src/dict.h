@@ -6,6 +6,7 @@
 Matrix* dict_get(char* key);
 void *dict_add(char* key, Matrix* val);
 Matrix* dict_remove(char* key);
+void dict_clear(void);
 
 void dict_iter_begin(void);
 Matrix* dict_next(void);

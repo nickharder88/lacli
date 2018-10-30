@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "defs.h"
 
-typedef struct Row Row;
 typedef struct Matrix Matrix;
 
 Matrix* matrix_create(char* identifier);

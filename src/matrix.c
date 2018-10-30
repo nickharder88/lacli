@@ -7,93 +7,7 @@
 #include "defs.h"
 #include "matrix.h"
 #include "dict.h"
-
-/*
- * internal_matrix represented as a 2D array
- */
-struct Row {
-    unsigned len;
-    int *vals;
-};
-
-void row_destroy(Row *r) {
-    free(r->vals);
-}
-
-unsigned check_row_size(Row* ptr, unsigned size) {
-    int* vals;
-
-    if(ptr->len < size) {
-        return size;
-    }
-
-    size *= 2;
-    if((vals = realloc(ptr->vals, size * sizeof(int))) == NULL) {
-        printf("Error: could not allocate memory. Try again.\n");
-        row_destroy(ptr);
-        free(ptr);
-        return 0;
-    }
-    ptr->vals = vals;
-
-    return size;
-}
-
-Row* row_parse(char** line) {
-    char c, *ptr = *line;
-    int dig = 0, *vals;
-    unsigned size = 1;
-
-    Row* row = malloc(sizeof(Row));
-    row->len = 0;
-    row->vals = malloc(size * sizeof(int));
-
-    if((c = *ptr++) != '[') {
-        printf("Error: Row must start with a [\n");
-        row_destroy(row);
-        free(row);
-        return NULL;
-    }
-
-    while((c = *ptr++) != '\0') {
-        if(c == ']') {
-            if((size = check_row_size(row, size)) == 0) {
-                return NULL;
-            }
-            row->vals[row->len++] = dig;
-            break;
-        } else if(c == ',') {
-            if((size = check_row_size(row, size)) == 0) {
-                return NULL;
-            }
-            row->vals[row->len++] = dig;
-            dig = 0;
-        } else if(isdigit(c)) {
-            dig = dig * 10 + c - '0';
-        } else if(!isspace(c)) {
-            printf("Error: Invalid character in matrix defintion : %c\n", c);
-            row_destroy(row);
-            free(row);
-            return NULL;
-        }
-    }
-
-    if(c == '\0') {
-        row_destroy(row);
-        free(row);
-        return NULL;
-    }
-
-    if((vals = realloc(row->vals, row->len * sizeof(int))) == NULL) {
-        printf("Error: could not allocate memory. Try again.\n");
-        row_destroy(row);
-        free(row);
-        return NULL;
-    }
-    row->vals = vals;
-    *line = ptr;
-    return row;
-}
+#include "row.h"
 
 struct Matrix {
     char* name;
@@ -189,7 +103,7 @@ Matrix* matrix_parse(char* identifier, char* line) {
                 c++;
         } while(*c == '[');
     }
-    else if(isdigit(*c)) {
+    else if(isdigit(*c) || *c == '-') {
         /* this matrix is just a vector */
         if((r = row_parse(&line)) == NULL) {
             matrix_destroy(matrix);
@@ -248,6 +162,42 @@ Matrix* matrix_add(char* identifier, Matrix* a, Matrix* b) {
     return m;
 }
 
+Matrix* matrix_multiply(char* identifier, Matrix* a, Matrix* b) {
+    Matrix* m;
+    Row* row;
+    unsigned row_i, col_i, col_j;
+    int sum;
+
+    if(a->ncols != b->nrows) {
+        printf("Error: matrices cannot be multiplied\n");
+        return NULL;
+    }
+
+    m = matrix_create(identifier);
+    m->rows = (Row*)malloc(a->nrows * sizeof(Row));
+
+    /* dimensions: a=mxn b=nxp matrix=mxp */
+    m->nrows = a->nrows;
+    m->ncols = b->ncols;
+
+    for(row_i = 0; row_i < a->nrows; row_i++) {
+        row = m->rows + row_i;
+        row->len = m->ncols;
+        row->vals = (int*)malloc(m->ncols * sizeof(int));
+
+        for(col_i = 0; col_i < m->ncols; col_i++) {
+            sum = 0;
+
+            for(col_j = 0; col_j < a->ncols; col_j++)
+                sum += a->rows[row_i].vals[col_j] * b->rows[col_j].vals[col_i];
+
+            row->vals[col_i] = sum;
+        }
+    }
+
+    return m;
+}
+
 Matrix* matrix_evaluate(char* identifier, char* line) {
     char id[MAXIDENTIFIER];
     unsigned short i = 0, id_i = 0;
@@ -256,14 +206,10 @@ Matrix* matrix_evaluate(char* identifier, char* line) {
 
     struct {
         unsigned int addition : 1;
+        unsigned int mult : 1;
     } flags = {
-        0
+        0, 0
     };
-
-    // TODO 
-    // C = A + B
-    // C = A * B
-    // C = A - B
 
     while(*line != '\n' && *line != '\0') {
         while(*line == ' ')
@@ -272,6 +218,12 @@ Matrix* matrix_evaluate(char* identifier, char* line) {
         if(*line == '+') {
             line++;
             flags.addition = 1;
+            continue;
+        }
+
+        if(*line == '*') {
+            line++;
+            flags.mult = 1;
             continue;
         }
 
@@ -304,7 +256,9 @@ Matrix* matrix_evaluate(char* identifier, char* line) {
 
     if(flags.addition)
         matrix = matrix_add(identifier, matrices[0], matrices[1]);
-    else {
+    else if(flags.mult) {
+        matrix = matrix_multiply(identifier, matrices[0], matrices[1]);
+    } else {
         free(matrices);
         return NULL;
     }

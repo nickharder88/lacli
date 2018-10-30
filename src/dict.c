@@ -40,9 +40,11 @@ Matrix* _dict_next(char restart) {
     return m;
 }
 
+
 void dict_iter_begin(void) {
     _dict_next(1);
 }
+
 
 Matrix* dict_next(void) {
     return _dict_next(0);
@@ -127,9 +129,26 @@ Matrix* dict_remove(char* key) {
         dict[hashval] = next;
     }
 
-    m = next->matrix;
+    m = np->matrix;
     free(np->key);
     free(np);
 
     return m;
+}
+
+void dict_clear(void) {
+    nlist *np, *next;
+    unsigned i;
+
+    for(i = 0; i < HASHSIZE; i++) {
+        np = dict[i];
+
+        while(np != NULL) {
+            next = np->next;
+            matrix_destroy(np->matrix);
+            free(np->key);
+            free(np);
+            np = next;
+        }
+    }
 }

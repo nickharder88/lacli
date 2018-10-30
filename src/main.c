@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     char command[MAXIDENTIFIER];
     size_t len = 0;
 
-    Matrix* matrix;
+    Matrix* matrix, *tmp;
 
     while(!quit) {
         promptf("", 0);
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
                 matrix = dict_get(command);
                 if(matrix == NULL) {
                     printf("No matrix %s\n", command);
-                    continue;
+                    break;
                 }
                 matrix_print(matrix);
                 break;
@@ -72,8 +72,16 @@ int main(int argc, char** argv) {
                     matrix = matrix_parse(command, ptr);
                 else
                     matrix = matrix_evaluate(command, ptr);
-                dict_add(command, matrix);
 
+                if(matrix == NULL) {
+                    break;
+                }
+
+                if(dict_get(command) != NULL) {
+                    tmp = dict_remove(command);
+                    matrix_destroy(tmp);
+                }
+                dict_add(command, matrix);
                 break;
             default:
                 printf("Invalid input\n");
@@ -82,11 +90,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    /* free each matrix in dict */
-    dict_iter_begin();
-    while((matrix = dict_next()) != NULL)
-        matrix_destroy(matrix);
-
+    dict_clear();
     free(line);
     return 0;
 }
