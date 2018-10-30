@@ -19,14 +19,8 @@ void promptf(char* print, int n) {
 
 int get_command(char* command, char* line) {
     int i;
-    for(i = 0; i < MAXIDENTIFIER - 1; i++) {
-        if(isalnum(line[i])) {
-            command[i] = line[i];
-            continue;
-        }
-
-        break;
-    }
+    for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(line[i]); i++)
+        command[i] = line[i];
     command[i] = '\0';
     return i;
 }
@@ -38,7 +32,7 @@ int main(int argc, char** argv) {
     char command[MAXIDENTIFIER];
     size_t len = 0;
 
-    Matrix matrix;
+    Matrix* matrix;
 
     while(!quit) {
         promptf("", 0);
@@ -55,7 +49,7 @@ int main(int argc, char** argv) {
             case '\n':
             case '\0':
                 /* Exit the program */
-                if(strcmp(ptr, QUIT) == 0) {
+                if(strcmp(command, QUIT) == 0) {
                     quit = 1;
                     break;
                 }
