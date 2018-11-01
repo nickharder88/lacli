@@ -4,17 +4,21 @@
 #include "dict.h"
 #include "matrix.h"
 
+#define HASHSIZE 101
+
 typedef struct nlist {
     struct nlist* next;
     struct nlist* prev;
     char* key;
-    Matrix* matrix;
+    void* data;
 } nlist;
 
-#define HASHSIZE 101
-static nlist* dict[HASHSIZE];
+struct dict {
+    void (*destroy)(void *);
+    nlist* table[HASHSIZE];
+};
 
-Matrix* _dict_next(char restart) {
+void* _dict_next(dict* d, char restart) {
     static unsigned i = 0;
     static nlist *np = NULL;
     Matrix* m;
@@ -27,7 +31,7 @@ Matrix* _dict_next(char restart) {
 
     while(np == NULL && i < HASHSIZE) {
         i++;
-        np = dict[i];
+        np = d->table[i];
     }
 
     /* need to restart iterator */
@@ -35,19 +39,19 @@ Matrix* _dict_next(char restart) {
         return NULL;
     }
 
-    m = np->matrix;
+    m = np->data;
     np = np->next;
     return m;
 }
 
 
-void dict_iter_begin(void) {
-    _dict_next(1);
+void dict_iter_begin(dict* d) {
+    _dict_next(d, 1);
 }
 
 
-Matrix* dict_next(void) {
-    return _dict_next(0);
+void* dict_next(dict* d) {
+    return _dict_next(d, 0);
 }
 
 unsigned hash(char* s) {
@@ -57,45 +61,46 @@ unsigned hash(char* s) {
     return hashval % HASHSIZE;
 }
 
-nlist* dict_lookup(char* key) {
-    for(nlist* np = dict[hash(key)]; np != NULL; np = np->next)
+nlist* dict_lookup(dict* d, char* key) {
+    for(nlist* np = d->table[hash(key)]; np != NULL; np = np->next)
         if(strcmp(key, np->key) == 0)
             return np; /* found */
     return NULL; /* not found */
 }
 
-Matrix* dict_get(char* key) {
-    nlist* np = dict_lookup(key);
+void* dict_get(dict* d, char* key) {
+    nlist* np = dict_lookup(d, key);
     if(np == NULL)
         return NULL;
-    return np->matrix;
+    return np->data;
 }
 
-void *dict_add(char* key, Matrix* val) {
+void *dict_add(dict* d, char* key, void* val) {
+    void* data;
     nlist *np, *next;
     unsigned hashval;
 
-    if((np = dict_lookup(key)) == NULL) {
+    if((np = dict_lookup(d, key)) == NULL) {
         np = malloc(sizeof(nlist));
         if(np == NULL || (np->key = strdup(key)) == NULL) {
             free(np);
             return NULL;
         }
-        np->matrix = val;
+        np->data = val;
 
         hashval = hash(key);
-        next = dict[hashval];
+        next = d->table[hashval];
         np->next = next;
         np->prev = NULL;
         if(next != NULL)
             next->prev = np;
-        dict[hashval] = np;
+        d->table[hashval] = np;
     } else {
         /* Already have this key
          * Destroy old matrix and put in new one 
          */
-        matrix_destroy(np->matrix);
-        np->matrix = val;
+        d->destroy(np->data);
+        np->data = val;
     }
 
     /* if strdup fails */
@@ -104,16 +109,16 @@ void *dict_add(char* key, Matrix* val) {
         return NULL;
     }
 
-    return np;
+    return data;
 }
 
-Matrix* dict_remove(char* key) {
+void* dict_remove(dict* d, char* key) {
     nlist *np, *prev, *next;
     unsigned hashval;
-    Matrix* m;
+    void* data;
 
     /* not in dict */
-    if((np = dict_lookup(key)) == NULL) {
+    if((np = dict_lookup(d, key)) == NULL) {
         return NULL;
     }
 
@@ -126,26 +131,26 @@ Matrix* dict_remove(char* key) {
         if(next != NULL) {
             next->prev = NULL;
         }
-        dict[hashval] = next;
+        d->table[hashval] = next;
     }
 
-    m = np->matrix;
+    data = np->data;
     free(np->key);
     free(np);
 
-    return m;
+    return data;
 }
 
-void dict_clear(void) {
+void dict_clear(dict* d) {
     nlist *np, *next;
     unsigned i;
 
     for(i = 0; i < HASHSIZE; i++) {
-        np = dict[i];
+        np = d->table[i];
 
         while(np != NULL) {
             next = np->next;
-            matrix_destroy(np->matrix);
+            d->destroy(np->data);
             free(np->key);
             free(np);
             np = next;

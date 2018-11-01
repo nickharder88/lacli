@@ -3,12 +3,15 @@
 
 #include "matrix.h"
 
-Matrix* dict_get(char* key);
-void *dict_add(char* key, Matrix* val);
-Matrix* dict_remove(char* key);
-void dict_clear(void);
+typedef struct dict dict;
 
-void dict_iter_begin(void);
-Matrix* dict_next(void);
+void* dict_create(void (*destroy)(void*));
+void* dict_get(dict* d, char* key);
+void *dict_add(dict* d, char* key, void* val);
+void* dict_remove(dict* d, char* key);
+void dict_clear(dict* d);
+
+void dict_iter_begin(dict* d);
+void* dict_next(dict* d);
 
 #endif

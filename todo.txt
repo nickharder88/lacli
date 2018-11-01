@@ -1,17 +1,19 @@
-1. Continuous prompt to user
-2. Storage of matrices
-3. Vector objects
-4. Algorithms on matrices
-5. Unit testing
-
-Be able to parse
-
 a = [1,2]
 b = [2,3]
 a = [1,2] + b
 c = [[1,2,3],[1,2,3]]
 d = [[3],[4]]
 e = c * d
+
+1. make a dictionary of functions that the user can type in
+3. make sure old functionality works
+4. write unit tests
+2. ref(e) -> run it in main
+
 rref(e)
+rank(e)
 det(e)
+inverse(e)
+transpose(e)
 null(e)
+identity(int) -> returns identity matrix of int x int

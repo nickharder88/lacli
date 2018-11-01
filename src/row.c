@@ -7,8 +7,21 @@ void row_destroy(Row *r) {
     free(r->vals);
 }
 
+Row* row_copy(Row* r) {
+    unsigned i;
+
+    Row* copy = malloc(sizeof(struct Row));
+    copy->len = r->len;
+    copy->vals = malloc(sizeof(int) * copy->len);
+
+    for(i = 0; i < copy->len; i++)
+        copy->vals[i] = r->vals[i];
+
+    return copy;
+}
+
 unsigned check_row_size(Row* ptr, unsigned size) {
-    int* vals;
+    double* vals;
 
     if(ptr->len < size) {
         return size;
@@ -28,7 +41,7 @@ unsigned check_row_size(Row* ptr, unsigned size) {
 
 Row* row_parse(char** line) {
     char c, *ptr = *line, sign = 1;
-    int dig = 0, *vals;
+    double dig = 0, *vals;
     unsigned size = 1;
 
     Row* row = malloc(sizeof(Row));
@@ -91,4 +104,17 @@ Row* row_parse(char** line) {
     row->vals = vals;
     *line = ptr;
     return row;
+}
+
+void row_multiply(Row* a, Row* b, double scalar) {
+    unsigned i;
+    for(i = 0; i < a->len; i++)
+        a->vals[i] += b->vals[i] * scalar;
+}
+
+
+void row_scale(Row* a, double scalar) {
+    unsigned i;
+    for(i = 0; i < a->len; i++)
+        a->vals[i] *= scalar;
 }
