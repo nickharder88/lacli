@@ -273,9 +273,9 @@ void matrix_print(Matrix* m) {
         row = m->rows + i;
         putchar('\t');
         for(j = 0; j < row->len - 1; j++) {
-            printf("%d\t", row->vals[j]);
+            printf("%.2f\t", row->vals[j]);
         }
-        printf("%d\n", row->vals[row->len-1]);
+        printf("%.2f\n", row->vals[row->len-1]);
     }
     printf("]\n");
 }

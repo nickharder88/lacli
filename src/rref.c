@@ -5,6 +5,24 @@
 
 static Matrix* rref(Matrix* m, char* identifier);
 
+Matrix* try_rref(Dict* matrix_dict, Matrix* m, char* matrix_identifier) {
+    /* some sort of error occurred when converting to RREF */
+    /* TODO make sure if it fails, the original is still in good state */
+    if((m = rref(m, matrix_identifier)) == NULL) {
+       printf("Error: could not reduce matrix %s\n", matrix_identifier);
+       return NULL;
+    }
+
+    /* some sort of error putting into dict */
+    if(dict_add(matrix_dict, m->name, m) == NULL) {
+       printf("Error: try again with a different matrix name\n");
+       matrix_destroy(m);
+       return NULL;
+    }
+
+    return m;
+}
+
 /* expects a string (arg1, arg2,..., argn) */
 void rref_handler(Dict* matrix_dict, char* line) {
    unsigned i;
@@ -22,40 +40,26 @@ void rref_handler(Dict* matrix_dict, char* line) {
        matrix_identifier[i] = *line++;
    matrix_identifier[i] = '\0';
 
+   /* matrix does not exist */
+   if((m = dict_get(matrix_dict, matrix_identifier)) == NULL) {
+      printf("Error: matrix %s does not exist.\n", matrix_identifier);
+      return;
+   }
+
    /* skip whitespace after first arg */
    while(*line == ' ' || *line == '\t')
        line++;
 
    /* no new identifier for copied matrix */
    if(*line == ')') {
-       /* matrix does not exist */
-       if((m = dict_get(matrix_dict, matrix_identifier)) == NULL) {
-           printf("Error: matrix %s does not exist.\n", matrix_identifier);
-           return;
-       }
-
-       /* some sort of error occurred when converting to RREF */
-       /* TODO make sure if it fails, the original is still in good state */
-       if((m = rref(m, NULL)) == NULL) {
-           printf("Error: could not reduce matrix %s\n", matrix_identifier);
-           return;
-       }
-
-       /* some sort of error putting into dict */
-       if(dict_add(matrix_dict, matrix_identifier, m) == NULL) {
-           printf("Error: try again with a different matrix name\n");
-           matrix_destroy(m);
-           return;
-       }
-
-       /* successful */
+       try_rref(matrix_dict, m, NULL);
        return;
    }
 
-   /* TODO pick up from here */
-
    /* error */
    if(*line != ',') {
+       printf("Usage: rref(matrix, copy_name)\n");
+       return;
    }
 
    line++;
@@ -74,23 +78,26 @@ void rref_handler(Dict* matrix_dict, char* line) {
 
    /* error */
    if(*line != ')') {
-
+       printf("Usage: rref(matrix, copy_name)\n");
+       return;
    }
 
-
+   try_rref(matrix_dict, m, new_identifier);
 }
 
 static unsigned left_most_nz_row(Matrix* m, unsigned cur_row, unsigned* left_most_col) {
-    unsigned i, col, left_most_row;
+    unsigned row_i, col_i, left_most_row;
+    Row* row;
 
     *left_most_col = m->ncols;
     left_most_row = cur_row;
-    for(i = cur_row; i < m->nrows; i++) {
-        for(col = 0; col < m->ncols; col++)
-            if(m->rows[i].vals[col]) { /* first non zero in row */
-                if(*left_most_col > col) {
-                    *left_most_col = col;
-                    left_most_row = i;
+    for(row_i = cur_row; row_i < m->nrows; row_i++) {
+        row = m->rows + row_i;
+        for(col_i = 0; col_i < m->ncols; col_i++)
+            if(row->vals[col_i]) { /* first non zero in row */
+                if(*left_most_col > col_i) {
+                    *left_most_col = col_i;
+                    left_most_row = row_i;
                 }
                 break;
             }
@@ -100,28 +107,55 @@ static unsigned left_most_nz_row(Matrix* m, unsigned cur_row, unsigned* left_mos
 }
 
 static void swap(Matrix* m, unsigned i, unsigned j) {
-    Row tmp = m->rows[i];
+    Row *tmp = m->rows + i;
     m->rows[i] = m->rows[j];
-    m->rows[j] = tmp;
+    m->rows[j] = *tmp;
 }
 
 static void make_pivot(Row* r, unsigned cur_col) {
     unsigned i;
-    for(; i < r->len; i++)
+    for(i = 0; i < r->len; i++)
         r->vals[i] /= r->vals[cur_col];
     r->vals[cur_col] = 1;
+    r->pivot = cur_col;
 }
 
-static void reduce_below(Matrix* m, unsigned row, unsigned cur_col) {
-    unsigned i, j, next_row = row + 1;
-    double quotient;
-    Row r = m->rows[row];
+static void reduce_below(Matrix* m, unsigned row_i) {
+    unsigned col_i, below_row_i;
+    double scalar;
+    unsigned pivot;
+    Row *row = NULL, *below_row = NULL;
 
-    for(i = next_row; i < m->nrows; i++) {
-        r = m->rows[i];
-        if(!(r.vals[cur_col]))
-            continue;
-        quotient = r.vals[cur_col] / m->rows[next_row].vals[cur_col];
+    row = m->rows + row_i;
+    pivot = row->pivot;
+    for(; row_i < m->nrows; row_i++) {
+        for(below_row_i = row_i+1; below_row_i < m->nrows; below_row_i++) {
+            below_row = m->rows + below_row_i;
+            scalar = below_row->vals[pivot];
+            for(col_i = pivot; col_i < m->ncols; col_i++)
+                below_row->vals[col_i] -= scalar * row->vals[col_i];
+        }
+    }
+}
+
+static void reduce_above(Matrix* m, unsigned row_i) {
+    unsigned above_row_i, col_i;
+    unsigned pivot;
+    double scalar;
+    Row *row = NULL, *above_row = NULL;
+
+    /* for each row */
+    /* get pivot pos */
+    /* for each row above this row */
+    /*    use scalar mult to reduce each column */
+    row = m->rows + row_i;
+    pivot = row->pivot;
+    for(above_row_i = 0; above_row_i < row_i; above_row_i++) {
+        above_row = m->rows + above_row_i;
+
+        scalar = above_row->vals[pivot];
+        for(col_i = pivot; col_i < m->ncols; col_i++)
+            above_row->vals[col_i] -= scalar * row->vals[col_i];
     }
 }
 
@@ -130,20 +164,21 @@ static Matrix* ref(Matrix* m, char* identifier) {
     Row* r;
 
     /* cur_row -> index of row we are interested in swapping 
-     * work_row -> index or row we want to swap into cur_row
+     * mov_row -> index or row we want to swap into cur_row
      */
     unsigned cur_row = 0, cur_col, move_row;
 
     while((move_row = left_most_nz_row(copy, cur_row, &cur_col)) < copy->nrows) {
         /* place left most row in next highest position */
         swap(m, cur_row, move_row);
-        *r = copy->rows[cur_row];
+        r = copy->rows + cur_row;
 
         /* make first element a pivot */
         make_pivot(r, cur_col);
 
         /* reduce all the rows below to 0 */
-        reduce_below(m, cur_row, cur_col);
+        if(cur_col < copy->ncols)
+            reduce_below(copy, cur_row);
 
         cur_row++;
     }
@@ -156,13 +191,11 @@ static Matrix* ref(Matrix* m, char* identifier) {
  * if identifier is NULL, then it replaces m with the copy
  */
 static Matrix* rref(Matrix* m, char* identifier) {
+    unsigned row_i;
     Matrix* copy = ref(m, identifier);
-    // 7. determine all the leading ones in the row echelon form
-    // 8. determine the right most columb containing a leading one
-    // 9. use scaled addition to reduce all nonzero entries above the leading one in the pivot column
-    // 10. if no more columbs containing leding ones go to 12
-    // 11. apply 8-10
-    // 12. the resulting matrix is in rref
-
+    for(row_i = 0; row_i < copy->nrows; row_i++) {
+        if(copy->rows[row_i].pivot < copy->ncols) /* is this a non zero row */
+            reduce_above(copy, row_i);
+    }
     return copy;
 }

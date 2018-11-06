@@ -8,7 +8,7 @@ Dict* func_create(void);
 
 /* expects the entire user input */
 void* is_func(Dict* func_dict, char* line);
-void call_func(void* func_dict, char* line);
+void call_func(void* func_dict, Dict* matrix_dict, char* line);
 
 #endif
 

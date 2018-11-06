@@ -9,7 +9,7 @@
 
 #define QUIT "quit"
 
-void promptf(char* print, int n) {
+static void promptf(char* print, int n) {
     if(n == 0) {
         printf("==> ");
         return;
@@ -18,7 +18,7 @@ void promptf(char* print, int n) {
     printf("%s\n==> ", print);
 }
 
-int get_command(char* command, char* line) {
+static int get_command(char* command, char* line) {
     int i;
 
     for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(line[i]); i++)
@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
     char *line = NULL, *ptr, quit = 0;
     char command[MAXIDENTIFIER];
     size_t len = 0;
-    unsigned param_offset;
     void* func;
 
     Matrix *matrix, *tmp;
@@ -49,7 +48,7 @@ int main(int argc, char** argv) {
         }
 
         /* skip initial whitespace */
-        for(line; *line == ' ' || *line == '\t'; line++);
+        for(; *line == ' ' || *line == '\t'; line++);
 
         numchar = get_command(command, line);
 
@@ -57,14 +56,15 @@ int main(int argc, char** argv) {
         for(ptr = line + numchar; *ptr == ' ' || *ptr == '\t'; ptr++);
 
         switch(*ptr) {
-            case '\n':
-            case '\0':
+            case '(':
                 /* Call a function */
                 if((func = is_func(func_dict, command))) {
-                    call_func(func, ptr);
+                    call_func(func, matrix_dict, ptr);
                     break;
                 }
-
+                break;
+            case '\n':
+            case '\0':
                 /* Exit the program */
                 if(strcmp(command, QUIT) == 0) {
                     quit = 1;
@@ -109,6 +109,7 @@ int main(int argc, char** argv) {
     }
 
     dict_clear(matrix_dict);
+    dict_clear(func_dict);
     free(line);
     return 0;
 }

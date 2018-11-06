@@ -16,5 +16,10 @@ main : $(OBJFILES)
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+$(OBJFILES): | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
 clean :
-	rm -rf main $(OBJDIR)
+	rm -rf main debug $(OBJDIR)

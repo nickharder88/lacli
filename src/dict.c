@@ -80,7 +80,6 @@ void* dict_get(Dict* d, char* key) {
 }
 
 void* dict_add(Dict* d, char* key, void* val) {
-    void* data;
     nlist *np, *next;
     unsigned hashval;
 
@@ -111,7 +110,7 @@ void* dict_add(Dict* d, char* key, void* val) {
         return NULL;
     }
 
-    return data;
+    return np->data;
 }
 
 void* dict_remove(Dict* d, char* key) {
