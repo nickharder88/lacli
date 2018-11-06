@@ -114,7 +114,7 @@ static void swap(Matrix* m, unsigned i, unsigned j) {
 
 static void make_pivot(Row* r, unsigned cur_col) {
     unsigned i;
-    for(i = 0; i < r->len; i++)
+    for(i = cur_col + 1; i < r->len; i++)
         r->vals[i] /= r->vals[cur_col];
     r->vals[cur_col] = 1;
     r->pivot = cur_col;
@@ -128,13 +128,11 @@ static void reduce_below(Matrix* m, unsigned row_i) {
 
     row = m->rows + row_i;
     pivot = row->pivot;
-    for(; row_i < m->nrows; row_i++) {
-        for(below_row_i = row_i+1; below_row_i < m->nrows; below_row_i++) {
-            below_row = m->rows + below_row_i;
-            scalar = below_row->vals[pivot];
-            for(col_i = pivot; col_i < m->ncols; col_i++)
-                below_row->vals[col_i] -= scalar * row->vals[col_i];
-        }
+    for(below_row_i = row_i+1; below_row_i < m->nrows; below_row_i++) {
+        below_row = m->rows + below_row_i;
+        scalar = below_row->vals[pivot];
+        for(col_i = pivot; col_i < m->ncols; col_i++)
+            below_row->vals[col_i] -= scalar * row->vals[col_i];
     }
 }
 
@@ -165,22 +163,29 @@ static Matrix* ref(Matrix* m, char* identifier) {
 
     /* cur_row -> index of row we are interested in swapping 
      * mov_row -> index or row we want to swap into cur_row
+     *
+     * if cur_col == copy->ncols, then its a zero row
      */
-    unsigned cur_row = 0, cur_col, move_row;
+    unsigned cur_row, cur_col, move_row;
 
-    while((move_row = left_most_nz_row(copy, cur_row, &cur_col)) < copy->nrows) {
+    for(cur_row = 0;
+            (move_row = left_most_nz_row(copy, cur_row, &cur_col)) < copy->nrows;
+            cur_row++) {
         /* place left most row in next highest position */
-        swap(m, cur_row, move_row);
-        r = copy->rows + cur_row;
+        if(cur_row != move_row)
+            swap(m, cur_row, move_row);
 
+        /* don't operate on a zero row */
+        if(cur_col == copy->ncols)
+            continue;
+
+        r = copy->rows + cur_row;
         /* make first element a pivot */
         make_pivot(r, cur_col);
 
         /* reduce all the rows below to 0 */
         if(cur_col < copy->ncols)
             reduce_below(copy, cur_row);
-
-        cur_row++;
     }
 
     return copy;

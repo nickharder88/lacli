@@ -12,7 +12,8 @@ Row* row_copy(Row* r) {
 
     Row* copy = malloc(sizeof(struct Row));
     copy->len = r->len;
-    copy->vals = malloc(sizeof(int) * copy->len);
+    copy->vals = malloc(sizeof(double) * copy->len);
+    copy->pivot = r->pivot;
 
     for(i = 0; i < copy->len; i++)
         copy->vals[i] = r->vals[i];
@@ -28,7 +29,7 @@ unsigned check_row_size(Row* ptr, unsigned size) {
     }
 
     size *= 2;
-    if((vals = realloc(ptr->vals, size * sizeof(int))) == NULL) {
+    if((vals = realloc(ptr->vals, size * sizeof(double))) == NULL) {
         printf("Error: could not allocate memory. Try again.\n");
         row_destroy(ptr);
         free(ptr);
@@ -46,7 +47,7 @@ Row* row_parse(char** line) {
 
     Row* row = malloc(sizeof(Row));
     row->len = 0;
-    row->vals = malloc(size * sizeof(int));
+    row->vals = malloc(size * sizeof(double));
 
     if((c = *ptr++) != '[') {
         printf("Error: Row must start with a [\n");
@@ -95,7 +96,7 @@ Row* row_parse(char** line) {
         return NULL;
     }
 
-    if((vals = realloc(row->vals, row->len * sizeof(int))) == NULL) {
+    if((vals = realloc(row->vals, row->len * sizeof(double))) == NULL) {
         printf("Error: could not allocate memory. Try again.\n");
         row_destroy(row);
         free(row);
