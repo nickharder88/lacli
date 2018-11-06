@@ -5,6 +5,7 @@
 #include "defs.h"
 #include "matrix.h"
 #include "dict.h"
+#include "funcs.h"
 
 #define QUIT "quit"
 
@@ -19,6 +20,7 @@ void promptf(char* print, int n) {
 
 int get_command(char* command, char* line) {
     int i;
+
     for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(line[i]); i++)
         command[i] = line[i];
     command[i] = '\0';
@@ -31,14 +33,23 @@ int main(int argc, char** argv) {
     char *line = NULL, *ptr, quit = 0;
     char command[MAXIDENTIFIER];
     size_t len = 0;
+    unsigned param_offset;
+    void* func;
 
-    Matrix* matrix, *tmp;
+    Matrix *matrix, *tmp;
+    Dict *matrix_dict, *func_dict;
+
+    matrix_dict = dict_create(matrix_destroy);
+    func_dict = func_create();
 
     while(!quit) {
         promptf("", 0);
         if((numchar = getline(&line, &len, stdin)) == -1) {
             continue;
         }
+
+        /* skip initial whitespace */
+        for(line; *line == ' ' || *line == '\t'; line++);
 
         numchar = get_command(command, line);
 
@@ -48,13 +59,20 @@ int main(int argc, char** argv) {
         switch(*ptr) {
             case '\n':
             case '\0':
+                /* Call a function */
+                if((func = is_func(func_dict, command))) {
+                    call_func(func, ptr);
+                    break;
+                }
+
                 /* Exit the program */
                 if(strcmp(command, QUIT) == 0) {
                     quit = 1;
                     break;
                 }
 
-                matrix = dict_get(command);
+                /* Print matrix */
+                matrix = dict_get(matrix_dict, command);
                 if(matrix == NULL) {
                     printf("No matrix %s\n", command);
                     break;
@@ -71,17 +89,17 @@ int main(int argc, char** argv) {
                 if(*ptr == '[')
                     matrix = matrix_parse(command, ptr);
                 else
-                    matrix = matrix_evaluate(command, ptr);
+                    matrix = matrix_evaluate(matrix_dict, command, ptr);
 
                 if(matrix == NULL) {
                     break;
                 }
 
-                if(dict_get(command) != NULL) {
-                    tmp = dict_remove(command);
+                if(dict_get(matrix_dict, command) != NULL) {
+                    tmp = dict_remove(matrix_dict, command);
                     matrix_destroy(tmp);
                 }
-                dict_add(command, matrix);
+                dict_add(matrix_dict, command, matrix);
                 break;
             default:
                 printf("Invalid input\n");
@@ -90,7 +108,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    dict_clear();
+    dict_clear(matrix_dict);
     free(line);
     return 0;
 }

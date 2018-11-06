@@ -2,6 +2,7 @@
 #define ROW_H
 
 typedef struct Row {
+    unsigned pivot;
     unsigned len;
     double *vals;
 } Row;

@@ -13,12 +13,18 @@ typedef struct nlist {
     void* data;
 } nlist;
 
-struct dict {
+struct Dict {
     void (*destroy)(void *);
     nlist* table[HASHSIZE];
 };
 
-void* _dict_next(dict* d, char restart) {
+Dict* dict_create(void (*destroy)(void*)) {
+    Dict* d = malloc(sizeof(struct Dict));
+    d->destroy = destroy;
+    return d;
+}
+
+void* _dict_next(Dict* d, char restart) {
     static unsigned i = 0;
     static nlist *np = NULL;
     Matrix* m;
@@ -44,13 +50,11 @@ void* _dict_next(dict* d, char restart) {
     return m;
 }
 
-
-void dict_iter_begin(dict* d) {
+void dict_iter_begin(Dict* d) {
     _dict_next(d, 1);
 }
 
-
-void* dict_next(dict* d) {
+void* dict_next(Dict* d) {
     return _dict_next(d, 0);
 }
 
@@ -61,21 +65,21 @@ unsigned hash(char* s) {
     return hashval % HASHSIZE;
 }
 
-nlist* dict_lookup(dict* d, char* key) {
+nlist* dict_lookup(Dict* d, char* key) {
     for(nlist* np = d->table[hash(key)]; np != NULL; np = np->next)
         if(strcmp(key, np->key) == 0)
             return np; /* found */
     return NULL; /* not found */
 }
 
-void* dict_get(dict* d, char* key) {
+void* dict_get(Dict* d, char* key) {
     nlist* np = dict_lookup(d, key);
     if(np == NULL)
         return NULL;
     return np->data;
 }
 
-void *dict_add(dict* d, char* key, void* val) {
+void* dict_add(Dict* d, char* key, void* val) {
     void* data;
     nlist *np, *next;
     unsigned hashval;
@@ -96,9 +100,7 @@ void *dict_add(dict* d, char* key, void* val) {
             next->prev = np;
         d->table[hashval] = np;
     } else {
-        /* Already have this key
-         * Destroy old matrix and put in new one 
-         */
+        /* Already have this key */
         d->destroy(np->data);
         np->data = val;
     }
@@ -112,12 +114,12 @@ void *dict_add(dict* d, char* key, void* val) {
     return data;
 }
 
-void* dict_remove(dict* d, char* key) {
+void* dict_remove(Dict* d, char* key) {
     nlist *np, *prev, *next;
     unsigned hashval;
     void* data;
 
-    /* not in dict */
+    /* not in Dict* */
     if((np = dict_lookup(d, key)) == NULL) {
         return NULL;
     }
@@ -141,7 +143,7 @@ void* dict_remove(dict* d, char* key) {
     return data;
 }
 
-void dict_clear(dict* d) {
+void dict_clear(Dict* d) {
     nlist *np, *next;
     unsigned i;
 

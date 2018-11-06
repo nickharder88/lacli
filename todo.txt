@@ -6,9 +6,11 @@ d = [[3],[4]]
 e = c * d
 
 1. make a dictionary of functions that the user can type in
-3. make sure old functionality works
-4. write unit tests
-2. ref(e) -> run it in main
+2. make sure old functionality works
+3. write unit tests
+4. make static functions where necessary
+5. make it so that we utilize pivot property in rows
+6. ref(e) -> run it in main
 
 rref(e)
 rank(e)
@@ -17,3 +19,7 @@ inverse(e)
 transpose(e)
 null(e)
 identity(int) -> returns identity matrix of int x int
+
+
+dictionary of function name to function handler
+handler checks the line input and tells if its valid then calls the corresponding method if possible
