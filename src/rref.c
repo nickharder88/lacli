@@ -9,8 +9,11 @@ Matrix* try_rref(Dict* matrix_dict, Matrix* m, char* matrix_identifier) {
     /* some sort of error occurred when converting to RREF */
     /* TODO make sure if it fails, the original is still in good state */
     if((m = rref(m, matrix_identifier)) == NULL) {
-       printf("Error: could not reduce matrix %s\n", matrix_identifier);
-       return NULL;
+        if(matrix_identifier == NULL)
+            printf("Error: could not reduce matrix\n");
+        else
+            printf("Error: could not reduce matrix %s\n", matrix_identifier);
+        return NULL;
     }
 
     /* some sort of error putting into dict */
@@ -27,7 +30,6 @@ Matrix* try_rref(Dict* matrix_dict, Matrix* m, char* matrix_identifier) {
 void rref_handler(Dict* matrix_dict, char* line) {
    unsigned i;
    Matrix* m; 
-   char matrix_identifier[MAXIDENTIFIER];
    char new_identifier[MAXIDENTIFIER];
 
    if(*line++ != '(') {
@@ -35,15 +37,9 @@ void rref_handler(Dict* matrix_dict, char* line) {
        return;
    }
 
-
-   for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(*line); i++)
-       matrix_identifier[i] = *line++;
-   matrix_identifier[i] = '\0';
-
-   /* matrix does not exist */
-   if((m = dict_get(matrix_dict, matrix_identifier)) == NULL) {
-      printf("Error: matrix %s does not exist.\n", matrix_identifier);
-      return;
+   /* could not get matrix from dict */
+   if((m = try_get_matrix(matrix_dict, &line)) == NULL) {
+       return;
    }
 
    /* skip whitespace after first arg */

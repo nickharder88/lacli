@@ -22,6 +22,13 @@ Matrix* matrix_create(char* identifier) {
     return matrix;
 }
 
+Matrix* matrix_create_dim(char* identifier, unsigned nrows, unsigned ncols) {
+    Matrix* m = matrix_create(identifier);
+    m->nrows = nrows;
+    m->ncols = ncols;
+    return m;
+}
+
 void matrix_destroy(void* data) {
     unsigned i;
     Matrix* m = (Matrix*)data;
@@ -305,4 +312,24 @@ Matrix* matrix_copy(Matrix* m, char* identifier) {
         } else
             copy->rows[i] = *rcopy;
     return copy;
+}
+
+Matrix* try_get_matrix(Dict* matrix_dict, char** line) {
+    unsigned i;
+    Matrix *m;
+    char matrix_identifier[MAXIDENTIFIER];
+    char *ptr = *line;
+
+    for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(*ptr); i++)
+       matrix_identifier[i] = *ptr++;
+    matrix_identifier[i] = '\0';
+
+    /* matrix does not exist */
+    if((m = dict_get(matrix_dict, matrix_identifier)) == NULL) {
+       printf("Error: matrix %s does not exist.\n", matrix_identifier);
+       return NULL;
+    }
+
+    *line = ptr;
+    return m;
 }

@@ -9,6 +9,7 @@ typedef struct Row {
 
 void row_destroy(Row *r);
 Row* row_parse(char** line);
+Row* row_create(unsigned len, unsigned pivot);
 
 void row_multiply(Row* a, Row* b, double scalar);
 void row_scale(Row* a, double scalar);

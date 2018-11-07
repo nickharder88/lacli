@@ -3,6 +3,17 @@
 #include <ctype.h>
 #include "row.h"
 
+Row* row_create(unsigned len, unsigned pivot) {
+    Row* row;
+
+    row = malloc(sizeof(struct Row));
+    row->len = len;
+    row->vals = malloc(sizeof(double) * len);
+    row->pivot = pivot;
+
+    return row;
+}
+
 void row_destroy(Row *r) {
     free(r->vals);
 }
@@ -10,11 +21,7 @@ void row_destroy(Row *r) {
 Row* row_copy(Row* r) {
     unsigned i;
 
-    Row* copy = malloc(sizeof(struct Row));
-    copy->len = r->len;
-    copy->vals = malloc(sizeof(double) * copy->len);
-    copy->pivot = r->pivot;
-
+    Row* copy = row_create(r->len, r->pivot);
     for(i = 0; i < copy->len; i++)
         copy->vals[i] = r->vals[i];
 

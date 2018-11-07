@@ -1,0 +1,8 @@
+When the user types a command such as
+
+==> rref(matrix)
+
+the main parser reads "rref(", and then passes the string to
+a set of helper functions. These functions cooperate with the
+func_dict to determine which function handler to pass the arguments
+and matrix to. 

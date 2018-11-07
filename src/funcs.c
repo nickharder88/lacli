@@ -3,12 +3,13 @@
 #include <ctype.h>
 
 #include "funcs.h"
-#include "defs.h"
 #include "rref.h"
+#include "aug.h"
 
 Dict* func_create(void) {
     Dict* d = dict_create(func_destroy);
     dict_add(d, "rref", rref_handler);
+    dict_add(d, "aug", aug_handler);
     return d;
 }
 
