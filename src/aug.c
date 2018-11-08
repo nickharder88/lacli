@@ -5,77 +5,22 @@
 #include "funcs.h"
 
 void aug_handler(Dict* matrix_dict, char* line) {
-    char new_identifier[MAXIDENTIFIER];
-    unsigned i;
-    Matrix *m1, *m2;
+    char *identifier;
+    Matrix **marr;
 
-    if(*line++ != '(') {
+    if((marr = parse_args(matrix_dict, line, 2, &identifier)) == NULL) {
        printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
        return;
     }
 
-    /* could not get matrix */
-    if((m1 = try_get_matrix(matrix_dict, &line)) == NULL) {
-        return;
-    }
-
-    /* skip whitespace */
-    while(*line == ' ' || *line == '\t')
-        line++;
-
-    if(*line != ',') {
-        printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
-        return;
-    }
-
-    line++;
-
-    /* skip whitespace */
-    while(*line == ' ' || *line == '\t')
-        line++;
-
-    if((m2 = try_get_matrix(matrix_dict, &line)) == NULL) {
-        return;
-    }
-
-    /* skip whitespace */
-    while(*line == ' ' || *line == '\t')
-        line++;
-
-    if(*line == ')') {
-        try_aug(matrix_dict, m1, m2, NULL);
-        return;
-    } else if(*line != ',') {
-        printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
-        return;
-    }
-
-    /* skip , */
-    line++;
-
-    /* skip whitespace */
-    while(*line == ' ' || *line == '\t')
-        line++;
-
-    for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(*line); i++)
-        new_identifier[i] = *line++;
-    new_identifier[i] = '\0';
-
-    /* skip whitespace after second arg */
-    while(*line == ' ' || *line == '\t')
-        line++;
-
-    /* error */
-    if(*line != ')') {
-        printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
-    }
-
-    try_aug(matrix_dict, m1, m2, new_identifier);
+    if(identifier == NULL)
+        identifier = (*marr)->name;
+    try_aug(matrix_dict, marr[0], marr[1], identifier);
 }
 
 Matrix* try_aug(Dict* matrix_dict, Matrix* m1, Matrix* m2, char* identifier) {
     Matrix* m;
-    if((m = aug(matrix_dict, m1, m2, identifier)) == NULL) {
+    if((m = aug(m1, m2, identifier)) == NULL) {
        printf("Error: could not create augmented matrix\n");
        return NULL;
     }
@@ -90,7 +35,7 @@ Matrix* try_aug(Dict* matrix_dict, Matrix* m1, Matrix* m2, char* identifier) {
     return m;
 }
 
-Matrix* aug(Dict* matrix_dict, Matrix* m1, Matrix* m2, char* identifier) {
+Matrix* aug(Matrix* m1, Matrix* m2, char* identifier) {
     Matrix *m;
     Row *row, *m1_row, *m2_row;
     unsigned row_i, len, col_i;

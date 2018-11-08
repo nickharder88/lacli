@@ -2,8 +2,7 @@
 
 #include "matrix.h"
 #include "row.h"
-
-static Matrix* rref(Matrix* m, char* identifier);
+#include "rref.h"
 
 Matrix* try_rref(Dict* matrix_dict, Matrix* m, char* matrix_identifier) {
     /* some sort of error occurred when converting to RREF */
@@ -191,7 +190,7 @@ static Matrix* ref(Matrix* m, char* identifier) {
  * Creates a copy of matrix m and puts it in rref
  * if identifier is NULL, then it replaces m with the copy
  */
-static Matrix* rref(Matrix* m, char* identifier) {
+Matrix* rref(Matrix* m, char* identifier) {
     unsigned row_i;
     Matrix* copy = ref(m, identifier);
     for(row_i = 0; row_i < copy->nrows; row_i++) {

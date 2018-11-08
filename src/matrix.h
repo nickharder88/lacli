@@ -24,4 +24,7 @@ void matrix_print(Matrix* m);
 Matrix* matrix_copy(Matrix* m, char* identifier);
 Matrix* try_get_matrix(Dict* matrix_dict, char** line);
 
+void matrix_slice_before(Matrix *m, unsigned col);
+void matrix_slice_after(Matrix *m, unsigned col);
+
 #endif

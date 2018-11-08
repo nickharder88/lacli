@@ -333,3 +333,38 @@ Matrix* try_get_matrix(Dict* matrix_dict, char** line) {
     *line = ptr;
     return m;
 }
+
+void matrix_slice_before(Matrix *m, unsigned col) {
+    unsigned i;
+    Row* row;
+    double* vals;
+
+    for(i = 0; i < m->nrows; i++) {
+        row = m->rows + i;
+        if((vals = realloc(row->vals, col * sizeof(double))) == NULL) {
+            printf("Error: could not allocate memory. Try again.\n");
+            continue;
+        }
+        row->vals = vals;
+        row->len = col;
+    }
+    m->ncols = col;
+}
+
+void matrix_slice_after(Matrix *m, unsigned col) {
+    unsigned row_i, col_i, ncols = m->ncols - col;
+
+    Row *row;
+    double* vals;
+    for(row_i = 0; row_i < m->nrows; row_i++) {
+        row =  m->rows + row_i;
+        vals = malloc(ncols * sizeof(double));
+        for(col_i = 0; col_i < ncols; col_i++)
+            vals[col_i] = row->vals[col + col_i];
+        free(row->vals);
+        row->vals = vals;
+        row->len = ncols;
+        row->pivot = ncols;
+    }
+    m->ncols = ncols;
+}

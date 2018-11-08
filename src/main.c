@@ -103,8 +103,7 @@ int main(int argc, char** argv) {
                 break;
             default:
                 printf("Invalid input\n");
-                free(line);
-                return 1;
+                continue;
         }
     }
 

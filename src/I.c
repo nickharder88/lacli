@@ -57,7 +57,7 @@ void I_handler(Dict* matrix_dict, char* line) {
 
 Matrix* try_I(Dict* matrix_dict, unsigned nrows, char* identifier) {
     Matrix* m;
-    if((m = I(matrix_dict, nrows, identifier)) == NULL) {
+    if((m = I(nrows, identifier)) == NULL) {
        printf("Error: could not create Identity matrix\n");
        return NULL;
     }
@@ -72,14 +72,14 @@ Matrix* try_I(Dict* matrix_dict, unsigned nrows, char* identifier) {
     return m;
 }
 
-Matrix* I(Dict* matrix_dict, unsigned nrows, char* identifier) {
+Matrix* I(unsigned nrows, char* identifier) {
     Matrix* m;
     Row* r;
     unsigned row_i, col_i;
 
     m = matrix_create(identifier);
     m->rows = malloc(nrows * sizeof(struct Row));
-    m->nrows = nrows;
+    m->ncols = nrows;
     m->nrows = nrows;
     for(row_i = 0; row_i < nrows; row_i++) {
         r = m->rows + row_i;

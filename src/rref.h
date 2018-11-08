@@ -5,5 +5,6 @@
 
 void rref_handler(Dict* matrix_dict, char* line);
 Matrix* try_rref(Dict* matrix_dict, Matrix* m, char* identifier);
+Matrix* rref(Matrix* m, char* identifier);
 
 #endif

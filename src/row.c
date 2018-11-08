@@ -120,9 +120,14 @@ void row_multiply(Row* a, Row* b, double scalar) {
         a->vals[i] += b->vals[i] * scalar;
 }
 
-
 void row_scale(Row* a, double scalar) {
     unsigned i;
     for(i = 0; i < a->len; i++)
         a->vals[i] *= scalar;
+}
+
+void row_slice_before(Row* r, unsigned col) {
+    unsigned i;
+    for(i = 0; i < r->len; i++) { 
+    }
 }
