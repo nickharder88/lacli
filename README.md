@@ -1,18 +1,22 @@
-### Synopsis
+# Synopsis
 
 Linear Algebra CLI that computes functions based off of matrices input by the user.
 
-## Functions
-rref(matrix, optional:newname)
-Takes a matrix and transforms to reduced row echelon form. If a second argument is supplied, then the rref matrix is saved under that name, conserving the original matrix.
+### Functions
+If a function has the last parameter optional:newname, then it will give the resulting matrix the name supplied in the parameter list if given, otherwise it will use the FIRST matrix in the argument list's name.  
 
-## Coming soon
+* rref(matrix, optional:newname) - transforms to reduced row echelon form
+* inverse(matrix, optional:newname) - inverses the matrix
+* I(n, name) - produces an identity matrix with dimension nxn
+* aug(matrix1, matrix2, optional:newname) - creates an augmented matrix by combining matrix1 and matrix 2 
+
+### Coming soon
 rank(e)
 det(e)
-inverse(e)
 transpose(e)
 null(e)
-identity(int) -> returns identity matrix of int x int
 
-# Valgrind
+### Valgrind
+```bash
 valgrind --leak-check=yes debug
+```

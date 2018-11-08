@@ -7,6 +7,7 @@
 #include "aug.h"
 #include "I.h"
 #include "inverse.h"
+#include "rank.h"
 
 Dict* func_create(void) {
     Dict* d = dict_create(func_destroy);
@@ -14,6 +15,7 @@ Dict* func_create(void) {
     dict_add(d, "aug", aug_handler);
     dict_add(d, "I", I_handler);
     dict_add(d, "inverse", inverse_handler);
+    dict_add(d, "rank", rank_handler);
     return d;
 }
 
@@ -42,10 +44,8 @@ Matrix** parse_args(Dict* matrix_dict, char* line, unsigned nmatrices, char** id
     unsigned i;
     Matrix *m;
     Matrix** marr = malloc(nmatrices * sizeof(Matrix*));
-    *identifier = NULL;
 
     if(*line++ != '(') {
-       printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
        free(marr);
        return NULL;
     }
@@ -68,7 +68,6 @@ Matrix** parse_args(Dict* matrix_dict, char* line, unsigned nmatrices, char** id
 
         if(i < nmatrices - 1) {
             if(*line != ',') {
-                printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
                 free(marr);
                 return NULL;
             }
@@ -83,9 +82,13 @@ Matrix** parse_args(Dict* matrix_dict, char* line, unsigned nmatrices, char** id
         line++;
 
     if(*line == ')') {
+        if(identifier != NULL)
+            *identifier = NULL;
         return marr;
     } else if(*line != ',') {
-        printf("Usage: aug(matrix1, matrix2, optional:newname)\n");
+        free(marr);
+        return NULL;
+    } else if(identifier == NULL) {
         free(marr);
         return NULL;
     }
