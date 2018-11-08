@@ -15,6 +15,7 @@ typedef struct Matrix {
 
 Matrix* matrix_create(char* identifier);
 Matrix* matrix_create_dim(char* identifier, unsigned nrows, unsigned ncols);
+Matrix* matrix_create_empty(char* identifier, unsigned nrows, unsigned ncols);
 void matrix_destroy(void* m);
 
 Matrix* matrix_parse(char* identifier, char* line);

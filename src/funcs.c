@@ -10,6 +10,7 @@
 #include "rank.h"
 #include "det.h"
 #include "trace.h"
+#include "transpose.h"
 
 Dict* func_create(void) {
     Dict* d = dict_create(func_destroy);
@@ -20,6 +21,7 @@ Dict* func_create(void) {
     dict_add(d, "rank", rank_handler);
     dict_add(d, "det", det_handler);
     dict_add(d, "trace", trace_handler);
+    dict_add(d, "transpose", transpose_handler);
     return d;
 }
 

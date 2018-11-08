@@ -29,6 +29,24 @@ Matrix* matrix_create_dim(char* identifier, unsigned nrows, unsigned ncols) {
     return m;
 }
 
+Matrix* matrix_create_empty(char* identifier, unsigned nrows, unsigned ncols) {
+    unsigned row_i;
+    Row* r;
+    Matrix* m = matrix_create(identifier);
+    m->nrows = nrows;
+    m->ncols = ncols;
+    m->rows = malloc(nrows * sizeof(struct Row));
+
+    for(row_i = 0; row_i < nrows; row_i++) {
+        r = m->rows + row_i;
+        r->len = ncols;
+        r->pivot = ncols;
+        r->vals = malloc(ncols * sizeof(double));
+    }
+
+    return m;
+}
+
 void matrix_destroy(void* data) {
     unsigned i;
     Matrix* m = (Matrix*)data;

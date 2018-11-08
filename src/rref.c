@@ -5,8 +5,6 @@
 #include "rref.h"
 
 Matrix* try_rref(Dict* matrix_dict, Matrix* m, char* matrix_identifier) {
-    /* some sort of error occurred when converting to RREF */
-    /* TODO make sure if it fails, the original is still in good state */
     if((m = rref(m, matrix_identifier)) == NULL) {
         if(matrix_identifier == NULL)
             printf("Error: could not reduce matrix\n");

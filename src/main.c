@@ -62,6 +62,7 @@ int main(int argc, char** argv) {
                     call_func(func, matrix_dict, ptr);
                     break;
                 }
+                printf("Error: Invalid function name.\n");
                 break;
             case '\n':
             case '\0':
@@ -74,7 +75,7 @@ int main(int argc, char** argv) {
                 /* Print matrix */
                 matrix = dict_get(matrix_dict, command);
                 if(matrix == NULL) {
-                    printf("No matrix %s\n", command);
+                    printf("Error: No matrix %s\n", command);
                     break;
                 }
                 matrix_print(matrix);
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
                 dict_add(matrix_dict, command, matrix);
                 break;
             default:
-                printf("Invalid input\n");
+                printf("Error: Invalid input\n");
                 continue;
         }
     }
