@@ -5,11 +5,13 @@
 #include "funcs.h"
 #include "rref.h"
 #include "aug.h"
+#include "I.h"
 
 Dict* func_create(void) {
     Dict* d = dict_create(func_destroy);
     dict_add(d, "rref", rref_handler);
     dict_add(d, "aug", aug_handler);
+    dict_add(d, "I", I_handler);
     return d;
 }
 
