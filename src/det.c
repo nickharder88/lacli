@@ -11,8 +11,7 @@ void det_handler(Dict* matrix_dict, char* line) {
     }
 
     mdet = det(*marr);
-    printf("%f\n", mdet);
-
+    printf("%.2f\n", mdet);
 }
 
 double det(Matrix* m) {
