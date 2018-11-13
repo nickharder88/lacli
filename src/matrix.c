@@ -189,6 +189,36 @@ Matrix* matrix_add(char* identifier, Matrix* a, Matrix* b) {
     return m;
 }
 
+Matrix* matrix_subtract(char* identifier, Matrix* a, Matrix* b) {
+    Matrix* m;
+    Row* row;
+    unsigned row_i, col_i;
+
+    if(a->ncols != b->ncols || a->nrows != b->nrows) {
+        printf("Error: matrices have different dimensions\n");
+        return NULL;
+    }
+
+    m = matrix_create(identifier);
+    m->rows = (Row*)malloc(a->nrows * sizeof(Row));
+    m->nrows = a->nrows;
+    m->ncols = a->ncols;
+
+    for(row_i = 0; row_i < a->nrows; row_i++) {
+        row = m->rows + row_i;
+        row->len = m->ncols;
+        row->vals = (double*)malloc(m->ncols * sizeof(double));
+
+        for(col_i = 0; col_i < a->ncols; col_i++) {
+            row->vals[col_i] = a->rows[row_i].vals[col_i]
+                             - b->rows[row_i].vals[col_i];
+        }
+    }
+
+    return a;
+}
+
+
 Matrix* matrix_multiply(char* identifier, Matrix* a, Matrix* b) {
     Matrix* m;
     Row* row;
@@ -395,4 +425,14 @@ void matrix_slice_after(Matrix *m, unsigned col) {
         row->pivot = ncols;
     }
     m->ncols = ncols;
+}
+
+void matrix_multiply_constant(Matrix* m, double val) {
+    unsigned col_i, row_i;
+    Row* row;
+    for(row_i = 0; row_i < m->nrows; row_i++) {
+        row = m->rows + row_i;
+        for(col_i = 0; col_i < m->ncols; col_i++)
+            row->vals[col_i] *= val;
+    }
 }

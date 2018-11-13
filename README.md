@@ -13,18 +13,21 @@ If a function has the last parameter optional:newname, then it will give the res
 * transpose(matrix1, optional:newname) - flips values around diagonal to get transpose. must be a square matrix.
 
 #####Value functions
-* rank(e) - the rank of the matrix. First reduces to rref.
-* det(e) - the determinant of the 2x2 matrix
-* trace(e) - the trace of the matrix
+* rank(matrix) - the rank of the matrix. First reduces to rref.
+* det(matrix) - the determinant of the 2x2 matrix
+* trace(matrix) - the trace of the matrix
+* eval(matrix) - finds the eigenvalues of the matrix
+* evec(matrix) - finds the eigenvectors of the matrix
 
 ### Coming soon
 1. Constant multiplication of matrices
+1. Save double values in variables
 1. Assigning result to variables
 1. don't invert 2x2 matrices with 0 determinant
 1. row equivalence
 1. null(e)
-1. evalue(matrix)
-1. evec(matrix, name)
+1. evec(matrix)
+* diffsolve(matrix) - solves the matrix of form dx/dt = CX
 
 ### Valgrind
 ```bash
