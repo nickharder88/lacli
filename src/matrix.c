@@ -47,6 +47,16 @@ Matrix* matrix_create_empty(char* identifier, unsigned nrows, unsigned ncols) {
     return m;
 }
 
+Matrix* matrix_create_zero(char* identifier, unsigned nrows, unsigned ncols) {
+    unsigned row_i, col_i;
+    Matrix* m = matrix_create_empty(identifier, nrows, ncols);
+    for(row_i = 0; row_i < m->nrows; row_i++)
+        for(col_i = 0; col_i < m->ncols; col_i++)
+            m->rows[row_i].vals[col_i] = 0;
+
+    return m;
+}
+
 void matrix_destroy(void* data) {
     unsigned i;
     Matrix* m = (Matrix*)data;

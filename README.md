@@ -21,9 +21,10 @@ If a function has the last parameter optional:newname, then it will give the res
 1. Constant multiplication of matrices
 1. Assigning result to variables
 1. don't invert 2x2 matrices with 0 determinant
-1. null(e)
 1. row equivalence
-1. diff eqs
+1. null(e)
+1. evalue(matrix)
+1. evec(matrix, name)
 
 ### Valgrind
 ```bash
