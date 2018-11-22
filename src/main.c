@@ -5,7 +5,7 @@
 #include "defs.h"
 #include "matrix.h"
 #include "dict.h"
-#include "funcs.h"
+#include "funcs/funcs.h"
 
 #define QUIT "quit"
 

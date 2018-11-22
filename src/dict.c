@@ -113,6 +113,12 @@ void* dict_add(Dict* d, char* key, void* val) {
     return np->data;
 }
 
+void* dict_add_range(Dict* d, char* keys, void* vals, unsigned len) {
+    unsigned i;
+    for(i = 0; i < len; i++)
+        dict_add(d, keys + i, vals + i);
+}
+
 void* dict_remove(Dict* d, char* key) {
     nlist *np, *prev, *next;
     unsigned hashval;
