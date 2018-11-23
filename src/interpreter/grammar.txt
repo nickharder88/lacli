@@ -1,0 +1,18 @@
+Literals - numbers and matrices
+Unary expressions - "-" negates a number
+Binary - +, -, *, /
+Parentheses - grouping
+
+expression -> addition;
+call -> method(expression)
+binary -> expression operator expression;
+addition -> multiplication (("-"| "+") multiplication);
+multiplication -> unary (("/"|"*") unary)*;
+unary -> "-" unary | primary;
+primary -> NUMBER | MATRIX | "(" expression ")";
+
+terminal -> code to match and consume a token
+nonterminal -> call to that rules function
+| -> if or switch statement
+* or + -> while or for loop
+? -> if statement

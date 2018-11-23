@@ -7,26 +7,25 @@
 #include "row.h"
 
 typedef struct Matrix {
-    char* name;
     unsigned nrows;
     unsigned ncols;
     Row* rows;
 } Matrix;
 
-Matrix* matrix_create(char* identifier);
-Matrix* matrix_create_dim(char* identifier, unsigned nrows, unsigned ncols);
-Matrix* matrix_create_empty(char* identifier, unsigned nrows, unsigned ncols);
-Matrix* matrix_create_zero(char* identifier, unsigned nrows, unsigned ncols);
+Matrix* matrix_create();
+Matrix* matrix_create_dim(unsigned nrows, unsigned ncols);
+Matrix* matrix_create_empty(unsigned nrows, unsigned ncols);
+Matrix* matrix_create_zero(unsigned nrows, unsigned ncols);
 void matrix_destroy(void* m);
 
-Matrix* matrix_parse(char* identifier, char* line);
-Matrix* matrix_evaluate(Dict* d, char* identifier, char* line);
+Matrix* matrix_parse(char* line);
+Matrix* matrix_evaluate(Dict* d, char* line);
 void matrix_print(Matrix* m);
 
 void matrix_multiply_constant(Matrix* m, double val);
-Matrix* matrix_subtract(char* identifier, Matrix *m1, Matrix *m2);
+Matrix* matrix_subtract(Matrix *m1, Matrix *m2);
 
-Matrix* matrix_copy(Matrix* m, char* identifier);
+Matrix* matrix_copy(Matrix* m);
 Matrix* try_get_matrix(Dict* matrix_dict, char** line);
 
 void matrix_slice_before(Matrix *m, unsigned col);

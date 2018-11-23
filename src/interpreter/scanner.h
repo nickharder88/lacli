@@ -19,10 +19,15 @@ typedef struct Token {
         char* lexeme;
         double number;
     } literal;
-    struct Token* next;
-} TokenNode;
+} Token;
 
-TokenNode* token_scan(char* line, unsigned len);
-void token_destroy(TokenNode* token);
+typedef struct TokenList {
+    unsigned count;
+    unsigned length;
+    Token* arr;
+} TokenList;
+
+TokenList* token_scan(char* line, unsigned len);
+void token_destroy(TokenList* tlist);
 
 #endif

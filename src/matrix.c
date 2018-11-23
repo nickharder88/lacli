@@ -9,30 +9,29 @@
 /*
  * Returns rows by cols Matrix without a name
  */
-Matrix* matrix_create(char* identifier) {
+Matrix* matrix_create() {
     Matrix* matrix;
 
     matrix = (Matrix*)malloc(sizeof(Matrix));
 
     matrix->rows = NULL;
-    matrix->name = strdup(identifier);
     matrix->nrows = 0;
     matrix->ncols = 0;
 
     return matrix;
 }
 
-Matrix* matrix_create_dim(char* identifier, unsigned nrows, unsigned ncols) {
-    Matrix* m = matrix_create(identifier);
+Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
+    Matrix* m = matrix_create();
     m->nrows = nrows;
     m->ncols = ncols;
     return m;
 }
 
-Matrix* matrix_create_empty(char* identifier, unsigned nrows, unsigned ncols) {
+Matrix* matrix_create_empty(unsigned nrows, unsigned ncols) {
     unsigned row_i;
     Row* r;
-    Matrix* m = matrix_create(identifier);
+    Matrix* m = matrix_create();
     m->nrows = nrows;
     m->ncols = ncols;
     m->rows = malloc(nrows * sizeof(struct Row));
@@ -47,9 +46,9 @@ Matrix* matrix_create_empty(char* identifier, unsigned nrows, unsigned ncols) {
     return m;
 }
 
-Matrix* matrix_create_zero(char* identifier, unsigned nrows, unsigned ncols) {
+Matrix* matrix_create_zero(unsigned nrows, unsigned ncols) {
     unsigned row_i, col_i;
-    Matrix* m = matrix_create_empty(identifier, nrows, ncols);
+    Matrix* m = matrix_create_empty(nrows, ncols);
     for(row_i = 0; row_i < m->nrows; row_i++)
         for(col_i = 0; col_i < m->ncols; col_i++)
             m->rows[row_i].vals[col_i] = 0;
@@ -66,15 +65,14 @@ void matrix_destroy(void* data) {
             row_destroy((m->rows + i));
         free(m->rows);
     }
-    free(m->name);
     free(m);
 }
 
-Matrix* matrix_parse(char* identifier, char* line) {
+Matrix* matrix_parse(char* line) {
     unsigned row_check = 0, size = 1;
     char *c = line;
     Row *r, *rows;
-    Matrix* matrix = matrix_create(identifier);
+    Matrix* matrix = matrix_create();
 
     matrix->rows = (Row*)malloc(sizeof(Row));
     matrix->nrows = 0;
@@ -160,7 +158,7 @@ Matrix* matrix_parse(char* identifier, char* line) {
     return matrix;
 }
 
-Matrix* matrix_add(char* identifier, Matrix* a, Matrix* b) {
+Matrix* matrix_add(Matrix* a, Matrix* b) {
     Matrix* m;
     Row* row;
     unsigned row_i, col_i;
@@ -170,7 +168,7 @@ Matrix* matrix_add(char* identifier, Matrix* a, Matrix* b) {
         return NULL;
     }
 
-    m = matrix_create(identifier);
+    m = matrix_create();
     m->rows = (Row*)malloc(a->nrows * sizeof(Row));
     m->nrows = a->nrows;
     m->ncols = a->ncols;
@@ -189,7 +187,7 @@ Matrix* matrix_add(char* identifier, Matrix* a, Matrix* b) {
     return m;
 }
 
-Matrix* matrix_subtract(char* identifier, Matrix* a, Matrix* b) {
+Matrix* matrix_subtract(Matrix* a, Matrix* b) {
     Matrix* m;
     Row* row;
     unsigned row_i, col_i;
@@ -199,7 +197,7 @@ Matrix* matrix_subtract(char* identifier, Matrix* a, Matrix* b) {
         return NULL;
     }
 
-    m = matrix_create(identifier);
+    m = matrix_create();
     m->rows = (Row*)malloc(a->nrows * sizeof(Row));
     m->nrows = a->nrows;
     m->ncols = a->ncols;
@@ -219,7 +217,7 @@ Matrix* matrix_subtract(char* identifier, Matrix* a, Matrix* b) {
 }
 
 
-Matrix* matrix_multiply(char* identifier, Matrix* a, Matrix* b) {
+Matrix* matrix_multiply(Matrix* a, Matrix* b) {
     Matrix* m;
     Row* row;
     unsigned row_i, col_i, col_j;
@@ -230,7 +228,7 @@ Matrix* matrix_multiply(char* identifier, Matrix* a, Matrix* b) {
         return NULL;
     }
 
-    m = matrix_create(identifier);
+    m = matrix_create();
     m->rows = (Row*)malloc(a->nrows * sizeof(Row));
 
     /* dimensions: a=mxn b=nxp matrix=mxp */
@@ -255,7 +253,7 @@ Matrix* matrix_multiply(char* identifier, Matrix* a, Matrix* b) {
     return m;
 }
 
-Matrix* matrix_evaluate(Dict* d, char* identifier, char* line) {
+Matrix* matrix_evaluate(Dict* d, char* line) {
     char id[MAXIDENTIFIER];
     unsigned short i = 0, id_i = 0;
     Matrix* matrix;
@@ -312,9 +310,9 @@ Matrix* matrix_evaluate(Dict* d, char* identifier, char* line) {
     }
 
     if(flags.addition)
-        matrix = matrix_add(identifier, matrices[0], matrices[1]);
+        matrix = matrix_add(matrices[0], matrices[1]);
     else if(flags.mult) {
-        matrix = matrix_multiply(identifier, matrices[0], matrices[1]);
+        matrix = matrix_multiply(matrices[0], matrices[1]);
     } else {
         free(matrices);
         return NULL;
@@ -332,7 +330,6 @@ void matrix_print(Matrix* m) {
         return;
     }
 
-    printf("%s\n", m->name);
     printf("[\n");
     for(i = 0; i < m->nrows; i++) {
         row = m->rows + i;
@@ -348,18 +345,14 @@ void matrix_print(Matrix* m) {
 /* deep copies the matrix. if identifier is null, it uses the name
  * of the original matrix.
  */
-Matrix* matrix_copy(Matrix* m, char* identifier) {
+Matrix* matrix_copy(Matrix* m) {
     Matrix* copy;
     Row* rcopy;
     unsigned i;
 
-    if(identifier == NULL)
-        identifier = m->name;
-
-    copy = matrix_create(identifier);
+    copy = matrix_create();
     copy->ncols = m->ncols;
     copy->nrows = m->nrows;
-    copy->name = strdup(identifier);
     copy->rows = malloc(sizeof(Row) * copy->nrows);
 
     for(i = 0; i < m->nrows; i++)

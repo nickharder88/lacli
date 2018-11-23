@@ -9,6 +9,7 @@
 #include "../dict.h"
 
 #define VARSTR "var"
+#define DEFAULTSIZE 8
 
 static char* ptr;
 static unsigned ptrlen;
@@ -20,7 +21,7 @@ static TokenType is_keyword(char* identifier) {
 
 static void scan_init(char* line, unsigned len) {
     ptr = line;
-    len = ptrlen;
+    ptrlen = len;
     ptrindex = 0;
 }
 
@@ -38,10 +39,10 @@ static char scan_peek() {
     return '\0';
 }
 
-static double scan_dig(void) {
-    char c, has_fraction;
+static double scan_dig(char c) {
+    char has_fraction;
     unsigned i, power = 1;
-    double dig;
+    double dig = c - '0';
 
     for(i = 0; i < MAXDIGIT - 1 
             && ptrindex < ptrlen 
@@ -63,44 +64,41 @@ static double scan_dig(void) {
     return dig / power;
 }
 
-static char* scan_identifier(void) {
-    char c;
+static char* scan_identifier(char c) {
     unsigned i;
     char* identifier = malloc(MAXIDENTIFIER * sizeof(char));
+    identifier[0] = c;
 
-    for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(c = ptr[ptrindex]); ptrindex++, i++)
+    for(i = 1; i < MAXIDENTIFIER - 1 && isalnum(c = ptr[ptrindex]); ptrindex++, i++)
         identifier[i] = c;
 
     return identifier;
 }
 
-static TokenNode* token_create(TokenType type) {
-    TokenNode* token;
+static Token* token_create(TokenType type) {
+    Token* token;
     token = malloc(sizeof(struct Token));
     token->literal.lexeme = NULL;
     token->type = type;
-    token->next = NULL;
     return token;
 }
 
-static TokenNode* token_create_lex(TokenType type, char* lexeme) {
-    TokenNode* token = token_create(type);
+static Token* token_create_lex(TokenType type, char* lexeme) {
+    Token* token = token_create(type);
     token->literal.lexeme = strdup(lexeme);
     return token;
 }
 
-static TokenNode* token_create_dig(TokenType type, double digit) {
-    TokenNode* token = token_create(type);
+static Token* token_create_dig(TokenType type, double digit) {
+    Token* token = token_create(type);
     token->literal.number = digit;
     return token;
 }
 
-static TokenNode* token_next(void) {
+static Token* token_next(void) {
     char c;
     char* str;
     double dig;
-    TokenNode* token;
-
     switch(c = scan_next()) {
         case '(':
             return token_create(LEFT_PAREN);
@@ -127,47 +125,61 @@ static TokenNode* token_next(void) {
         case '\t':
             // ignore whitespace
             break;
+        case '\n':
+            // finish
+            ptrindex = ptrlen;
+            break;
         default:
             if(isdigit(c)) {
-                token_create_dig(NUMBER, scan_dig());
+                return token_create_dig(NUMBER, scan_dig(c));
             } else if(isalpha(c)) {
-                str = scan_identifier();
+                str = scan_identifier(c);
                 if(strcmp(VARSTR, str))
                     return token_create(VAR);
                 return token_create_lex(IDENTIFIER, str);
             } else {
                 errlog("Unexpected character");
+                // TODO error handle
                 return NULL;
             }
             break;
     }
-
-    return token;
+    return NULL;
 }
 
-TokenNode* token_scan(char* line, unsigned len) {
-    TokenNode *head, *ptr;
-    head = ptr = token_create(NONE);
+TokenList* token_scan(char* line, unsigned len) {
+    unsigned i, size, length = DEFAULTSIZE;
+    Token* tarr;
+    TokenList* tlist = malloc(sizeof(struct TokenList));
+    tlist->arr = malloc(DEFAULTSIZE * sizeof(struct Token));
 
     scan_init(line, len);
+    for(i = 0; ptrindex < ptrlen; i++) {
+        if(length <= i) {
+            length *= 2;
+            tarr = realloc(tlist->arr, length * sizeof(struct Token));
+            tlist->arr = tarr;
+        }
 
-    while(*line != '\n' && *line != '\0' && *line != EOF) {
-        ptr->next = token_next();
-        ptr = ptr->next;
+        if((tarr = token_next()) == NULL) {
+            break;
+        }
+        tlist->arr[i] = *tarr;
     }
 
-    ptr = head->next;
-    free(head);
-    return ptr;
+    tlist->length = length;
+    tlist->count = i;
+    return tlist;
 }
 
-void token_destroy(TokenNode* token) {
-    TokenNode* ptr;
-    while(token) {
-        if(token->type == IDENTIFIER)
-            free(token->literal.lexeme);
-        ptr = token;
-        token = token->next;
+void token_destroy(TokenList* tlist) {
+    unsigned i;
+    Token* ptr;
+    for(i = 0; i < tlist->count; i++) {
+        ptr = tlist->arr + i;
+        if(ptr->type == IDENTIFIER)
+            free(ptr->literal.lexeme);
         free(ptr);
     }
+    free(tlist);
 }
