@@ -22,11 +22,15 @@ Matrix* matrix_parse(char* line);
 Matrix* matrix_evaluate(Dict* d, char* line);
 void matrix_print(Matrix* m);
 
-void matrix_multiply_constant(Matrix* m, double val);
-Matrix* matrix_subtract(Matrix *m1, Matrix *m2);
 
 Matrix* matrix_copy(Matrix* m);
 Matrix* try_get_matrix(Dict* matrix_dict, char** line);
+
+Matrix* matrix_add(Matrix* a, Matrix* b);
+Matrix* matrix_subtract(Matrix* a, Matrix* b);
+Matrix* matrix_multiply_constant(Matrix* m, double val);
+Matrix* matrix_multiply(Matrix* a, Matrix* b);
+Matrix* matrix_subtract(Matrix *m1, Matrix *m2);
 
 void matrix_slice_before(Matrix *m, unsigned col);
 void matrix_slice_after(Matrix *m, unsigned col);

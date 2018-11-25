@@ -1,12 +1,12 @@
 #include "../matrix.h"
 
-typedef enum {
+typedef enum Operator {
     ADD, SUB, MULT, DIV, NEG
 } Operator;
 
 typedef struct Expr {
     enum {
-        binop, unop, call, grouping, literal, matrix
+        BINOP, UNOP, CALL, GROUPING, LITERAL, MATRIX
     } tag;
 
     union {
@@ -45,3 +45,4 @@ Expr* make_call(Expr* expr, char* name);
 Expr* make_grouping(Expr* expr);
 Expr* make_literal_expr(double val);
 Expr* make_matrix(Expr* expr_list, unsigned length);
+void free_expr(Expr* expr);

@@ -420,12 +420,15 @@ void matrix_slice_after(Matrix *m, unsigned col) {
     m->ncols = ncols;
 }
 
-void matrix_multiply_constant(Matrix* m, double val) {
+Matrix* matrix_multiply_constant(Matrix* m, double val) {
     unsigned col_i, row_i;
     Row* row;
-    for(row_i = 0; row_i < m->nrows; row_i++) {
-        row = m->rows + row_i;
-        for(col_i = 0; col_i < m->ncols; col_i++)
+    Matrix* copy = matrix_copy(m);
+    for(row_i = 0; row_i < copy->nrows; row_i++) {
+        row = copy->rows + row_i;
+        for(col_i = 0; col_i < copy->ncols; col_i++)
             row->vals[col_i] *= val;
     }
+
+    return copy;
 }
