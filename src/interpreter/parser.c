@@ -100,7 +100,8 @@ static Stmt* declaration(void) {
 
 static Expr* primary(void) {
     Matrix* m;
-    unsigned size, count;
+    unsigned char is_nested_matrix;
+    unsigned size, nrows, ncols;
     Token* tkn;
     Expr *expr, *expr_list;
 
@@ -122,23 +123,48 @@ static Expr* primary(void) {
     if(tkn->type == LEFT_BRACE) {
         tokens_advance();
 
-        count = 0;
+        nrows = ncols = 0;
         size = MATRIXBASESIZE;
         expr_list = malloc(size * sizeof(struct Expr));
 
+        expr = expression();
+        if(expr->type == MATRIX) {
+
+        } else if (expr->type == LITERAL){
+        } else {
+            //err
+        }
+
+        // TODO ISSUE tell if its valid, recursively define matrices but limit to 2 dimensions for now
         do {
-            if(count >= size) {
+            if(nrows>= size) {
                 size *= 2;
                 expr_list = realloc(expr_list, size * sizeof(struct Expr));
             }
-            expr_list[count++] = *(expression());
+
+            if(expr->type == MATRIX) {
+                if(!is_nested_matrix) {
+                    //err
+                }
+                nrows++;
+
+            } else if(expr->type == LITERAL) {
+                if(is_nested_matrix) {
+                    //err
+                }
+
+                // TODO
+            } else {
+                //ERR
+            }
+            expr_list[nrows++] = *(expression());
         } while((tkn = tokens_peek())->type == COMMA);
 
         if(tokens_peek()->type != RIGHT_BRACE) {
             //ERR
         }
         tokens_advance();
-        return expr_make_matrix(expr_list, count);
+        return expr_make_matrix(expr_list, count, nrows, ncols);
     }
 
     if(tkn->type == NUMBER) {

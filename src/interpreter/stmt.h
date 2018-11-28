@@ -9,8 +9,16 @@ typedef struct Stmt {
         PRINT_S, EXPR_S, VAR_S
     } type;
 
-    char* name;
-    Expr* expr;
+    union {
+        struct {
+            char* name;
+            Expr* initializer;
+        } var;
+
+        struct {
+            Expr* expr;
+        } expr;
+    } value;
 } Stmt;
 
 Stmt* stmt_make_print(Expr* expr);

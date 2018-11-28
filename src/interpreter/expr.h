@@ -18,7 +18,8 @@ typedef struct Expr {
 
         struct {
             struct Expr* expr_list;
-            unsigned length;
+            unsigned nrows;
+            unsigned ncols;
         } matrix;
 
         struct {
@@ -49,7 +50,7 @@ Expr* expr_make_call(Expr* expr, char* name);
 Expr* expr_make_grouping(Expr* expr);
 Expr* expr_make_literal(double val);
 Expr* expr_make_variable(char* val);
-Expr* expr_make_matrix(Expr* expr_list, unsigned length);
+Expr* expr_make_matrix(Expr* expr_list, unsigned nrows, unsigned ncols);
 void expr_free(Expr* expr);
 
 #endif

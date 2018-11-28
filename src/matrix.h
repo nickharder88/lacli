@@ -9,7 +9,15 @@
 typedef struct Matrix {
     unsigned nrows;
     unsigned ncols;
-    Row* rows;
+
+    enum {
+        ONE, TWO
+    } dim;
+
+    union {
+        struct Matrix* nested;
+        double* vals;
+    }
 } Matrix;
 
 Matrix* matrix_create();

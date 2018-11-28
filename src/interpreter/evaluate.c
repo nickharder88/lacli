@@ -3,6 +3,7 @@
 #include "evaluate.h"
 #include "expr.h"
 #include "rval.h"
+#include "environment.h"
 
 static void rval_free(Rval* rval) {
     if(rval->type == RMATRIX)
@@ -65,7 +66,6 @@ static Rval* evaluate_binary(Expr* expr) {
     Rval *right, *left, *tmp;
     left = evaluate_expression(expr->binop.left);
     right = evaluate_expression(expr->binop.right);
-
  
     switch(expr->unop.op) {
         case ADD:
@@ -147,10 +147,25 @@ static Rval* evaluate_grouping(Expr* grouping) {
     return evaluate_expression(grouping->grouping.expr);
 }
 
-static Matrix* evaluate_matrix(Expr* mexpr) {
-    Matrix* m;
+static Matrix* evaluate_row(Expr* rexpr) {
+}
 
-    // TODO
+static Matrix* evaluate_matrix(Expr* mexpr) {
+    unsigned i;
+    Rval* val;
+    Row* row;
+    Matrix* m = matrix_create();
+    m->rows = malloc(mexpr->matrix.length * sizeof(struct Row));
+
+    for(i = 0; i < mexpr->matrix.length; i++) {
+        val = evaluate_expression(mexpr->matrix.expr_list + i);
+        if(val->type == RLITERAL) {
+
+        } else {
+        }
+        row = malloc(sizeof(struct Row));
+        m->rows[i] = val->value.literal;
+    }
 
     return m;
 }
@@ -160,17 +175,19 @@ static Matrix* evaluate_matrix(Expr* mexpr) {
  */
 
 static void evaluate_expr_statement(Stmt* expr) {
-    evaluate_expression(expr->expr);
+    evaluate_expression(expr->value.expr.expr);
 }
 
 static void evaluate_print_statement(Stmt* print) {
-    Rval* val = evaluate_expression(print->expr);
+    Rval* val = evaluate_expression(print->value.expr.expr);
     rval_print(val);
 }
 
 static void evaluate_var_statement(Stmt* var) {
-    if(var->initializer == NULL) {
-    }
+    Rval* value = NULL;
+    if(var->value.var.initializer != NULL)
+        value = evaluate_expression(var->value.var.initializer);
+    env_define(var->value.var.name, value);
 }
 
 /*
@@ -178,5 +195,18 @@ static void evaluate_var_statement(Stmt* var) {
  */
 
 void evaluate(Stmt* statement) {
-
+    switch(statement->type) {
+        case PRINT_S:
+            evaluate_print_statement(statement);
+            break;
+        case EXPR_S:
+            evaluate_expr_statement(statement);
+            break;
+        case VAR_S:
+            evaluate_var_statement(statement);
+            break;
+        default:
+            //err
+            break;
+    }
 }
