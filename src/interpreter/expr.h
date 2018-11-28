@@ -1,3 +1,6 @@
+#ifndef EXPR_H
+#define EXPR_H
+
 #include "../matrix.h"
 
 typedef enum Operator {
@@ -6,11 +9,12 @@ typedef enum Operator {
 
 typedef struct Expr {
     enum {
-        BINOP, UNOP, CALL, GROUPING, LITERAL, MATRIX
-    } tag;
+        BINOP, UNOP, CALL, GROUPING, LITERAL, MATRIX, VARIABLE
+    } type;
 
     union {
         double value;
+        char* identifier;
 
         struct {
             struct Expr* expr_list;
@@ -30,7 +34,7 @@ typedef struct Expr {
 
         struct {
             char* name;
-            struct Expr* expr;
+            struct Expr* expr_list;
         } call;
 
         struct {
@@ -39,10 +43,13 @@ typedef struct Expr {
     };
 } Expr;
 
-Expr* make_bin_op(Expr* left, Expr* right, Operator op);
-Expr* make_un_op(Expr* expr, Operator op);
-Expr* make_call(Expr* expr, char* name);
-Expr* make_grouping(Expr* expr);
-Expr* make_literal_expr(double val);
-Expr* make_matrix(Expr* expr_list, unsigned length);
-void free_expr(Expr* expr);
+Expr* expr_make_bin_op(Expr* left, Expr* right, Operator op);
+Expr* expr_make_un_op(Expr* expr, Operator op);
+Expr* expr_make_call(Expr* expr, char* name);
+Expr* expr_make_grouping(Expr* expr);
+Expr* expr_make_literal(double val);
+Expr* expr_make_variable(char* val);
+Expr* expr_make_matrix(Expr* expr_list, unsigned length);
+void expr_free(Expr* expr);
+
+#endif

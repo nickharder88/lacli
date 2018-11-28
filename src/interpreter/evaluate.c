@@ -1,6 +1,8 @@
 #include <stdlib.h>
 
 #include "evaluate.h"
+#include "expr.h"
+#include "rval.h"
 
 static void rval_free(Rval* rval) {
     if(rval->type == RMATRIX)
@@ -22,12 +24,17 @@ static Rval* make_rval_matrix(Matrix* m) {
     return rval;
 }
 
+
 static Rval* evaluate_literal(Expr* literal) {
     return make_rval_literal(literal->value);
 }
 
 static Rval* evaluate_expression(Expr* expression) {
     // TODO
+}
+
+static Rval* evaluate_call(Expr* call) {
+
 }
 
 static Rval* evaluate_unary(Expr* unary) {
@@ -140,10 +147,36 @@ static Rval* evaluate_grouping(Expr* grouping) {
     return evaluate_expression(grouping->grouping.expr);
 }
 
-Matrix* evaluate_matrix(Expr* mexpr) {
+static Matrix* evaluate_matrix(Expr* mexpr) {
     Matrix* m;
 
     // TODO
 
     return m;
+}
+
+/*
+ * STATEMENT
+ */
+
+static void evaluate_expr_statement(Stmt* expr) {
+    evaluate_expression(expr->expr);
+}
+
+static void evaluate_print_statement(Stmt* print) {
+    Rval* val = evaluate_expression(print->expr);
+    rval_print(val);
+}
+
+static void evaluate_var_statement(Stmt* var) {
+    if(var->initializer == NULL) {
+    }
+}
+
+/*
+ * INTERFACE
+ */
+
+void evaluate(Stmt* statement) {
+
 }

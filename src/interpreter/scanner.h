@@ -10,7 +10,7 @@ typedef enum {
     IDENTIFIER, NUMBER,
 
     // KEYWORDS
-    VAR, NONE
+    VAR, PRINT
 } TokenType;
 
 typedef struct Token {

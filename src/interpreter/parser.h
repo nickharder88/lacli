@@ -2,8 +2,9 @@
 #define PARSER_H
 
 #include "expr.h"
+#include "stmt.h"
 #include "scanner.h"
 
-Expr* parse(TokenList* tokenlist);
+Stmt* parse(TokenList* tokenlist);
 
 #endif

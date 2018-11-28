@@ -3,49 +3,56 @@
 #include "../matrix.h"
 #include "expr.h"
 
-Expr* make_bin_op(Expr* left, Expr* right, Operator op) {
+Expr* expr_make_bin_op(Expr* left, Expr* right, Operator op) {
     Expr* bop = malloc(sizeof(struct Expr));
     bop->binop.left = left;
     bop->binop.right = right;
     bop->binop.op = op;
-    bop->tag = BINOP;
+    bop->type = BINOP;
     return bop;
 }
 
-Expr* make_un_op(Expr* expr, Operator op) {
+Expr* expr_make_un_op(Expr* expr, Operator op) {
     Expr* uop = malloc(sizeof(struct Expr));
     uop->unop.expr = expr;
     uop->unop.op = op;
-    uop->tag = UNOP;
+    uop->type = UNOP;
     return uop;
 }
 
-Expr* make_call(Expr* expr, char* name) {
+Expr* expr_make_call(Expr* expr, char* name) {
     Expr* cexp = malloc(sizeof(struct Expr));
     cexp->call.name = name;
-    cexp->call.expr = expr;
-    cexp->tag = CALL;
+    cexp->call.expr_list = expr;
+    cexp->type = CALL;
     return cexp;
 }
 
-Expr* make_grouping(Expr* expr) {
+Expr* expr_make_grouping(Expr* expr) {
     Expr* group = malloc(sizeof(struct Expr));
     group->grouping.expr = expr;
-    group->tag = GROUPING;
+    group->type = GROUPING;
     return group;
 }
 
-Expr* make_literal_expr(double val) {
+Expr* expr_make_literal(double val) {
     Expr* value = malloc(sizeof(struct Expr));
     value->value = val;
-    value->tag = LITERAL;
+    value->type = LITERAL;
     return value;
 }
 
-Expr* make_matrix(Expr* expr_list, unsigned length) {
+Expr* expr_make_variable(char* val) {
+    Expr* value = malloc(sizeof(struct Expr));
+    value->identifier = val;
+    value->type = VARIABLE;
+    return value;
+}
+
+Expr* expr_make_matrix(Expr* expr_list, unsigned length) {
     Expr* mexpr = malloc(sizeof(struct Expr));
     mexpr->matrix.expr_list = expr_list;
     mexpr->matrix.length = length;
-    mexpr->tag = MATRIX;
+    mexpr->type = MATRIX;
     return mexpr;
 }
