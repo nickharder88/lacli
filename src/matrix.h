@@ -4,20 +4,17 @@
 #include <stdio.h>
 #include "defs.h"
 #include "dict.h"
-#include "row.h"
 
 typedef struct Matrix {
     unsigned nrows;
     unsigned ncols;
 
-    enum {
-        ONE, TWO
-    } dim;
+    unsigned char dim;
 
     union {
-        struct Matrix* nested;
-        double* vals;
-    }
+        struct Matrix* rows;
+        double* literals;
+    } values;
 } Matrix;
 
 Matrix* matrix_create();

@@ -3,9 +3,8 @@
 #include "parser.h"
 #include "evaluate.h"
 
-void repl(void) {
+void* repl(char* line) {
     unsigned len;
-    char* line;
 
     TokenList* tlist;
     Stmt* statement;

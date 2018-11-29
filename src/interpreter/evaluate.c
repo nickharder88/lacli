@@ -4,38 +4,24 @@
 #include "expr.h"
 #include "rval.h"
 #include "environment.h"
+#include "funcs.h"
 
-static void rval_free(Rval* rval) {
-    if(rval->type == RMATRIX)
-        matrix_destroy(rval->value.matrix);
-    free(rval);
-}
-
-static Rval* make_rval_literal(double val) {
-    Rval* rval = malloc(sizeof(struct Rval));
-    rval->type = LITERAL;
-    rval->value.literal = val;
-    return rval;
-}
-
-static Rval* make_rval_matrix(Matrix* m) {
-    Rval* rval = malloc(sizeof(struct Rval));
-    rval->type = MATRIX;
-    rval->value.matrix = m;
-    return rval;
-}
-
+static Rval* evaluate_expression(Expr* expr);
 
 static Rval* evaluate_literal(Expr* literal) {
     return make_rval_literal(literal->value);
 }
 
-static Rval* evaluate_expression(Expr* expression) {
-    // TODO
-}
-
 static Rval* evaluate_call(Expr* call) {
+    unsigned i;
+    Expr* expr_list;
+    Rval* ret;
+    Rval* args = malloc(call->call.nargs * sizeof(struct Rval));
+    expr_list = call->call.expr_list;
+    for(i = 0; i < call->call.nargs; i++)
+        args[i] = *(evaluate_expression(expr_list + i));
 
+    return func_call(call->call.name, args);
 }
 
 static Rval* evaluate_unary(Expr* unary) {
@@ -139,7 +125,7 @@ static Rval* evaluate_binary(Expr* expr) {
             return NULL;
     }
 
-    rval_free(right);
+    rval_destroy(right);
     return left;
 }
 
@@ -148,26 +134,70 @@ static Rval* evaluate_grouping(Expr* grouping) {
 }
 
 static Matrix* evaluate_row(Expr* rexpr) {
-}
-
-static Matrix* evaluate_matrix(Expr* mexpr) {
     unsigned i;
+    Matrix *m;
+    Expr* e;
     Rval* val;
-    Row* row;
-    Matrix* m = matrix_create();
-    m->rows = malloc(mexpr->matrix.length * sizeof(struct Row));
-
-    for(i = 0; i < mexpr->matrix.length; i++) {
-        val = evaluate_expression(mexpr->matrix.expr_list + i);
-        if(val->type == RLITERAL) {
-
-        } else {
+    m->values.literals = malloc(rexpr->matrix.ncols * sizeof(double));
+    for(i = 0; i < rexpr->matrix.ncols; i++) {
+        e = rexpr->matrix.expr_list + i;
+        val = evaluate_expression(e);
+        if(val->type == RMATRIX) {
+            //err
+            return NULL;
         }
-        row = malloc(sizeof(struct Row));
-        m->rows[i] = val->value.literal;
+
+        m->values.literals[i] = val->value.literal;
     }
 
     return m;
+}
+
+static Rval* evaluate_matrix(Expr* mexpr) {
+    unsigned i;
+    Rval *val, *ret;
+    Matrix *row, *m;
+    if(mexpr->matrix.nrows == 1) {
+        m = evaluate_row(mexpr);
+    } else {
+        m->values.rows = malloc(mexpr->matrix.nrows * sizeof(struct Matrix));
+        for(i = 0; i < mexpr->matrix.nrows; i++) {
+            row = evaluate_row(mexpr->matrix.expr_list + i);
+            m->values.rows[i] = *row;
+        }
+    }
+
+    return make_rval_matrix(m);
+}
+
+static Rval* evaluate_expression(Expr* expr) {
+    Rval* val;
+
+    switch(expr->type) {
+        case BINOP:
+            val = evaluate_binary(expr);
+            break;
+        case UNOP:
+            val = evaluate_unary(expr);
+            break;
+        case CALL:
+            val = evaluate_call(expr);
+            break;
+        case GROUPING:
+            val = evaluate_grouping(expr);
+            break;
+        case LITERAL:
+            val = evaluate_literal(expr);
+            break;
+        case MATRIX:
+            val = evaluate_matrix(expr);
+            break;
+        default:
+            //err
+            break;
+    }
+
+    return val;
 }
 
 /*

@@ -14,7 +14,8 @@ Matrix* matrix_create() {
 
     matrix = (Matrix*)malloc(sizeof(Matrix));
 
-    matrix->rows = NULL;
+    matrix->dim = 0;
+    matrix->values.literals = NULL;
     matrix->nrows = 0;
     matrix->ncols = 0;
 
@@ -30,17 +31,16 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
 
 Matrix* matrix_create_empty(unsigned nrows, unsigned ncols) {
     unsigned row_i;
-    Row* r;
+    Matrix* row;
     Matrix* m = matrix_create();
     m->nrows = nrows;
     m->ncols = ncols;
-    m->rows = malloc(nrows * sizeof(struct Row));
-
+    m->values.rows = malloc(nrows * sizeof(struct Matrix));
     for(row_i = 0; row_i < nrows; row_i++) {
-        r = m->rows + row_i;
-        r->len = ncols;
-        r->pivot = ncols;
-        r->vals = malloc(ncols * sizeof(double));
+        row = m->values.rows + row_i;
+        row->nrows = 1;
+        row->ncols = ncols;
+        row->values.literals = NULL;
     }
 
     return m;
@@ -48,10 +48,16 @@ Matrix* matrix_create_empty(unsigned nrows, unsigned ncols) {
 
 Matrix* matrix_create_zero(unsigned nrows, unsigned ncols) {
     unsigned row_i, col_i;
+    Matrix* row;
     Matrix* m = matrix_create_empty(nrows, ncols);
-    for(row_i = 0; row_i < m->nrows; row_i++)
+    for(row_i = 0; row_i < m->nrows; row_i++) {
+        row = m->values.rows + row_i;
+        row->values.literals = malloc(ncols * sizeof(double));
+        row->ncols = ncols;
+        row->nrows = 1;
         for(col_i = 0; col_i < m->ncols; col_i++)
-            m->rows[row_i].vals[col_i] = 0;
+            row->values.literals[col_i] = 0;
+    }
 
     return m;
 }
@@ -60,14 +66,28 @@ void matrix_destroy(void* data) {
     unsigned i;
     Matrix* m = (Matrix*)data;
 
-    if(m->rows != NULL) {
-        for(i = 0; i < m->nrows; i++)
-            row_destroy((m->rows + i));
-        free(m->rows);
+    switch(m->dim) {
+        case 1:
+            if(m->values.literals != NULL) {
+                free(m->values.literals);
+            }
+            break;
+        case 2:
+            if(m->values.rows != NULL) {
+                for(i = 0; i < m->nrows; i++) {
+                    matrix_destroy(m->values.rows + i);
+                }
+            }
+            break;
+        default:
+            //ERR
+            break;
+
     }
     free(m);
 }
 
+/*
 Matrix* matrix_parse(char* line) {
     unsigned row_check = 0, size = 1;
     char *c = line;
@@ -117,7 +137,6 @@ Matrix* matrix_parse(char* line) {
             }
             matrix->rows[matrix->nrows++] = *r;
 
-            /* skip spaces, commas, and deal with end of matrix */
             while(*c == ' ')
                 c++;
             if(*c == ']')
@@ -129,7 +148,6 @@ Matrix* matrix_parse(char* line) {
         } while(*c == '[');
     }
     else if(isdigit(*c) || *c == '-') {
-        /* this matrix is just a vector */
         if((r = row_parse(&line)) == NULL) {
             matrix_destroy(matrix);
             return NULL;
@@ -157,10 +175,10 @@ Matrix* matrix_parse(char* line) {
 
     return matrix;
 }
+*/
 
 Matrix* matrix_add(Matrix* a, Matrix* b) {
-    Matrix* m;
-    Row* row;
+    Matrix *m, *row;
     unsigned row_i, col_i;
 
     if(a->ncols != b->ncols || a->nrows != b->nrows) {
@@ -169,7 +187,7 @@ Matrix* matrix_add(Matrix* a, Matrix* b) {
     }
 
     m = matrix_create();
-    m->rows = (Row*)malloc(a->nrows * sizeof(Row));
+    m->values.rows = malloc(a->nrows * sizeof(Matrix));
     m->nrows = a->nrows;
     m->ncols = a->ncols;
 

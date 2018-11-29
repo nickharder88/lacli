@@ -20,10 +20,11 @@ Expr* expr_make_un_op(Expr* expr, Operator op) {
     return uop;
 }
 
-Expr* expr_make_call(Expr* expr, char* name) {
+Expr* expr_make_call(char* name, Expr* expr_list, unsigned nargs) {
     Expr* cexp = malloc(sizeof(struct Expr));
     cexp->call.name = name;
-    cexp->call.expr_list = expr;
+    cexp->call.expr_list = expr_list;
+    cexp->call.nargs = nargs;
     cexp->type = CALL;
     return cexp;
 }
@@ -49,10 +50,11 @@ Expr* expr_make_variable(char* val) {
     return value;
 }
 
-Expr* expr_make_matrix(Expr* expr_list, unsigned length) {
+Expr* expr_make_matrix(Expr* expr_list, unsigned nrows, unsigned ncols) {
     Expr* mexpr = malloc(sizeof(struct Expr));
     mexpr->matrix.expr_list = expr_list;
-    mexpr->matrix.length = length;
+    mexpr->matrix.nrows = nrows;
+    mexpr->matrix.ncols = ncols;
     mexpr->type = MATRIX;
     return mexpr;
 }

@@ -100,7 +100,7 @@ static Stmt* declaration(void) {
 
 static Expr* primary(void) {
     Matrix* m;
-    unsigned char is_nested_matrix;
+    unsigned char ncol_checked = 0;
     unsigned size, nrows, ncols;
     Token* tkn;
     Expr *expr, *expr_list;
@@ -127,44 +127,59 @@ static Expr* primary(void) {
         size = MATRIXBASESIZE;
         expr_list = malloc(size * sizeof(struct Expr));
 
-        expr = expression();
-        if(expr->type == MATRIX) {
+        if((tkn = tokens_peek())->type == LEFT_BRACE) {
+            // 2 dimensional matrix
+            do {
+                if(nrows >= size) {
+                    size *= 2;
+                    expr_list = realloc(expr_list, size * sizeof(struct Expr));
+                }
+                if((expr = primary())->type != MATRIX || expr->matrix.nrows != 1) {
+                    //err
+                    return NULL;
+                }
 
-        } else if (expr->type == LITERAL){
+                expr_list[nrows++] = *expr;
+
+                if(ncol_checked) {
+                    if(expr->matrix.ncols != ncols) {
+                        //err
+                        return NULL;
+                    }
+                } else
+                    ncols = expr->matrix.ncols;
+
+                if((tkn = tokens_peek())->type == COMMA) {
+                    tokens_advance();
+                } else if(tkn->type == RIGHT_BRACE) {
+                    tokens_advance();
+                    return expr_make_matrix(expr_list, nrows, ncols);
+                } else {
+                    //err
+                }
+            } while(1);
+
         } else {
-            //err
-        }
+            // 1 dimensional matrix
+            nrows = 1;
+            do {
+                if(ncols >= size) {
+                    size *= 2;
+                    expr_list = realloc(expr_list, size * sizeof(struct Expr));
+                }
+                expr_list[ncols++] = *(expression());
 
-        // TODO ISSUE tell if its valid, recursively define matrices but limit to 2 dimensions for now
-        do {
-            if(nrows>= size) {
-                size *= 2;
-                expr_list = realloc(expr_list, size * sizeof(struct Expr));
-            }
-
-            if(expr->type == MATRIX) {
-                if(!is_nested_matrix) {
+                if((tkn = tokens_peek())->type == COMMA) {
+                    tokens_advance();
+                } else if(tkn->type == RIGHT_BRACE) {
+                    tokens_advance();
+                    // TODO
+                    return expr_make_matrix(expr_list, nrows, ncols);
+                } else {
                     //err
                 }
-                nrows++;
-
-            } else if(expr->type == LITERAL) {
-                if(is_nested_matrix) {
-                    //err
-                }
-
-                // TODO
-            } else {
-                //ERR
-            }
-            expr_list[nrows++] = *(expression());
-        } while((tkn = tokens_peek())->type == COMMA);
-
-        if(tokens_peek()->type != RIGHT_BRACE) {
-            //ERR
+            } while (1);
         }
-        tokens_advance();
-        return expr_make_matrix(expr_list, count, nrows, ncols);
     }
 
     if(tkn->type == NUMBER) {
@@ -175,33 +190,8 @@ static Expr* primary(void) {
     return NULL;
 }
 
-static Expr* get_arg_list(void) {
-    unsigned char i;
-    Expr* exprlist = malloc(MAXARGLIST * sizeof(struct Expr));
-
-    if(tokens_peek()->type == RIGHT_PAREN) {
-        // consume right parenthesis
-        tokens_advance();
-        return NULL;
-    }
-
-    for(i = 0; i < MAXARGLIST; i++) {
-        exprlist[i] = *expression();
-
-        if(tokens_peek()->type != COMMA) {
-            break;
-        }
-        tokens_advance();
-    }
-
-    if(tokens_peek()->type != RIGHT_PAREN) {
-        // ERR
-    }
-
-    return exprlist;
-}
-
 static Expr* call(void) {
+    unsigned char nargs;
     Token* tkn;
     Expr *expr_list, *expr = primary();
 
@@ -210,9 +200,28 @@ static Expr* call(void) {
             //err
         }
 
-        expr_list = get_arg_list();
+        Expr* exprlist = malloc(MAXARGLIST * sizeof(struct Expr));
 
-        return expr_make_call(expr_list, expr->identifier);
+        if(tokens_peek()->type == RIGHT_PAREN) {
+            // consume right parenthesis
+            tokens_advance();
+            return NULL;
+        }
+
+        for(nargs = 0; nargs < MAXARGLIST; nargs++) {
+            exprlist[nargs] = *expression();
+
+            if(tokens_peek()->type != COMMA) {
+                break;
+            }
+            tokens_advance();
+        }
+
+        if(tokens_peek()->type != RIGHT_PAREN) {
+            // ERR
+        }
+
+        return expr_make_call(expr->identifier, expr_list, nargs);
     }
 
     return expr;

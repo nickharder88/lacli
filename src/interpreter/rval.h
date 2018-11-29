@@ -16,5 +16,7 @@ typedef struct Rval {
 
 void rval_destroy(Rval* val);
 void rval_print(Rval* val);
+Rval* make_rval_literal(double val);
+Rval* make_rval_matrix(Matrix* m);
 
 #endif

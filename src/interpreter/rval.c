@@ -17,3 +17,19 @@ void rval_print(Rval* val) {
 
     matrix_print(val->value.matrix);
 }
+
+Rval* make_rval_literal(double val) {
+    Rval* rval = malloc(sizeof(struct Rval));
+    rval->type = RLITERAL;
+    rval->value.literal = val;
+    return rval;
+}
+
+Rval* make_rval_matrix(Matrix* m) {
+    Rval* rval = malloc(sizeof(struct Rval));
+    rval->type = RMATRIX;
+    rval->value.matrix = m;
+    return rval;
+}
+
+

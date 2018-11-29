@@ -34,6 +34,7 @@ typedef struct Expr {
         } unop;
 
         struct {
+            unsigned char nargs;
             char* name;
             struct Expr* expr_list;
         } call;
@@ -46,7 +47,7 @@ typedef struct Expr {
 
 Expr* expr_make_bin_op(Expr* left, Expr* right, Operator op);
 Expr* expr_make_un_op(Expr* expr, Operator op);
-Expr* expr_make_call(Expr* expr, char* name);
+Expr* expr_make_call(char* name, Expr* expr_list, unsigned nargs);
 Expr* expr_make_grouping(Expr* expr);
 Expr* expr_make_literal(double val);
 Expr* expr_make_variable(char* val);
