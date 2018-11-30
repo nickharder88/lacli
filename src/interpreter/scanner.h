@@ -12,7 +12,7 @@ typedef enum {
     IDENTIFIER, NUMBER,
 
     // KEYWORDS
-    VAR, PRINT
+    VAR, PRINT, QUIT
 } TokenType;
 
 typedef struct Token {

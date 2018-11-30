@@ -55,7 +55,7 @@ static Stmt* print_statement(void) {
     return stmt_make_print(value);
 }
 
-static Stmt* var_declaration(void) {
+static Stmt* var_statement(Stmt* (*func)(char*, Expr*)) {
     Token *tkn, *name;
     Expr* initializer = NULL;
 
@@ -65,20 +65,7 @@ static Stmt* var_declaration(void) {
         initializer = expression();
     }
 
-    return stmt_make_var(name, initializer);
-}
-
-static Stmt* declaration(void) {
-    Token* tkn;
-
-    if((tkn = tokens_peek()) != NULL && tkn->type == VAR) {
-        tokens_advance();
-        return var_declaration();
-    } else if(tkn->type == PRINT) {
-        tokens_advance();
-        return print_statement();
-    }
-    return expr_statement();
+    return func(name->literal.lexeme, initializer);
 }
 
 /* 
@@ -250,6 +237,25 @@ static Expr* addition(void) {
 
 static Expr* expression(void) {
     return addition();
+}
+
+static Stmt* declaration(void) {
+    Token* tkn = tokens_peek();
+    if(tkn == NULL) {
+        return NULL;
+    }
+
+    if(tkn->type == VAR) {
+        tokens_advance();
+        return var_statement(stmt_make_var);
+    } else if(tkn->type == IDENTIFIER) {
+        return var_statement(stmt_make_assign);
+    } else if(tkn->type == PRINT) {
+        tokens_advance();
+        return print_statement();
+    }
+
+    return expr_statement();
 }
 
 Stmt* parse(TokenList* tokenlist) {

@@ -6,7 +6,7 @@
 
 typedef struct Stmt {
     enum {
-        PRINT_S, EXPR_S, VAR_S
+        PRINT_S, EXPR_S, VAR_S, ASSIGN_S
     } type;
 
     union {
@@ -23,6 +23,7 @@ typedef struct Stmt {
 
 Stmt* stmt_make_print(Expr* expr);
 Stmt* stmt_make_expr(Expr* expr);
-Stmt* stmt_make_var(Token* name, Expr* initializer);
+Stmt* stmt_make_var(char* name, Expr* initializer);
+Stmt* stmt_make_assign(char* name, Expr* initializer);
 
 #endif

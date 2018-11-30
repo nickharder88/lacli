@@ -10,6 +10,8 @@
 
 #define VARSTR "var"
 #define PRINTSTR "print"
+#define QUITSTR "quit"
+
 #define DEFAULTSIZE 8
 
 static char* ptr;
@@ -127,6 +129,9 @@ static Token* token_next(void) {
                     return token_create(VAR);
                 } else if(strcmp(PRINTSTR, str) == 0) {
                     return token_create(PRINT);
+                } else if(strcmp(QUITSTR, str) == 0) {
+                    // TODO
+                    return token_create(QUIT);
                 }
                 return token_create_lex(IDENTIFIER, str);
             } else {
@@ -156,6 +161,11 @@ TokenList* token_scan(char* line, ssize_t nchar) {
         if((tarr = token_next()) == NULL) {
             // err?
             continue;
+        } else if(tarr->type == QUIT) {
+            if(count != 0) {
+                printf("Error: quit is a keyword. Exiting.\n");
+            }
+            return NULL;
         }
         tlist->arr[count++] = *tarr;
     }

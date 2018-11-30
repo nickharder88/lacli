@@ -66,21 +66,25 @@ Matrix* matrix_create_zero(unsigned nrows, unsigned ncols) {
 
 void matrix_destroy(void* data) {
     unsigned i;
-    Matrix* m = (Matrix*)data;
+    Matrix *row, *m = (Matrix*)data;
 
     switch(m->dim) {
         case 1:
-            if(m->values.literals != NULL) {
+            if(m->values.literals != NULL)
                 free(m->values.literals);
-            }
             free(m);
             break;
         case 2:
             if(m->values.rows != NULL) {
                 for(i = 0; i < m->nrows; i++) {
-                    matrix_destroy(m->values.rows + i);
+                    row = m->values.rows + i;
+                    if(row->values.literals != NULL) {
+                        free(row->values.literals);
+                    }
                 }
+                free(m->values.rows);
             }
+            free(m);
             break;
         default:
             //ERR

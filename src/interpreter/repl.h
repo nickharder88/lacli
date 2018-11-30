@@ -4,6 +4,6 @@
 #include <sys/types.h>
 
 void repl_init(void);
-void repl(char* line, ssize_t nchar);
+char repl(char* line, ssize_t nchar);
 
 #endif

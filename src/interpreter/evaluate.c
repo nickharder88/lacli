@@ -11,7 +11,7 @@
 static Rval* evaluate_expression(Expr* expr);
 
 static Rval* evaluate_literal(Expr* literal) {
-    return make_rval_literal(literal->value);
+    return rval_make_literal(literal->value);
 }
 
 static Rval* evaluate_call(Expr* call) {
@@ -72,7 +72,7 @@ static Rval* evaluate_binary(Expr* expr) {
                     return NULL;
                 }
 
-                return make_rval_matrix(m);
+                return rval_make_matrix(m);
             }
             break;
         case SUB:
@@ -88,7 +88,7 @@ static Rval* evaluate_binary(Expr* expr) {
                     // ERR
                     return NULL;
                 }
-                return make_rval_matrix(m);
+                return rval_make_matrix(m);
             }
             break;
         case MULT:
@@ -103,7 +103,7 @@ static Rval* evaluate_binary(Expr* expr) {
                 tmp = left;
                 left = right;
                 right = tmp;
-                return make_rval_matrix(m);
+                return rval_make_matrix(m);
             } else if(left->type == RMATRIX && right->type == RLITERAL) {
                 if((m = matrix_multiply_constant(left->value.matrix, right->value.literal)) == NULL) {
                     // ERR
@@ -115,7 +115,7 @@ static Rval* evaluate_binary(Expr* expr) {
                     // ERR
                     return NULL;
                 }
-                return make_rval_matrix(m);
+                return rval_make_matrix(m);
             }
             break;
         case DIV:
@@ -171,7 +171,7 @@ static Rval* evaluate_matrix(Expr* mexpr) {
         }
     }
 
-    return make_rval_matrix(m);
+    return rval_make_matrix(m);
 }
 
 static Rval* evaluate_expression(Expr* expr) {
@@ -220,9 +220,26 @@ static void evaluate_print_statement(Stmt* print) {
     rval_print(val);
 }
 
+static void evaluate_assign_statement(Stmt* assign) {
+    Rval* value = NULL;
+
+    if(env_get(assign->value.var.name) == NULL)  {
+        printf("Error: identifier not defined %s", assign->value.var.name);
+        return;
+    }
+
+    if(assign->value.var.initializer == NULL)
+        value = rval_make_nil();
+    else
+        value = evaluate_expression(assign->value.var.initializer);
+    env_define(assign->value.var.name, value);
+}
+
 static void evaluate_var_statement(Stmt* var) {
     Rval* value = NULL;
-    if(var->value.var.initializer != NULL)
+    if(var->value.var.initializer == NULL)
+        value = rval_make_nil();
+    else
         value = evaluate_expression(var->value.var.initializer);
     env_define(var->value.var.name, value);
 }
@@ -241,6 +258,9 @@ void evaluate(Stmt* statement) {
             break;
         case VAR_S:
             evaluate_var_statement(statement);
+            break;
+        case ASSIGN_S:
+            evaluate_assign_statement(statement);
             break;
         default:
             //err

@@ -29,7 +29,9 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        repl(line, nchar);
+        if(!repl(line, nchar)) {
+            break;
+        }
     }
 
     free(line);
