@@ -19,7 +19,11 @@ char repl(char* line, ssize_t nchar) {
         return 0;
     }
 
-    statement = parse(tlist);
+    if((statement = parse(tlist)) == NULL) {
+        // skip
+        return 1;
+    }
+
     evaluate(statement);
     return 1;
 }

@@ -26,10 +26,12 @@ static char tokens_empty(void) {
     return index >= tlist->count;
 }
 
-static Token* tokens_peek(void) {
+static Token* tokens_peek(unsigned count) {
     if(tokens_empty())
         return NULL;
-    return tlist->arr + index;
+    if(index + count >= tlist->count)
+        return NULL;
+    return tlist->arr + index + count;
 }
 
 static Token* tokens_advance(void) {
@@ -60,13 +62,27 @@ static Stmt* var_statement(Stmt* (*func)(char*, Expr*)) {
     Expr* initializer = NULL;
 
     name = tokens_advance();
-    if((tkn = tokens_peek()) != NULL && tkn->type == EQUAL) {
+    if((tkn = tokens_peek(0)) != NULL && tkn->type == EQUAL) {
         tokens_advance();
         initializer = expression();
     }
 
     return func(name->literal.lexeme, initializer);
 }
+
+static Stmt* check_var_statement(Stmt* (*func)(char*, Expr*)) {
+    Token* tkn;
+
+    if((tkn = tokens_peek(1)) == NULL) {
+        // example
+        // var a = [[1,2],[1,2]]
+        // a
+        return NULL;
+    }
+
+    return var_statement(func);
+}
+
 
 /* 
  * EXPRESSIONS 
@@ -78,15 +94,15 @@ static Expr* primary(void) {
     Token* tkn;
     Expr *expr, *expr_list;
 
-    if((tkn = tokens_peek()) != NULL && tkn->type == IDENTIFIER) {
+    if((tkn = tokens_peek(0)) != NULL && tkn->type == IDENTIFIER) {
         tokens_advance();
         return expr_make_variable(tkn->literal.lexeme);
     }
 
-    if((tkn = tokens_peek()) != NULL && tkn->type == LEFT_PAREN) {
+    if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_PAREN) {
         tokens_advance();
         expr = expression();
-        if((tkn = tokens_peek()) != NULL && tkn->type != RIGHT_PAREN) {
+        if((tkn = tokens_peek(0)) != NULL && tkn->type != RIGHT_PAREN) {
             // ERR
         }
         tokens_advance();
@@ -100,7 +116,7 @@ static Expr* primary(void) {
         size = MATRIXBASESIZE;
         expr_list = malloc(size * sizeof(struct Expr));
 
-        if((tkn = tokens_peek()) != NULL && tkn->type == LEFT_BRACE) {
+        if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_BRACE) {
             // 2 dimensional matrix
             do {
                 if(nrows >= size) {
@@ -122,7 +138,7 @@ static Expr* primary(void) {
                 } else
                     ncols = expr->matrix.ncols;
 
-                if((tkn = tokens_peek()) != NULL && tkn->type == COMMA) {
+                if((tkn = tokens_peek(0)) != NULL && tkn->type == COMMA) {
                     tokens_advance();
                 } else if(tkn->type == RIGHT_BRACE) {
                     tokens_advance();
@@ -142,7 +158,7 @@ static Expr* primary(void) {
                 }
                 expr_list[ncols++] = *(expression());
 
-                if((tkn = tokens_peek()) != NULL && tkn->type == COMMA) {
+                if((tkn = tokens_peek(0)) != NULL && tkn->type == COMMA) {
                     tokens_advance();
                 } else if(tkn->type == RIGHT_BRACE) {
                     tokens_advance();
@@ -168,13 +184,13 @@ static Expr* call(void) {
     Token* tkn;
     Expr *expr_list, *expr = primary();
 
-    if((tkn = tokens_peek()) != NULL && tkn->type == LEFT_PAREN) {
+    if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_PAREN) {
         if(expr->type != VARIABLE) {
             //err
         }
 
 
-        if((tkn = tokens_peek()) != NULL && tkn->type == RIGHT_PAREN) {
+        if((tkn = tokens_peek(0)) != NULL && tkn->type == RIGHT_PAREN) {
             // consume right parenthesis
             tokens_advance();
             return expr_make_call(expr->identifier, NULL, 0);
@@ -185,13 +201,13 @@ static Expr* call(void) {
         for(nargs = 0; nargs < MAXARGLIST; nargs++) {
             expr_list[nargs] = *expression();
 
-            if((tkn = tokens_peek()) != NULL && tkn->type != COMMA) {
+            if((tkn = tokens_peek(0)) != NULL && tkn->type != COMMA) {
                 break;
             }
             tokens_advance();
         }
 
-        if((tkn = tokens_peek()) != NULL && tkn->type != RIGHT_PAREN) {
+        if((tkn = tokens_peek(0)) != NULL && tkn->type != RIGHT_PAREN) {
             // ERR
         }
 
@@ -203,7 +219,7 @@ static Expr* call(void) {
 
 static Expr* unary(void) {
     Token* tkn;
-    if((tkn = tokens_peek()) != NULL && tkn->type == MINUS) {
+    if((tkn = tokens_peek(0)) != NULL && tkn->type == MINUS) {
         tokens_advance();
         return expr_make_un_op(unary(), NEG);
     }
@@ -215,7 +231,7 @@ static Expr* multiplication(void) {
     Token* tkn;
     Expr* left = unary();
 
-    while((tkn = tokens_peek()) != NULL && (tkn->type == FSLASH || tkn->type == STAR)) {
+    while((tkn = tokens_peek(0)) != NULL && (tkn->type == FSLASH || tkn->type == STAR)) {
         tokens_advance();
         left = expr_make_bin_op(left, unary(), tkn->type == STAR ? MULT : DIV);
     }
@@ -228,7 +244,7 @@ static Expr* addition(void) {
     Token* tkn;
 
     left = multiplication();
-    while((tkn = tokens_peek()) != NULL && (tkn->type == MINUS || tkn->type == PLUS)) {
+    while((tkn = tokens_peek(0)) != NULL && (tkn->type == MINUS || tkn->type == PLUS)) {
         tokens_advance();
         left = expr_make_bin_op(left, multiplication(), tkn->type == PLUS ? ADD : SUB);
     }
@@ -240,7 +256,7 @@ static Expr* expression(void) {
 }
 
 static Stmt* declaration(void) {
-    Token* tkn = tokens_peek();
+    Token* tkn = tokens_peek(0);
     if(tkn == NULL) {
         return NULL;
     }
@@ -249,7 +265,7 @@ static Stmt* declaration(void) {
         tokens_advance();
         return var_statement(stmt_make_var);
     } else if(tkn->type == IDENTIFIER) {
-        return var_statement(stmt_make_assign);
+        return check_var_statement(stmt_make_assign);
     } else if(tkn->type == PRINT) {
         tokens_advance();
         return print_statement();
