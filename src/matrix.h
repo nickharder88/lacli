@@ -19,7 +19,6 @@ typedef struct Matrix {
 
 Matrix* matrix_create();
 Matrix* matrix_create_dim(unsigned nrows, unsigned ncols);
-Matrix* matrix_create_empty(unsigned nrows, unsigned ncols);
 Matrix* matrix_create_zero(unsigned nrows, unsigned ncols);
 void matrix_destroy(void* m);
 

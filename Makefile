@@ -1,17 +1,17 @@
 CFLAGS := -g -Wall
-CC := cc
+CC := cc -g
 
 OBJDIR := obj
 SRCDIR := src 
 
-SRCFILES := $(foreach sdir, $(SRCDIR), $(wildcard $(sdir)/*.c))
-OBJFILES := $(patsubst $(foreach sdir, $(SRCDIR), $(sdir)/%.c),$(OBJDIR)/%.o,$(SRCFILES))
+SRCFILES := $(shell find . -name '*.c')
+OBJFILES := $(patsubst $(shell find . -name '*.c')/%.c, $(OBJ)/%.o, $(SRCFILES))
 
 main : $(OBJFILES)
-	$(CC) -o $@ $^
+	$(CC) $^ -o $@
 
-$(OBJDIR)/%.o: $(foreach sdir, $(SRCDIR), $(sdir)/%.c)
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(OBJDIR)/%.o: $(SRC)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJFILES): | $(OBJDIR)
 

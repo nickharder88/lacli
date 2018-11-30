@@ -3,9 +3,11 @@
 #include "parser.h"
 #include "evaluate.h"
 #include "environment.h"
+#include "funcs.h"
 
 void repl_init(void) {
     env_init();
+    funcs_init();
 }
 
 /*

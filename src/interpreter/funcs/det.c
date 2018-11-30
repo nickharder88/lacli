@@ -18,4 +18,6 @@ Rval* det(Matrix* m) {
 
     val = (m->values.rows[0].values.literals[0] * m->values.rows[1].values.literals[1])
         - (m->values.rows[0].values.literals[1] * m->values.rows[0].values.literals[1]);
+
+    return rval_make_literal(val);
 }

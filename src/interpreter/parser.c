@@ -180,15 +180,15 @@ static Expr* primary(void) {
 }
 
 static Expr* call(void) {
-    unsigned char nargs;
+    unsigned char nargs = 0;
     Token* tkn;
     Expr *expr_list, *expr = primary();
 
     if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_PAREN) {
+        tokens_advance();
         if(expr->type != VARIABLE) {
             //err
         }
-
 
         if((tkn = tokens_peek(0)) != NULL && tkn->type == RIGHT_PAREN) {
             // consume right parenthesis
@@ -198,9 +198,8 @@ static Expr* call(void) {
 
         expr_list = malloc(MAXARGLIST * sizeof(struct Expr));
 
-        for(nargs = 0; nargs < MAXARGLIST; nargs++) {
-            expr_list[nargs] = *expression();
-
+        while(nargs < MAXARGLIST) {
+            expr_list[nargs++] = *expression();
             if((tkn = tokens_peek(0)) != NULL && tkn->type != COMMA) {
                 break;
             }

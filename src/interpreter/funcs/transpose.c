@@ -19,7 +19,7 @@ Rval* transpose(Matrix* m) {
         return NULL;
     }
 
-    t = matrix_create_empty(m->ncols, m->nrows);
+    t = matrix_create_dim(m->ncols, m->nrows);
 
     // TODO 1 row matrix
     for(row_i = 0; row_i < t->nrows; row_i++) {
