@@ -9,15 +9,12 @@
 #include "../dict.h"
 
 #define VARSTR "var"
+#define PRINTSTR "print"
 #define DEFAULTSIZE 8
 
 static char* ptr;
 static unsigned ptrlen;
 static unsigned ptrindex;
-
-static TokenType is_keyword(char* identifier) {
-    return strcmp(identifier, "var") == 0;
-}
 
 static void scan_init(char* line, unsigned len) {
     ptr = line;
@@ -28,13 +25,6 @@ static void scan_init(char* line, unsigned len) {
 static char scan_next() {
     if(ptrindex < ptrlen) {
         return ptr[ptrindex++];
-    }
-    return '\0';
-}
-
-static char scan_peek() {
-    if(ptrindex < ptrlen) {
-        return ptr[ptrindex];
     }
     return '\0';
 }
@@ -98,7 +88,6 @@ static Token* token_create_dig(TokenType type, double digit) {
 static Token* token_next(void) {
     char c;
     char* str;
-    double dig;
     switch(c = scan_next()) {
         case '(':
             return token_create(LEFT_PAREN);
@@ -134,8 +123,11 @@ static Token* token_next(void) {
                 return token_create_dig(NUMBER, scan_dig(c));
             } else if(isalpha(c)) {
                 str = scan_identifier(c);
-                if(strcmp(VARSTR, str))
+                if(strcmp(VARSTR, str) == 0) {
                     return token_create(VAR);
+                } else if(strcmp(PRINTSTR, str) == 0) {
+                    return token_create(PRINT);
+                }
                 return token_create_lex(IDENTIFIER, str);
             } else {
                 errlog("Unexpected character");
@@ -147,39 +139,38 @@ static Token* token_next(void) {
     return NULL;
 }
 
-TokenList* token_scan(char* line, unsigned len) {
-    unsigned i, size, length = DEFAULTSIZE;
+TokenList* token_scan(char* line, ssize_t nchar) {
+    unsigned count = 0, length = DEFAULTSIZE;
     Token* tarr;
     TokenList* tlist = malloc(sizeof(struct TokenList));
     tlist->arr = malloc(DEFAULTSIZE * sizeof(struct Token));
 
-    scan_init(line, len);
-    for(i = 0; ptrindex < ptrlen; i++) {
-        if(length <= i) {
+    scan_init(line, nchar);
+    while(ptrindex < ptrlen) {
+        if(length <= count) {
             length *= 2;
             tarr = realloc(tlist->arr, length * sizeof(struct Token));
             tlist->arr = tarr;
         }
 
         if((tarr = token_next()) == NULL) {
-            break;
+            // err?
+            continue;
         }
-        tlist->arr[i] = *tarr;
+        tlist->arr[count++] = *tarr;
     }
 
     tlist->length = length;
-    tlist->count = i;
+    tlist->count = count;
     return tlist;
 }
 
 void token_destroy(TokenList* tlist) {
     unsigned i;
-    Token* ptr;
     for(i = 0; i < tlist->count; i++) {
-        ptr = tlist->arr + i;
-        if(ptr->type == IDENTIFIER)
-            free(ptr->literal.lexeme);
-        free(ptr);
+        if(tlist->arr[i].type == IDENTIFIER)
+            free(tlist->arr[i].literal.lexeme);
     }
+    free(tlist->arr);
     free(tlist);
 }

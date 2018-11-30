@@ -6,6 +6,8 @@
 #include "environment.h"
 #include "funcs.h"
 
+#include "../matrix.h"
+
 static Rval* evaluate_expression(Expr* expr);
 
 static Rval* evaluate_literal(Expr* literal) {
@@ -15,7 +17,6 @@ static Rval* evaluate_literal(Expr* literal) {
 static Rval* evaluate_call(Expr* call) {
     unsigned i;
     Expr* expr_list;
-    Rval* ret;
     Rval* args = malloc(call->call.nargs * sizeof(struct Rval));
     expr_list = call->call.expr_list;
     for(i = 0; i < call->call.nargs; i++)
@@ -37,6 +38,9 @@ static Rval* evaluate_unary(Expr* unary) {
         case NEG:
             right->value.literal *= -1;
             return right;
+        default:
+            //err
+            break;
     }
 
     return NULL;
@@ -135,10 +139,9 @@ static Rval* evaluate_grouping(Expr* grouping) {
 
 static Matrix* evaluate_row(Expr* rexpr) {
     unsigned i;
-    Matrix *m;
     Expr* e;
     Rval* val;
-    m->values.literals = malloc(rexpr->matrix.ncols * sizeof(double));
+    Matrix *m = matrix_create_dim(rexpr->matrix.nrows, rexpr->matrix.ncols);
     for(i = 0; i < rexpr->matrix.ncols; i++) {
         e = rexpr->matrix.expr_list + i;
         val = evaluate_expression(e);
@@ -155,12 +158,11 @@ static Matrix* evaluate_row(Expr* rexpr) {
 
 static Rval* evaluate_matrix(Expr* mexpr) {
     unsigned i;
-    Rval *val, *ret;
     Matrix *row, *m;
     if(mexpr->matrix.nrows == 1) {
         m = evaluate_row(mexpr);
     } else {
-        m->values.rows = malloc(mexpr->matrix.nrows * sizeof(struct Matrix));
+        m = matrix_create_dim(mexpr->matrix.nrows, mexpr->matrix.ncols);
         for(i = 0; i < mexpr->matrix.nrows; i++) {
             row = evaluate_row(mexpr->matrix.expr_list + i);
             m->values.rows[i] = *row;
@@ -191,6 +193,9 @@ static Rval* evaluate_expression(Expr* expr) {
             break;
         case MATRIX:
             val = evaluate_matrix(expr);
+            break;
+        case VARIABLE:
+            val = env_get(expr->identifier);
             break;
         default:
             //err

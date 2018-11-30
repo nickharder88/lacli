@@ -1,4 +1,5 @@
 #include "funcs.h"
+#include "../dict.h"
 
 static Dict* func_dict;
 
@@ -8,4 +9,5 @@ void funcs_init(void) {
 
 Rval* func_call(char* name, Rval* args) {
     //TODO
+    return NULL;
 }

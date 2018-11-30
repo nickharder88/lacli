@@ -1,6 +1,8 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include <sys/types.h>
+
 typedef enum {
     // Single character tokens
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -27,7 +29,7 @@ typedef struct TokenList {
     Token* arr;
 } TokenList;
 
-TokenList* token_scan(char* line, unsigned len);
+TokenList* token_scan(char* line, ssize_t nchar);
 void token_destroy(TokenList* tlist);
 
 #endif

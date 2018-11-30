@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "aug.h"
-#include "funcs.h"
 
 void aug_handler(Dict* matrix_dict, char* line) {
     char *identifier;
