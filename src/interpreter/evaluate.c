@@ -109,7 +109,7 @@ static Rval* evaluate_binary(Expr* expr) {
                     // ERR
                     return NULL;
                 }
-                left->value.matrix = m;
+                return rval_make_matrix(m);
             } else {
                 if((m = matrix_multiply(left->value.matrix, right->value.matrix)) == NULL){
                     // ERR
