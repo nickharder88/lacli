@@ -57,7 +57,7 @@ static Rval* evaluate_binary(Expr* expr) {
     left = evaluate_expression(expr->binop.left);
     right = evaluate_expression(expr->binop.right);
  
-    switch(expr->unop.op) {
+    switch(expr->binop.op) {
         case ADD:
             if(!is_valid_operation(left, right)) {
                 // ERR
@@ -71,8 +71,10 @@ static Rval* evaluate_binary(Expr* expr) {
                     // ERR
                     return NULL;
                 }
-                left->value.matrix = m;
+
+                return make_rval_matrix(m);
             }
+            break;
         case SUB:
             if(!is_valid_operation(left, right)) {
                 // ERR
@@ -86,8 +88,9 @@ static Rval* evaluate_binary(Expr* expr) {
                     // ERR
                     return NULL;
                 }
-                left->value.matrix = m;
+                return make_rval_matrix(m);
             }
+            break;
         case MULT:
             if(left->type == RLITERAL && right->type == RLITERAL) {
                 left->value.literal *= right->value.literal;
@@ -100,7 +103,7 @@ static Rval* evaluate_binary(Expr* expr) {
                 tmp = left;
                 left = right;
                 right = tmp;
-                left->value.matrix = m;
+                return make_rval_matrix(m);
             } else if(left->type == RMATRIX && right->type == RLITERAL) {
                 if((m = matrix_multiply_constant(left->value.matrix, right->value.literal)) == NULL) {
                     // ERR
@@ -112,7 +115,7 @@ static Rval* evaluate_binary(Expr* expr) {
                     // ERR
                     return NULL;
                 }
-                left->value.matrix = m;
+                return make_rval_matrix(m);
             }
             break;
         case DIV:
@@ -129,7 +132,6 @@ static Rval* evaluate_binary(Expr* expr) {
             return NULL;
     }
 
-    rval_destroy(right);
     return left;
 }
 
