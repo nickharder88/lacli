@@ -18,11 +18,12 @@ static Rval* evaluate_call(Expr* call) {
     unsigned i;
     Expr* expr_list;
     Rval* args = malloc(call->call.nargs * sizeof(struct Rval));
+
     expr_list = call->call.expr_list;
     for(i = 0; i < call->call.nargs; i++)
         args[i] = *(evaluate_expression(expr_list + i));
 
-    return func_call(call->call.name, args);
+    return func_call(call->call.name, args, call->call.nargs);
 }
 
 static Rval* evaluate_unary(Expr* unary) {

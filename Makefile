@@ -1,19 +1,16 @@
 CFLAGS := -g -Wall
-CC := cc -lm
+CC := cc
 
 OBJDIR := obj
-SRCDIR := src
+SRCDIR := src 
 
-SRCFILES := $(wildcard $(SRCDIR)/*.c)
-OBJFILES := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCFILES))
-
-debug : $(OBJFILES)
-	$(CC) -O0 -o $@ $^
+SRCFILES := $(foreach sdir, $(SRCDIR), $(wildcard $(sdir)/*.c))
+OBJFILES := $(patsubst $(foreach sdir, $(SRCDIR), $(sdir)/%.c),$(OBJDIR)/%.o,$(SRCFILES))
 
 main : $(OBJFILES)
 	$(CC) -o $@ $^
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: $(foreach sdir, $(SRCDIR), $(sdir)/%.c)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OBJFILES): | $(OBJDIR)
@@ -22,4 +19,4 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 clean :
-	rm -rf main debug $(OBJDIR)
+	rm -rf main $(OBJDIR)
