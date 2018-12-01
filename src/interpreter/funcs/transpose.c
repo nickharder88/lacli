@@ -18,7 +18,7 @@ Rval* transpose(Matrix* m) {
 
     if(m->nrows == 1) {
         for(col_i = 0; col_i < ncols; col_i++)
-            t->values.rows[row_i]->values.literals[0] = m->values.literals[col_i];
+            t->values.rows[col_i]->values.literals[0] = m->values.literals[col_i];
     } else {
         for(row_i = 0; row_i < t->nrows; row_i++) {
             for(col_i = 0; col_i < ncols; col_i++)

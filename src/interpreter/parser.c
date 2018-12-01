@@ -262,6 +262,7 @@ static Expr* primary(void) {
 }
 
 static Expr* call(void) {
+    char* func_name;
     unsigned char nargs = 0, i;
     Token* tkn;
     Expr **expr_list, *expr;
@@ -269,8 +270,10 @@ static Expr* call(void) {
     if((expr = primary()) == NULL)
         return NULL;
 
-    if((tkn = tokens_peek(0)) == NULL)
+    if((tkn = tokens_peek(0)) == NULL || expr->type != VARIABLE)
         return expr;
+
+    func_name = expr->identifier;
 
     if(tkn->type == LEFT_PAREN) {
         tokens_advance();
@@ -324,7 +327,7 @@ static Expr* call(void) {
         // consume RIGHT_PAREN
         tokens_advance();
 
-        return expr_make_call(expr->identifier, expr_list, nargs);
+        return expr_make_call(func_name, expr_list, nargs);
     }
 
     return expr;
