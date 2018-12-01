@@ -26,7 +26,7 @@ Rval* I(unsigned nrows) {
         m->values.literals[0] = 1;
     } else {
         for(row_i = 0; row_i < nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             for(col_i = 0; col_i < nrows; col_i++)
                 row->values.literals[col_i] = 0;
             row->values.literals[row_i] = 1;

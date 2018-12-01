@@ -13,8 +13,10 @@ Rval* trace(Matrix* m) {
     unsigned i;
     double val = 0;
 
-    // TODO 1x1 matrix
+    if(m->nrows == 1)
+        return rval_make_literal(m->values.literals[0]);
+
     for(i = 0; i < m->nrows; i++)
-        val += m->values.rows[i].values.literals[i];
+        val += m->values.rows[i]->values.literals[i];
     return rval_make_literal(val);
 }

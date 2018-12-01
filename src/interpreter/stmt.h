@@ -25,5 +25,6 @@ Stmt* stmt_make_print(Expr* expr);
 Stmt* stmt_make_expr(Expr* expr);
 Stmt* stmt_make_var(char* name, Expr* initializer);
 Stmt* stmt_make_assign(char* name, Expr* initializer);
+void stmt_destroy(Stmt* stmt);
 
 #endif

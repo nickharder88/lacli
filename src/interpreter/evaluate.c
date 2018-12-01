@@ -16,12 +16,12 @@ static Rval* evaluate_literal(Expr* literal) {
 
 static Rval* evaluate_call(Expr* call) {
     unsigned i;
-    Expr* expr_list;
+    Expr **expr_list;
     Rval* args = malloc(call->call.nargs * sizeof(struct Rval));
 
     expr_list = call->call.expr_list;
     for(i = 0; i < call->call.nargs; i++)
-        args[i] = *(evaluate_expression(expr_list + i));
+        args[i] = *(evaluate_expression(expr_list[i]));
 
     return func_call(call->call.name, args, call->call.nargs);
 }
@@ -146,7 +146,7 @@ static Matrix* evaluate_row(Expr* rexpr) {
     Rval* val;
     Matrix *m = matrix_create_dim(rexpr->matrix.nrows, rexpr->matrix.ncols);
     for(i = 0; i < rexpr->matrix.ncols; i++) {
-        e = rexpr->matrix.expr_list + i;
+        e = rexpr->matrix.expr_list[i];
         val = evaluate_expression(e);
         if(val->type == RMATRIX) {
             //err
@@ -167,8 +167,8 @@ static Rval* evaluate_matrix(Expr* mexpr) {
     } else {
         m = matrix_create_dim(mexpr->matrix.nrows, mexpr->matrix.ncols);
         for(i = 0; i < mexpr->matrix.nrows; i++) {
-            row = evaluate_row(mexpr->matrix.expr_list + i);
-            m->values.rows[i] = *row;
+            row = evaluate_row(mexpr->matrix.expr_list[i]);
+            m->values.rows[i] = row;
         }
     }
 

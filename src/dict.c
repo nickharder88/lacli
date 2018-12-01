@@ -148,7 +148,7 @@ void* dict_remove(Dict* d, char* key) {
     return data;
 }
 
-void dict_clear(Dict* d) {
+void dict_destroy(Dict* d) {
     nlist *np, *next;
     unsigned i;
 
@@ -161,7 +161,8 @@ void dict_clear(Dict* d) {
 
         while(np != NULL) {
             next = np->next;
-            d->destroy(np->data);
+            if(d->destroy != NULL)
+                d->destroy(np->data);
             free(np->key);
             free(np);
             np = next;

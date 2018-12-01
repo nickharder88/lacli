@@ -26,7 +26,7 @@ typedef struct Token {
 typedef struct TokenList {
     unsigned count;
     unsigned length;
-    Token* arr;
+    Token** arr;
 } TokenList;
 
 TokenList* token_scan(char* line, ssize_t nchar);

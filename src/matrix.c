@@ -14,7 +14,6 @@ Matrix* matrix_create() {
 
     matrix = (Matrix*)malloc(sizeof(Matrix));
 
-    matrix->dim = 0;
     matrix->values.literals = NULL;
     matrix->nrows = 0;
     matrix->ncols = 0;
@@ -28,14 +27,12 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
     m->nrows = nrows;
     m->ncols = ncols;
     if(nrows == 1) {
-        m->dim = 1;
         m->values.literals = malloc(ncols * sizeof(double));
     } else {
-        m->dim = 2;
-        m->values.rows = malloc(nrows * sizeof(struct Matrix));
+        m->values.rows = malloc(nrows * sizeof(struct Matrix *));
 
         for(row_i = 0; row_i < nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             row->nrows = 1;
             row->ncols = ncols;
             row->values.literals = malloc(sizeof(double));
@@ -55,7 +52,7 @@ Matrix* matrix_create_zero(unsigned nrows, unsigned ncols) {
         }
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             for(col_i = 0; col_i < m->ncols; col_i++)
                 row->values.literals[col_i] = 0;
         }
@@ -68,27 +65,22 @@ void matrix_destroy(void* data) {
     unsigned i;
     Matrix *row, *m = (Matrix*)data;
 
-    switch(m->dim) {
-        case 1:
-            if(m->values.literals != NULL)
-                free(m->values.literals);
-            free(m);
-            break;
-        case 2:
-            if(m->values.rows != NULL) {
-                for(i = 0; i < m->nrows; i++) {
-                    row = m->values.rows + i;
-                    if(row->values.literals != NULL) {
-                        free(row->values.literals);
-                    }
+    if(m->nrows == 1) {
+        if(m->values.literals != NULL)
+            free(m->values.literals);
+        free(m);
+    } else {
+        if(m->values.rows != NULL) {
+            for(i = 0; i < m->nrows; i++) {
+                row = m->values.rows[i];
+                if(row->values.literals != NULL) {
+                    free(row->values.literals);
                 }
-                free(m->values.rows);
-            }
-            free(m);
-            break;
-        default:
-            //ERR
-            break;
+                free(row);
+             }
+             free(m->values.rows);
+        }
+        free(m);
     }
 }
 
@@ -107,10 +99,10 @@ Matrix* matrix_add(Matrix* a, Matrix* b) {
             m->values.literals[col_i] = a->values.literals[col_i] + b->values.literals[col_i];
     } else {
         for(row_i = 0; row_i < a->nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             for(col_i = 0; col_i < a->ncols; col_i++) {
-                row->values.literals[col_i] = a->values.rows[row_i].values.literals[col_i]
-                                 + b->values.rows[row_i].values.literals[col_i];
+                row->values.literals[col_i] = a->values.rows[row_i]->values.literals[col_i]
+                                 + b->values.rows[row_i]->values.literals[col_i];
             }
         }
     }
@@ -134,9 +126,9 @@ Matrix* matrix_subtract(Matrix* a, Matrix* b) {
         }
     } else {
         for(row_i = 0; row_i < a->nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             for(col_i = 0; col_i < a->ncols; col_i++)
-                row->values.literals[col_i] = a->values.rows[row_i].values.literals[col_i] - b->values.rows[row_i].values.literals[col_i];
+                row->values.literals[col_i] = a->values.rows[row_i]->values.literals[col_i] - b->values.rows[row_i]->values.literals[col_i];
         }
 
     }
@@ -158,12 +150,12 @@ Matrix* matrix_multiply(Matrix* a, Matrix* b) {
     m = matrix_create_dim(a->nrows, b->ncols);
 
     for(row_i = 0; row_i < a->nrows; row_i++) {
-        row = m->values.rows + row_i;
+        row = m->values.rows[row_i];
         for(col_i = 0; col_i < m->ncols; col_i++) {
             sum = 0;
 
             for(col_j = 0; col_j < a->ncols; col_j++)
-                sum += a->values.rows[row_i].values.literals[col_j] * b->values.rows[col_j].values.literals[col_i];
+                sum += a->values.rows[row_i]->values.literals[col_j] * b->values.rows[col_j]->values.literals[col_i];
 
             row->values.literals[col_i] = sum;
         }
@@ -188,7 +180,7 @@ void matrix_print(Matrix* m) {
         printf("%.2f\n", m->values.literals[col_i]);
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             putchar('\t');
             for(col_i = 0; col_i < row->ncols - 1; col_i++)
                 printf("%.2f\t", row->values.literals[col_i]);
@@ -211,34 +203,13 @@ Matrix* matrix_copy(Matrix* m) {
             copy->values.literals[col_i] = m->values.literals[col_i];
     else
         for(row_i = 0; row_i < m->nrows; row_i++) {
-            rcopy = copy->values.rows + row_i;
+            rcopy = copy->values.rows[row_i];
             rcopy->values.literals = malloc(copy->ncols * sizeof(double));
             for(col_i = 0; col_i < m->ncols; col_i++)
-                copy->values.rows[row_i].values.literals[col_i] = m->values.rows[row_i].values.literals[col_i];
-
+                copy->values.rows[row_i]->values.literals[col_i] = m->values.rows[row_i]->values.literals[col_i];
 
         }
     return copy;
-}
-
-Matrix* try_get_matrix(Dict* matrix_dict, char** line) {
-    unsigned i;
-    Matrix *m;
-    char matrix_identifier[MAXIDENTIFIER];
-    char *ptr = *line;
-
-    for(i = 0; i < MAXIDENTIFIER - 1 && isalnum(*ptr); i++)
-       matrix_identifier[i] = *ptr++;
-    matrix_identifier[i] = '\0';
-
-    /* matrix does not exist */
-    if((m = dict_get(matrix_dict, matrix_identifier)) == NULL) {
-       printf("Error: matrix %s does not exist.\n", matrix_identifier);
-       return NULL;
-    }
-
-    *line = ptr;
-    return m;
 }
 
 void matrix_slice_before(Matrix *m, unsigned col) {
@@ -253,7 +224,7 @@ void matrix_slice_before(Matrix *m, unsigned col) {
         }
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             for(col_i = 0; col_i < m->ncols; col_i++) {
                 if((vals = realloc(row->values.literals, col * sizeof(double))) == NULL) {
                     printf("Error: could not allocate memory. Try again.\n");
@@ -281,7 +252,7 @@ void matrix_slice_after(Matrix *m, unsigned col) {
         m->values.literals = vals;
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
-            row = m->values.rows + row_i;
+            row = m->values.rows[row_i];
             vals = malloc(ncols * sizeof(double));
             for(col_i = 0; col_i < ncols; col_i++)
                 vals[col_i] = row->values.literals[col + col_i];
@@ -298,10 +269,62 @@ Matrix* matrix_multiply_constant(Matrix* m, double val) {
     Matrix* row;
     Matrix* copy = matrix_copy(m);
     for(row_i = 0; row_i < copy->nrows; row_i++) {
-        row = copy->values.rows + row_i;
+        row = copy->values.rows[row_i];
         for(col_i = 0; col_i < copy->ncols; col_i++)
             row->values.literals[col_i] *= val;
     }
 
     return copy;
+}
+
+char matrix_cmp(Matrix* m1, Matrix* m2) {
+    Matrix *row1, *row2;
+    unsigned row_i, col_i;
+
+    if(m1->ncols != m2->ncols || m1->nrows != m2->nrows) {
+        return -1;
+    }
+
+    if(m1->nrows == 1)
+        for(col_i = 0; col_i < m1->ncols; col_i++)
+            if(m1->values.literals[col_i] != row2->values.literals[col_i])
+                return -1;
+    else
+        for(row_i = 0; row_i < m1->nrows; row_i++) {
+            row1 = m1->values.rows[row_i];
+            row2 = m2->values.rows[row_i];
+            for(col_i = 0; col_i < m1->ncols; col_i++)
+                if(row1->values.literals[col_i] != row2->values.literals[col_i])
+                    return -1;
+        }
+
+    return 0;
+}
+
+Matrix* matrix_create_initializer_1D(double* vals, unsigned ncols) {
+    unsigned col_i;
+    Matrix* m;
+
+    m = matrix_create_dim(1, ncols);
+    for(col_i = 0; col_i < ncols; col_i++) {
+        m->values.literals[col_i] = vals[col_i];
+    }
+
+    return m;
+}
+
+Matrix* matrix_create_initializer_2D(double** vals, unsigned nrows, unsigned ncols) {
+    unsigned row_i, col_i;
+    Matrix *m, *mrow;
+    double* drow;
+
+    m = matrix_create_dim(nrows, ncols);
+    for(row_i = 0; row_i < nrows; row_i++) {
+        mrow = m->values.rows[row_i];
+        drow = vals[row_i];
+        for(col_i = 0; col_i < ncols; col_i++)
+            mrow->values.literals[col_i] = drow[col_i];
+    }
+
+    return m;
 }

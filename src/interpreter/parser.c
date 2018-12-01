@@ -16,8 +16,6 @@ static TokenList* tlist;
 static unsigned index;
 
 static void tokens_reset(TokenList* token_list) {
-    if(tlist != NULL)
-        token_destroy(tlist);
     tlist = token_list;
     index = 0;
 }
@@ -31,14 +29,14 @@ static Token* tokens_peek(unsigned count) {
         return NULL;
     if(index + count >= tlist->count)
         return NULL;
-    return tlist->arr + index + count;
+    return tlist->arr[index + count];
 }
 
 static Token* tokens_advance(void) {
     Token* tkn;
     if(tokens_empty())
         return NULL;
-    tkn = tlist->arr + index;
+    tkn = tlist->arr[index];
     index++;
     return tkn;
 }
@@ -92,7 +90,7 @@ static Expr* primary(void) {
     unsigned char ncol_checked = 0;
     unsigned size, nrows, ncols;
     Token* tkn;
-    Expr *expr, *expr_list;
+    Expr *expr, **expr_list;
 
     if((tkn = tokens_peek(0)) != NULL && tkn->type == IDENTIFIER) {
         tokens_advance();
@@ -114,7 +112,7 @@ static Expr* primary(void) {
 
         nrows = ncols = 0;
         size = MATRIXBASESIZE;
-        expr_list = malloc(size * sizeof(struct Expr));
+        expr_list = malloc(size * sizeof(struct Expr *));
 
         if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_BRACE) {
             // 2 dimensional matrix
@@ -128,7 +126,7 @@ static Expr* primary(void) {
                     return NULL;
                 }
 
-                expr_list[nrows++] = *expr;
+                expr_list[nrows++] = expr;
 
                 if(ncol_checked) {
                     if(expr->matrix.ncols != ncols) {
@@ -156,7 +154,7 @@ static Expr* primary(void) {
                     size *= 2;
                     expr_list = realloc(expr_list, size * sizeof(struct Expr));
                 }
-                expr_list[ncols++] = *(expression());
+                expr_list[ncols++] = expression();
 
                 if((tkn = tokens_peek(0)) != NULL && tkn->type == COMMA) {
                     tokens_advance();
@@ -182,7 +180,7 @@ static Expr* primary(void) {
 static Expr* call(void) {
     unsigned char nargs = 0;
     Token* tkn;
-    Expr *expr_list, *expr = primary();
+    Expr **expr_list, *expr = primary();
 
     if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_PAREN) {
         tokens_advance();
@@ -196,10 +194,10 @@ static Expr* call(void) {
             return expr_make_call(expr->identifier, NULL, 0);
         }
 
-        expr_list = malloc(MAXARGLIST * sizeof(struct Expr));
+        expr_list = malloc(MAXARGLIST * sizeof(struct Expr * ));
 
         while(nargs < MAXARGLIST) {
-            expr_list[nargs++] = *expression();
+            expr_list[nargs++] = expression();
             if((tkn = tokens_peek(0)) != NULL && tkn->type != COMMA) {
                 break;
             }
@@ -209,6 +207,9 @@ static Expr* call(void) {
         if((tkn = tokens_peek(0)) != NULL && tkn->type != RIGHT_PAREN) {
             // ERR
         }
+
+        // consume RIGHT_PAREN
+        tokens_advance();
 
         return expr_make_call(expr->identifier, expr_list, nargs);
     }

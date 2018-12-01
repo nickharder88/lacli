@@ -63,6 +63,7 @@ static char* scan_identifier(char c) {
 
     for(i = 1; i < MAXIDENTIFIER - 1 && isalnum(c = ptr[ptrindex]); ptrindex++, i++)
         identifier[i] = c;
+    identifier[i] = '\0';
 
     return identifier;
 }
@@ -90,6 +91,7 @@ static Token* token_create_dig(TokenType type, double digit) {
 static Token* token_next(void) {
     char c;
     char* str;
+    Token* tkn;
     switch(c = scan_next()) {
         case '(':
             return token_create(LEFT_PAREN);
@@ -130,13 +132,13 @@ static Token* token_next(void) {
                 } else if(strcmp(PRINTSTR, str) == 0) {
                     return token_create(PRINT);
                 } else if(strcmp(QUITSTR, str) == 0) {
-                    // TODO
                     return token_create(QUIT);
                 }
-                return token_create_lex(IDENTIFIER, str);
+                tkn = token_create_lex(IDENTIFIER, str);
+                free(str);
+                return tkn;
             } else {
-                errlog("Unexpected character");
-                // TODO error handle
+                // TODO what happens if return null?
                 return NULL;
             }
             break;
@@ -146,28 +148,28 @@ static Token* token_next(void) {
 
 TokenList* token_scan(char* line, ssize_t nchar) {
     unsigned count = 0, length = DEFAULTSIZE;
-    Token* tarr;
+    Token **tarr, *tkn;
     TokenList* tlist = malloc(sizeof(struct TokenList));
-    tlist->arr = malloc(DEFAULTSIZE * sizeof(struct Token));
+    tlist->arr = malloc(DEFAULTSIZE * sizeof(struct Token *));
 
     scan_init(line, nchar);
     while(ptrindex < ptrlen) {
         if(length <= count) {
             length *= 2;
-            tarr = realloc(tlist->arr, length * sizeof(struct Token));
+            tarr = realloc(tlist->arr, length * sizeof(struct Token *));
             tlist->arr = tarr;
         }
 
-        if((tarr = token_next()) == NULL) {
+        if((tkn = token_next()) == NULL) {
             // err?
             continue;
-        } else if(tarr->type == QUIT) {
+        } else if(tkn->type == QUIT) {
             if(count != 0) {
                 printf("Error: quit is a keyword. Exiting.\n");
             }
             return NULL;
         }
-        tlist->arr[count++] = *tarr;
+        tlist->arr[count++] = tkn;
     }
 
     tlist->length = length;
@@ -178,8 +180,9 @@ TokenList* token_scan(char* line, ssize_t nchar) {
 void token_destroy(TokenList* tlist) {
     unsigned i;
     for(i = 0; i < tlist->count; i++) {
-        if(tlist->arr[i].type == IDENTIFIER)
-            free(tlist->arr[i].literal.lexeme);
+        if(tlist->arr[i]->type == IDENTIFIER)
+            free(tlist->arr[i]->literal.lexeme);
+        free(tlist->arr[i]);
     }
     free(tlist->arr);
     free(tlist);

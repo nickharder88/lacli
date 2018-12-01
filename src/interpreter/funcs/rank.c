@@ -20,12 +20,12 @@ Rval* rank(Matrix* m) {
     m = m_rref->value.matrix;
 
     for(i = 0; i < m->nrows; i++) {
-        row = m->values.rows + i;
+        row = m->values.rows[i];
         pivot = get_pivot(row);
         if(row->values.literals[i] < m->ncols)
             mrank++;
     }
     
-    free(m_rref);
+    rval_destroy(m_rref);
     return rval_make_literal(mrank);
 }

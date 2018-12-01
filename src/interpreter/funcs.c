@@ -28,6 +28,10 @@ void funcs_init(void) {
     // dict_add(func_dict, "eval", eval_handler);
 }
 
+void funcs_destroy(void) {
+    dict_destroy(func_dict);
+}
+
 /* expects the entire user input */
 void* is_func(Dict* func_dict, char* func_name) {
     void* func;

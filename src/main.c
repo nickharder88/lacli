@@ -20,6 +20,8 @@ int main(int argc, char** argv) {
     char *line = NULL, quit = 0;
     size_t len = 0;
 
+    printf("LACLI 1.0\n\n");
+
     repl_init();
 
     while(!quit) {
@@ -33,6 +35,8 @@ int main(int argc, char** argv) {
             break;
         }
     }
+
+    repl_destroy();
 
     free(line);
     return 0;

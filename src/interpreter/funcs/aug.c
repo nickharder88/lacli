@@ -38,16 +38,16 @@ Rval* aug(Matrix* m1, Matrix* m2) {
         }
     } else {
         for(row_i = 0; row_i < m1->nrows; row_i++) {
-            row = m->values.rows + row_i;
-            copy_row = m1->values.rows + row_i;
+            row = m->values.rows[row_i];
+            copy_row = m1->values.rows[row_i];
             for(col_i = 0; col_i < m1->ncols; row_i++) {
                 row->values.literals[col_i] = copy_row->values.literals[col_i];
             }
         }
 
         for(row_i = 0; row_i < m2->nrows; row_i++) {
-            row = m->values.rows + row_i;
-            copy_row = m1->values.rows + row_i;
+            row = m->values.rows[row_i];
+            copy_row = m1->values.rows[row_i];
             for(col_i = 0; col_i < m1->ncols; row_i++) {
                 row->values.literals[col_i + m1->ncols] = copy_row->values.literals[col_i];
             }

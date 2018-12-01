@@ -10,6 +10,11 @@ void repl_init(void) {
     funcs_init();
 }
 
+void repl_destroy(void) {
+    env_destroy();
+    funcs_destroy();
+}
+
 /*
  * Returns 0 if user wants to exit
  */
@@ -27,5 +32,8 @@ char repl(char* line, ssize_t nchar) {
     }
 
     evaluate(statement);
+
+    token_destroy(tlist);
+    stmt_destroy(statement);
     return 1;
 }

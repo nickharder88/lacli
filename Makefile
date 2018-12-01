@@ -4,8 +4,8 @@ CC := cc -g
 OBJDIR := obj
 SRCDIR := src 
 
-SRCFILES := $(shell find . -name '*.c')
-OBJFILES := $(patsubst $(shell find . -name '*.c')/%.c, $(OBJ)/%.o, $(SRCFILES))
+SRCFILES := $(shell find src/ -name '*.c')
+OBJFILES := $(patsubst $(shell find src/ -name '*.c')/%.c, $(OBJ)/%.o, $(SRCFILES))
 
 main : $(OBJFILES)
 	$(CC) $^ -o $@

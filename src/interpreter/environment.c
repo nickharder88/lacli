@@ -13,7 +13,7 @@ void env_init(void) {
 }
 
 void env_destroy(void) {
-    dict_clear(var_dict);
+    dict_destroy(var_dict);
 }
 
 void env_define(char* identifier, Rval* val) {
