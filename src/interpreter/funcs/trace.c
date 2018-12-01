@@ -1,12 +1,12 @@
 #include "trace.h"
 
-Rval* trace_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1 || args[0].type != RMATRIX) {
+Rval* trace_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RMATRIX) {
         printf("Usage: trace(matrix)\n");
         return NULL;
     }
 
-    return trace(args[0].value.matrix);
+    return trace(args[0]->value.matrix);
 }
 
 Rval* trace(Matrix* m) {

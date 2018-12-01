@@ -88,7 +88,7 @@ static Token* token_create_dig(TokenType type, double digit) {
     return token;
 }
 
-static Token* token_next(void) {
+static Token* token_next(unsigned char* err) {
     char c;
     char* str;
     Token* tkn;
@@ -138,15 +138,18 @@ static Token* token_next(void) {
                 free(str);
                 return tkn;
             } else {
-                // TODO what happens if return null?
+                printf("Error: invalid character %c\n", c);
+                *err = 1;
                 return NULL;
             }
             break;
     }
+    *err = 0;
     return NULL;
 }
 
 TokenList* token_scan(char* line, ssize_t nchar) {
+    unsigned char err;
     unsigned count = 0, length = DEFAULTSIZE;
     Token **tarr, *tkn;
     TokenList* tlist = malloc(sizeof(struct TokenList));
@@ -160,14 +163,23 @@ TokenList* token_scan(char* line, ssize_t nchar) {
             tlist->arr = tarr;
         }
 
-        if((tkn = token_next()) == NULL) {
-            // err?
+        if((tkn = token_next(&err)) == NULL) {
+            if(err) {
+                token_destroy(tlist);
+                return NULL;
+            }
             continue;
         } else if(tkn->type == QUIT) {
             if(count != 0) {
+                free(tkn);
+                token_destroy(tlist);
                 printf("Error: quit is a keyword. Exiting.\n");
             }
-            return NULL;
+
+            tlist->arr[0] = tkn;
+            tlist->length = length;
+            tlist->count = 1;
+            return tlist;
         }
         tlist->arr[count++] = tkn;
     }

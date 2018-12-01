@@ -3,7 +3,7 @@
 
 #include "../rval.h"
 
-Rval* trace_handler(Rval* args, unsigned nargs);
+Rval* trace_handler(Rval** args, unsigned nargs);
 Rval* trace(Matrix* m);
 
 #endif

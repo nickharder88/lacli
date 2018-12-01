@@ -4,13 +4,13 @@
 
 
 /* expects a string (arg1, arg2,..., argn) */
-Rval* rref_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1 || args[0].type != RMATRIX) {
+Rval* rref_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RMATRIX) {
         printf("Usage: rref(matrix)\n");
         return NULL;
     }
 
-    return rref(args[0].value.matrix);
+    return rref(args[0]->value.matrix);
 }
 
 static unsigned left_most_nz_row(Matrix* m, unsigned cur_row, unsigned* left_most_col) {

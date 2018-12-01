@@ -43,8 +43,8 @@ void* is_func(Dict* func_dict, char* func_name) {
     return func;
 }
 
-Rval* func_call(char* name, Rval* args, unsigned nargs) {
-    Rval* (*func)(Rval*, unsigned);
+Rval* func_call(char* name, Rval** args, unsigned nargs) {
+    Rval* (*func)(Rval**, unsigned);
 
     if((func = dict_get(func_dict, name)) == NULL) {
         printf("Error: undefined function\n");

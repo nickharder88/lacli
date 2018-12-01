@@ -3,18 +3,13 @@
 
 #include "I.h"
 
-Rval* I_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1) {
+Rval* I_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RLITERAL) {
         printf("Usage: I(rows)");
         return NULL;
     }
 
-    if(args[0].type != RLITERAL) {
-        printf("Usage: I(rows)");
-        return NULL;
-    }
-
-    return I(args[0].value.literal);
+    return I(args[0]->value.literal);
 }
 
 Rval* I(unsigned nrows) {

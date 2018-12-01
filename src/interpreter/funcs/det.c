@@ -1,12 +1,12 @@
 #include "det.h"
 
-Rval* det_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1 || args[0].type != RMATRIX) {
+Rval* det_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RMATRIX) {
         printf("Usage: det(matrix)\n");
         return NULL;
     }
 
-    return det(args[0].value.matrix);
+    return det(args[0]->value.matrix);
 }
 
 Rval* det(Matrix* m) {

@@ -5,13 +5,13 @@
 #include "aug.h"
 #include "rref.h"
 
-Rval* inverse_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1 || args[0].type != RMATRIX) {
+Rval* inverse_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RMATRIX) {
         printf("Usage: inverse(matrix)\n");
         return NULL;
     }
 
-    return inverse(args[0].value.matrix);
+    return inverse(args[0]->value.matrix);
 }
 
 Rval* inverse(Matrix* m) {

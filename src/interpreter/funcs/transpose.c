@@ -1,12 +1,12 @@
 #include "transpose.h"
 
-Rval* transpose_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1 || args[0].type != RMATRIX) {
+Rval* transpose_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RMATRIX) {
         printf("Usage: transpose(matrix)\n");
         return NULL;
     }
 
-    return transpose(args[0].value.matrix);
+    return transpose(args[0]->value.matrix);
 }
 
 Rval* transpose(Matrix* m) {

@@ -16,24 +16,34 @@ void repl_destroy(void) {
 }
 
 /*
- * Returns 0 if user wants to exit
+ * Returns 
+ * 0 if success
+ * 1 if quit
+ * 2 if recoverable error
+ * 3 if unrecoverable error
  */
-char repl(char* line, ssize_t nchar) {
+repl_code repl(char* line, ssize_t nchar) {
     TokenList* tlist;
     Stmt* statement;
 
     if((tlist = token_scan(line, nchar)) == NULL) {
-        return 0;
+        return REPL_ERROR;
+    } else if(tlist->count == 0) {
+        token_destroy(tlist);
+        return REPL_SUCCESS;
+    } else if(tlist->arr[0]->type == QUIT) {
+        token_destroy(tlist);
+        return REPL_QUIT;
     }
 
     if((statement = parse(tlist)) == NULL) {
-        // skip
-        return 1;
+        token_destroy(tlist);
+        return REPL_ERROR;
     }
 
     evaluate(statement);
 
     token_destroy(tlist);
     stmt_destroy(statement);
-    return 1;
+    return REPL_SUCCESS;
 }

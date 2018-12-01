@@ -19,21 +19,20 @@ int main(int argc, char** argv) {
     ssize_t nchar;
     char *line = NULL, quit = 0;
     size_t len = 0;
+    repl_code rc = REPL_SUCCESS;
 
     printf("LACLI 1.0\n\n");
 
     repl_init();
 
-    while(!quit) {
+    while(rc != REPL_QUIT) {
         promptf("", 0);
         if((nchar = getline(&line, &len, stdin)) == -1) {
             /* skipped line */
             continue;
         }
 
-        if(!repl(line, nchar)) {
-            break;
-        }
+        rc = repl(line, nchar);
     }
 
     repl_destroy();

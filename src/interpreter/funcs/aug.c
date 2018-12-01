@@ -3,18 +3,18 @@
 
 #include "aug.h"
 
-Rval* aug_handler(Rval* args, unsigned nargs) {
+Rval* aug_handler(Rval** args, unsigned nargs) {
     if(nargs != 2) {
         printf("Usage: aug(matrix, matrix)");
         return NULL;
     }
 
-    if(args[0].type != RMATRIX || args[1].type != RMATRIX) {
+    if(args[0]->type != RMATRIX || args[1]->type != RMATRIX) {
         printf("Usage: aug(matrix, matrix)");
         return NULL;
     }
 
-    return aug(args[0].value.matrix, args[1].value.matrix);
+    return aug(args[0]->value.matrix, args[1]->value.matrix);
 }
 
 Rval* aug(Matrix* m1, Matrix* m2) {

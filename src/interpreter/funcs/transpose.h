@@ -3,7 +3,7 @@
 
 #include "../rval.h"
 
-Rval* transpose_handler(Rval* args, unsigned nargs);
+Rval* transpose_handler(Rval** args, unsigned nargs);
 Rval* transpose(Matrix* m);
 
 #endif

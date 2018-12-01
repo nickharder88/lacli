@@ -46,12 +46,17 @@ static Token* tokens_advance(void) {
  */
 
 static Stmt* expr_statement(void) {
-    Expr* expr = expression();
+    Expr* expr;
+    if((expr = expression()) == NULL)
+        return NULL;
     return stmt_make_expr(expr);
 }
 
 static Stmt* print_statement(void) {
-    Expr* value = expression();
+    Expr* value;
+    if((value = expression()) == NULL) {
+        return NULL;
+    }
     return stmt_make_print(value);
 }
 
@@ -59,11 +64,24 @@ static Stmt* var_statement(Stmt* (*func)(char*, Expr*)) {
     Token *tkn, *name;
     Expr* initializer = NULL;
 
-    name = tokens_advance();
-    if((tkn = tokens_peek(0)) != NULL && tkn->type == EQUAL) {
-        tokens_advance();
-        initializer = expression();
+    if((name = tokens_advance()) == NULL || name->type != IDENTIFIER) {
+        printf("Error: expected variable identifier\n");
+        return NULL;
     }
+
+    if((tkn = tokens_peek(0)) == NULL) {
+        printf("Error: unexpected end of line\n");
+        return NULL;
+    }
+
+    if(tkn->type != EQUAL) {
+        printf("Error: expected =\n");
+        return NULL;
+    }
+
+    tokens_advance();
+    if((initializer = expression()) == NULL)
+        return NULL;
 
     return func(name->literal.lexeme, initializer);
 }
@@ -88,20 +106,35 @@ static Stmt* check_var_statement(Stmt* (*func)(char*, Expr*)) {
 
 static Expr* primary(void) {
     unsigned char ncol_checked = 0;
-    unsigned size, nrows, ncols;
+    unsigned size, nrows, ncols, i;
     Token* tkn;
     Expr *expr, **expr_list;
 
-    if((tkn = tokens_peek(0)) != NULL && tkn->type == IDENTIFIER) {
+    if((tkn = tokens_peek(0)) == NULL) {
+        printf("Error: unexpected end of line\n");
+        return NULL;
+    }
+
+    if(tkn->type == IDENTIFIER) {
         tokens_advance();
         return expr_make_variable(tkn->literal.lexeme);
     }
 
-    if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_PAREN) {
+    if(tkn->type == LEFT_PAREN) {
         tokens_advance();
-        expr = expression();
-        if((tkn = tokens_peek(0)) != NULL && tkn->type != RIGHT_PAREN) {
-            // ERR
+        if((expr = expression()) == NULL)
+            return NULL;
+
+        if((tkn = tokens_peek(0)) == NULL) {
+            printf("Error: unexpected end of line\n");
+            expr_free(expr);
+            return NULL;
+        }
+
+        if(tkn->type != RIGHT_PAREN) {
+            printf("Error: expected )\n");
+            expr_free(expr);
+            return NULL;
         }
         tokens_advance();
         return expr_make_grouping(expr);
@@ -110,19 +143,36 @@ static Expr* primary(void) {
     if(tkn->type == LEFT_BRACE) {
         tokens_advance();
 
+        if((tkn = tokens_peek(0)) == NULL) {
+            printf("Error: unexpected end of line\n");
+            return NULL;
+        }
+
         nrows = ncols = 0;
         size = MATRIXBASESIZE;
         expr_list = malloc(size * sizeof(struct Expr *));
 
-        if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_BRACE) {
+        if(tkn->type == LEFT_BRACE) {
             // 2 dimensional matrix
             do {
                 if(nrows >= size) {
                     size *= 2;
                     expr_list = realloc(expr_list, size * sizeof(struct Expr));
                 }
-                if((expr = primary())->type != MATRIX || expr->matrix.nrows != 1) {
-                    //err
+
+                if((expr = primary()) == NULL) {
+                    expr_free(expr);
+                    for(i = 0; i < nrows; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                }
+
+                if(expr->type != MATRIX || expr->matrix.nrows != 1) {
+                    expr_free(expr);
+                    for(i = 0; i < nrows; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                    printf("Error: matrix must be either one or two dimensions\n");
                     return NULL;
                 }
 
@@ -130,19 +180,34 @@ static Expr* primary(void) {
 
                 if(ncol_checked) {
                     if(expr->matrix.ncols != ncols) {
-                        //err
+                        for(i = 0; i < nrows; i++)
+                            expr_free(expr_list[i]);
+                        free(expr_list);
+                        printf("Error: matrix rows have different column lengths\n");
                         return NULL;
                     }
                 } else
                     ncols = expr->matrix.ncols;
 
-                if((tkn = tokens_peek(0)) != NULL && tkn->type == COMMA) {
+                if((tkn = tokens_peek(0)) == NULL) {
+                    printf("Error: unexpected end of line\n");
+                    for(i = 0; i < nrows; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                    return NULL;
+                }
+
+                if(tkn->type == COMMA) {
                     tokens_advance();
                 } else if(tkn->type == RIGHT_BRACE) {
                     tokens_advance();
                     return expr_make_matrix(expr_list, nrows, ncols);
                 } else {
-                    //err
+                    for(i = 0; i < nrows; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                    printf("Error: invalid token\n");
+                    return NULL;
                 }
             } while(1);
 
@@ -154,16 +219,35 @@ static Expr* primary(void) {
                     size *= 2;
                     expr_list = realloc(expr_list, size * sizeof(struct Expr));
                 }
-                expr_list[ncols++] = expression();
 
-                if((tkn = tokens_peek(0)) != NULL && tkn->type == COMMA) {
+                if((expr = expression()) == NULL) {
+                    for(i = 0; i < ncols; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                    return NULL;
+                }
+
+                expr_list[ncols++] = expr;
+
+                if((tkn = tokens_peek(0)) == NULL) {
+                    printf("Error: unexpected end of line\n");
+                    for(i = 0; i < ncols; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                    return NULL;
+                }
+
+                if(tkn->type == COMMA) {
                     tokens_advance();
                 } else if(tkn->type == RIGHT_BRACE) {
                     tokens_advance();
-                    // TODO
                     return expr_make_matrix(expr_list, nrows, ncols);
                 } else {
-                    //err
+                    for(i = 0; i < ncols; i++)
+                        expr_free(expr_list[i]);
+                    free(expr_list);
+                    printf("Error: invalid token\n");
+                    return NULL;
                 }
             } while (1);
         }
@@ -178,17 +262,26 @@ static Expr* primary(void) {
 }
 
 static Expr* call(void) {
-    unsigned char nargs = 0;
+    unsigned char nargs = 0, i;
     Token* tkn;
-    Expr **expr_list, *expr = primary();
+    Expr **expr_list, *expr;
 
-    if((tkn = tokens_peek(0)) != NULL && tkn->type == LEFT_PAREN) {
+    if((expr = primary()) == NULL)
+        return NULL;
+
+    if((tkn = tokens_peek(0)) == NULL)
+        return expr;
+
+    if(tkn->type == LEFT_PAREN) {
         tokens_advance();
-        if(expr->type != VARIABLE) {
-            //err
+
+        if((tkn = tokens_peek(0)) == NULL) {
+            printf("Error: unexpected end of line");
+            expr_free(expr);
+            return NULL;
         }
 
-        if((tkn = tokens_peek(0)) != NULL && tkn->type == RIGHT_PAREN) {
+        if(tkn->type == RIGHT_PAREN) {
             // consume right parenthesis
             tokens_advance();
             return expr_make_call(expr->identifier, NULL, 0);
@@ -197,15 +290,35 @@ static Expr* call(void) {
         expr_list = malloc(MAXARGLIST * sizeof(struct Expr * ));
 
         while(nargs < MAXARGLIST) {
-            expr_list[nargs++] = expression();
-            if((tkn = tokens_peek(0)) != NULL && tkn->type != COMMA) {
+            if((expr = expression()) == NULL) {
+                for(i = 0; i < nargs; i++)
+                    expr_free(expr_list[i]);
+                free(expr_list);
+                return NULL;
+            }
+
+            expr_list[nargs++] = expr;
+
+            if((tkn = tokens_peek(0)) == NULL) {
+                printf("Error: unexpected end of line");
+                for(i = 0; i < nargs; i++)
+                    expr_free(expr_list[i]);
+                free(expr_list);
+                return NULL;
+            }
+
+            if(tkn->type != COMMA) {
                 break;
             }
             tokens_advance();
         }
 
-        if((tkn = tokens_peek(0)) != NULL && tkn->type != RIGHT_PAREN) {
-            // ERR
+        if((tkn = tokens_peek(0)) == NULL || tkn->type != RIGHT_PAREN) {
+            for(i = 0; i < nargs; i++)
+                expr_free(expr_list[i]);
+            free(expr_list);
+            printf("Error: expected )\n");
+            return NULL;
         }
 
         // consume RIGHT_PAREN
@@ -219,9 +332,20 @@ static Expr* call(void) {
 
 static Expr* unary(void) {
     Token* tkn;
-    if((tkn = tokens_peek(0)) != NULL && tkn->type == MINUS) {
+    Expr* un;
+
+    if((tkn = tokens_peek(0)) == NULL) {
+        printf("Error: unexpected end of line\n");
+        return NULL;
+    }
+
+    if(tkn->type == MINUS) {
         tokens_advance();
-        return expr_make_un_op(unary(), NEG);
+
+        if((un = unary()) == NULL)
+            return NULL;
+
+        return expr_make_un_op(un, NEG);
     }
 
     return call();
@@ -229,24 +353,47 @@ static Expr* unary(void) {
 
 static Expr* multiplication(void) {
     Token* tkn;
-    Expr* left = unary();
+    Expr* left, *un;
 
-    while((tkn = tokens_peek(0)) != NULL && (tkn->type == FSLASH || tkn->type == STAR)) {
+    if((left = unary()) == NULL)
+        return NULL;
+
+    if((tkn = tokens_peek(0)) == NULL)
+        return left;
+
+    while(tkn->type == FSLASH || tkn->type == STAR) {
         tokens_advance();
-        left = expr_make_bin_op(left, unary(), tkn->type == STAR ? MULT : DIV);
+        if((un = unary()) == NULL) {
+            expr_free(left);
+            return NULL;
+        }
+
+        left = expr_make_bin_op(left, un, tkn->type == STAR ? MULT : DIV);
     }
 
     return left;
 }
 
 static Expr* addition(void) {
-    Expr* left;
+    Expr* left, *mult;
     Token* tkn;
 
-    left = multiplication();
-    while((tkn = tokens_peek(0)) != NULL && (tkn->type == MINUS || tkn->type == PLUS)) {
+    if((left = multiplication()) == NULL)
+        return NULL;
+
+    if((tkn = tokens_peek(0)) == NULL) {
+        return left;
+    }
+
+    while(tkn->type == MINUS || tkn->type == PLUS) {
         tokens_advance();
-        left = expr_make_bin_op(left, multiplication(), tkn->type == PLUS ? ADD : SUB);
+
+        if((mult = multiplication()) == NULL) {
+            expr_free(left);
+            return NULL;
+        }
+
+        left = expr_make_bin_op(left, mult, tkn->type == PLUS ? ADD : SUB);
     }
     return left;
 }

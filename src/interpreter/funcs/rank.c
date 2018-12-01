@@ -3,13 +3,13 @@
 #include "rank.h"
 #include "rref.h"
 
-Rval* rank_handler(Rval* args, unsigned nargs) {
-    if(nargs != 1 || args[0].type != RMATRIX) {
+Rval* rank_handler(Rval** args, unsigned nargs) {
+    if(nargs != 1 || args[0]->type != RMATRIX) {
         printf("Usage: rank(matrix)\n");
         return NULL;
     }
 
-    return rank(args[0].value.matrix);
+    return rank(args[0]->value.matrix);
 }
 
 Rval* rank(Matrix* m) {

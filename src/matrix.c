@@ -32,7 +32,7 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
         m->values.rows = malloc(nrows * sizeof(struct Matrix *));
 
         for(row_i = 0; row_i < nrows; row_i++) {
-            row = m->values.rows[row_i];
+            row = m->values.rows[row_i] = malloc(sizeof(struct Matrix));
             row->nrows = 1;
             row->ncols = ncols;
             row->values.literals = malloc(sizeof(double));
