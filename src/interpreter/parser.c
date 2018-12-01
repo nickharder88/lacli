@@ -419,6 +419,16 @@ static Stmt* declaration(void) {
 }
 
 Stmt* parse(TokenList* tokenlist) {
+    Token* tkn;
+    Stmt* dec;
     tokens_reset(tokenlist);
-    return declaration();
+
+    if((dec = declaration()) == NULL) {
+        if(tlist->count > 0) {
+            printf("Error: invalid expression\n");
+        }
+        return NULL;
+    }
+
+    return dec;
 }
