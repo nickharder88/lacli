@@ -361,10 +361,7 @@ static Expr* multiplication(void) {
     if((left = unary()) == NULL)
         return NULL;
 
-    if((tkn = tokens_peek(0)) == NULL)
-        return left;
-
-    while(tkn->type == FSLASH || tkn->type == STAR) {
+    while((tkn = tokens_peek(0)) != NULL && (tkn->type == FSLASH || tkn->type == STAR)) {
         tokens_advance();
         if((un = unary()) == NULL) {
             expr_free(left);
@@ -384,11 +381,7 @@ static Expr* addition(void) {
     if((left = multiplication()) == NULL)
         return NULL;
 
-    if((tkn = tokens_peek(0)) == NULL) {
-        return left;
-    }
-
-    while(tkn->type == MINUS || tkn->type == PLUS) {
+    while((tkn = tokens_peek(0)) != NULL && (tkn->type == MINUS || tkn->type == PLUS)) {
         tokens_advance();
 
         if((mult = multiplication()) == NULL) {
@@ -398,6 +391,7 @@ static Expr* addition(void) {
 
         left = expr_make_bin_op(left, mult, tkn->type == PLUS ? ADD : SUB);
     }
+
     return left;
 }
 

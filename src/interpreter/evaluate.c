@@ -258,8 +258,10 @@ static void evaluate_expr_statement(Stmt* expr) {
 
 static void evaluate_print_statement(Stmt* print) {
     Rval* val;
-    if((val = evaluate_expression(print->value.expr.expr)) == NULL)
+    if((val = evaluate_expression(print->value.expr.expr)) == NULL) {
+        printf("Error: cannot print this expression\n");
         return;
+    }
     rval_print(val);
 }
 
@@ -267,7 +269,7 @@ static void evaluate_assign_statement(Stmt* assign) {
     Rval* value = NULL;
 
     if(env_get(assign->value.var.name) == NULL)  {
-        printf("Error: identifier not defined %s", assign->value.var.name);
+        printf("Error: identifier %s not defined (define with var)\n", assign->value.var.name);
         return;
     }
 
