@@ -5,12 +5,12 @@
 
 Rval* aug_handler(Rval** args, unsigned nargs) {
     if(nargs != 2) {
-        printf("Usage: aug(matrix, matrix)");
+        printf("Usage: aug(matrix, matrix)\n");
         return NULL;
     }
 
     if(args[0]->type != RMATRIX || args[1]->type != RMATRIX) {
-        printf("Usage: aug(matrix, matrix)");
+        printf("Usage: aug(matrix, matrix)\n");
         return NULL;
     }
 

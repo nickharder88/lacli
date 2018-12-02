@@ -1,5 +1,5 @@
-CFLAGS := -g -Wall
-CC := cc -g
+CFLAGS := -Wall
+CC := cc -g -lm
 
 OBJDIR := obj
 SRCDIR := src 

@@ -134,8 +134,6 @@ static Token* token_next(unsigned char* err) {
                     return token_create(PRINT);
                 } else if(strcmp(QUITSTR, str) == 0) {
                     return token_create(QUIT);
-                } else if(strcmp(HELPSTR, str)) {
-                    return token_create(HELP);
                 }
                 tkn = token_create_lex(IDENTIFIER, str);
                 free(str);
