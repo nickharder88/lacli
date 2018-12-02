@@ -17,7 +17,7 @@ static Rval* evaluate_literal(Expr* literal) {
 static Rval* evaluate_call(Expr* call) {
     unsigned i, j;
     Expr **expr_list, *expr;
-    Rval *val, **args = malloc(call->call.nargs * sizeof(struct Rval));
+    Rval *val, **args = malloc(call->call.nargs * sizeof(struct Rval *));
 
     expr_list = call->call.expr_list;
     for(i = 0; i < call->call.nargs; i++) {

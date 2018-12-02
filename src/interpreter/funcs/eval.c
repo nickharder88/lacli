@@ -3,6 +3,7 @@
 #include "trace.h"
 #include "det.h"
 #include "eval.h"
+#include "disc.h"
 #include "../../util.h"
 
 Rval* eval_handler(Rval** args, unsigned nargs) {
@@ -16,7 +17,7 @@ Rval* eval_handler(Rval** args, unsigned nargs) {
  
 static Rval* eval_2_x_2(Matrix* m) {
     Rval *mtrace, *mdet;
-    double eig, ac4, mtrace_val;
+    double eig, ac4, mtrace_val, m_disc;
     double eigs[2];
 
     /* pc = y^2 - tr(c)+det(c)*/
@@ -27,14 +28,15 @@ static Rval* eval_2_x_2(Matrix* m) {
 
     mdet = det(m);
     ac4 = 4 * mdet->value.literal;
+    m_disc = discriminant_solve(mtrace_val, mdet->value.literal);
 
-    if(cmp_double(mdet->value.literal,0) == 0) {
+    if(cmp_double(m_disc, 0) == 0) {
         /* real and equal eigenvalues */
         eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
         rval_destroy(mtrace);
         rval_destroy(mdet);
         return rval_make_literal(eigs[0]);
-    } else if(mdet->value.literal > 0) {
+    } else if(m_disc > 0) {
         /* real and distinct eigenvalues */
         eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
         eigs[1] = (mtrace->value.literal - sqrt(mtrace_val * mtrace_val - ac4)) / 2;

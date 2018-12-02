@@ -21,6 +21,16 @@ Matrix* matrix_create() {
     return matrix;
 }
 
+Matrix* matrix_create_dim_uninitialized(unsigned nrows) {
+    unsigned row_i;
+    Matrix *row, *m = malloc(sizeof(Matrix));
+    m->nrows = nrows;
+    m->ncols = 1;
+    if(nrows > 1)
+        m->values.rows = malloc(nrows * sizeof(struct Matrix *));
+    return m;
+}
+
 Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
     unsigned row_i;
     Matrix *row, *m = malloc(sizeof(Matrix));
@@ -133,7 +143,7 @@ Matrix* matrix_subtract(Matrix* a, Matrix* b) {
 
     }
 
-    return a;
+    return m;
 }
 
 
