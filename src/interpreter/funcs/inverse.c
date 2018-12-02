@@ -4,6 +4,7 @@
 #include "I.h"
 #include "aug.h"
 #include "rref.h"
+#include "det.h"
 
 Rval* inverse_handler(Rval** args, unsigned nargs) {
     if(nargs != 1 || args[0]->type != RMATRIX) {
@@ -16,10 +17,15 @@ Rval* inverse_handler(Rval** args, unsigned nargs) {
 
 Rval* inverse(Matrix* m) {
     Matrix *copy;
-    Rval *m_aug, *In, *m_aug_rref;
+    Rval *m_aug, *In, *m_aug_rref, *m_det;
 
     if(m->ncols != m->nrows) {
         printf("Usage: matrix must be square.\n");
+        return NULL;
+    }
+
+    if((m_det = det(m)) == NULL || m_det->value.literal == 0) {
+        printf("Cannot inverse a matrix with determinant equal to 0\n");
         return NULL;
     }
 

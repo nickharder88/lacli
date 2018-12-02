@@ -35,7 +35,7 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
             row = m->values.rows[row_i] = malloc(sizeof(struct Matrix));
             row->nrows = 1;
             row->ncols = ncols;
-            row->values.literals = malloc(sizeof(double));
+            row->values.literals = malloc(ncols * sizeof(double));
         }
     }
     return m;
@@ -175,6 +175,7 @@ void matrix_print(Matrix* m) {
 
     if(m->nrows == 1) {
         // 1 Dimensional
+        putchar('\t');
         for(col_i = 0; col_i < m->ncols - 1; col_i++)
             printf("%.2f\t", m->values.literals[col_i]);
         printf("%.2f\n", m->values.literals[col_i]);
