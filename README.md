@@ -29,6 +29,10 @@ If a function has the last parameter optional:newname, then it will give the res
 1. evec(matrix)
 * diffsolve(matrix) - solves the matrix of form dx/dt = CX
 
+
+### Dev notes
+http://www.craftinginterpreters.com/
+
 ### Valgrind
 ```bash
 valgrind --leak-check=yes debug

@@ -414,7 +414,6 @@ static Stmt* declaration(void) {
         tokens_advance();
         return print_statement();
     }
-
     return expr_statement();
 }
 
