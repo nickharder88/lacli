@@ -429,5 +429,11 @@ Stmt* parse(TokenList* tokenlist) {
         return NULL;
     }
 
+    if(tlist->count > index) {
+        printf("Error: invalid expression\n");
+        stmt_destroy(dec);
+        return NULL;
+    }
+
     return dec;
 }

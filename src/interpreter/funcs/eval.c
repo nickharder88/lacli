@@ -3,6 +3,7 @@
 #include "trace.h"
 #include "det.h"
 #include "eval.h"
+#include "../../util.h"
 
 Rval* eval_handler(Rval** args, unsigned nargs) {
     if(nargs != 1 || args[0]->type != RMATRIX) {
@@ -12,8 +13,8 @@ Rval* eval_handler(Rval** args, unsigned nargs) {
 
     return eval(args[0]->value.matrix);
 }
-
-Rval* eval(Matrix* m) {
+ 
+static Rval* eval_2_x_2(Matrix* m) {
     Rval *mtrace, *mdet;
     double eig, ac4, mtrace_val;
     double eigs[2];
@@ -27,17 +28,33 @@ Rval* eval(Matrix* m) {
     mdet = det(m);
     ac4 = 4 * mdet->value.literal;
 
-    if(ac4 > mtrace_val) {
-        printf("Complex eigenvalues not available.\n");
+    if(cmp_double(mdet->value.literal,0) == 0) {
+        /* real and equal eigenvalues */
+        eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
         rval_destroy(mtrace);
         rval_destroy(mdet);
-        return NULL;
+        return rval_make_literal(eigs[0]);
+    } else if(mdet->value.literal > 0) {
+        /* real and distinct eigenvalues */
+        eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
+        eigs[1] = (mtrace->value.literal - sqrt(mtrace_val * mtrace_val - ac4)) / 2;
+
+        rval_destroy(mtrace);
+        rval_destroy(mdet);
+        return rval_make_literal_array(eigs, 2);
     }
 
-    eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
-    eigs[1] = (mtrace->value.literal - sqrt(mtrace_val * mtrace_val - ac4)) / 2;
-
+    /* complex eigenvalues*/
+    printf("Complex eigenvalues unsolvable\n");
     rval_destroy(mtrace);
     rval_destroy(mdet);
-    return rval_make_literal_array(eigs, 2);
+    return NULL;
+}
+ 
+Rval* eval(Matrix* m) {
+    if(m->nrows == 2 && m->ncols == 2) {
+        return eval_2_x_2(m);
+    }
+    printf("Cannot solve for eigenvalues of non 2x2 matrices.\n");
+    return NULL;
 }
