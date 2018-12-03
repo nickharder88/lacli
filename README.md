@@ -21,7 +21,6 @@ If a function has the last parameter optional:newname, then it will give the res
 
 ### Coming soon
 1. row equivalence
-1. linindep(matrix...)
 1. dim(m)
 1. null(e)
 1. nullity(m)

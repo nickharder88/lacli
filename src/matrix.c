@@ -187,17 +187,41 @@ void matrix_print(Matrix* m) {
         // 1 Dimensional
         putchar('\t');
         for(col_i = 0; col_i < m->ncols - 1; col_i++)
-            printf("%.2f\t", m->values.literals[col_i]);
-        printf("%.2f\n", m->values.literals[col_i]);
+            printf("%g\t", m->values.literals[col_i]);
+        printf("%g\n", m->values.literals[col_i]);
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
             row = m->values.rows[row_i];
             putchar('\t');
             for(col_i = 0; col_i < row->ncols - 1; col_i++)
-                printf("%.2f\t", row->values.literals[col_i]);
-            printf("%.2f\n", row->values.literals[col_i]);
+                printf("%g\t", row->values.literals[col_i]);
+            printf("%g\n", row->values.literals[col_i]);
         }
     }
+}
+
+unsigned matrix_max_row(Matrix** m, unsigned length) {
+    unsigned i, max = 0;
+
+    for(i = 0; i < length; i++)
+        if(m[i]->nrows > max)
+            max = m[i]->nrows;
+    
+    return max;
+}
+
+void matrix_print_multiple(Matrix** m, unsigned length) {
+    unsigned row_i, col_i, nrows;
+    /*
+     * 1 | 0
+     * 0 | 1
+     */
+    nrows = matrix_max_row(m, length);
+
+    for(row_i = 0; row_i < nrows; row_i++) {
+
+    }
+
 }
 
 /* deep copies the matrix. if identifier is null, it uses the name

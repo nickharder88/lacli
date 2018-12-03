@@ -12,12 +12,9 @@ Rval* rank_handler(Rval** args, unsigned nargs) {
     return rank(args[0]->value.matrix);
 }
 
-Rval* rank(Matrix* m) {
-    unsigned mrank = 0, i;
-    unsigned pivot;
+unsigned rank_rref(Matrix *m) {
     Matrix* row;
-    Rval* m_rref = rref(m);
-    m = m_rref->value.matrix;
+    unsigned mrank = 0, i, pivot;
 
     for(i = 0; i < m->nrows; i++) {
         row = m->values.rows[i];
@@ -25,7 +22,17 @@ Rval* rank(Matrix* m) {
         if(row->values.literals[i] < m->ncols)
             mrank++;
     }
-    
+
+    return mrank;
+}
+
+Rval* rank(Matrix* m) {
+    unsigned mrank;
+    Rval* m_rref = rref(m);
+    m = m_rref->value.matrix;
+
+    mrank = rank_rref(m);
+
     rval_destroy(m_rref);
     return rval_make_literal(mrank);
 }

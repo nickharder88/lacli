@@ -60,10 +60,7 @@ Rval* evec_eig(Matrix* m, Rval* evals) {
         evecs[1] = evec_solve(m, evals->value.array.literal_array[0]);
         evecs[0] = evec_solve(m, evals->value.array.literal_array[1]);
 
-        evec_aug = aug(evecs[0], evecs[1]);
-        matrix_destroy(evecs[0]);
-        matrix_destroy(evecs[1]);
-        return rval_make_matrix(evec_aug->value.matrix);
+        return rval_make_matrix_array(evecs, 2);
     } else {
         printf("Error: need eigenvalues to compute eigenvectors\n");
         return NULL;

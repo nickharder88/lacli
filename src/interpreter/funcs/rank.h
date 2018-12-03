@@ -6,4 +6,6 @@
 Rval* rank_handler(Rval** args, unsigned nargs);
 Rval* rank(Matrix* m);
 
+unsigned rank_rref(Matrix *m);
+
 #endif

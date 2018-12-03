@@ -26,7 +26,7 @@ void matrix_destroy(void* m);
 Matrix* matrix_parse(char* line);
 Matrix* matrix_evaluate(Dict* d, char* line);
 void matrix_print(Matrix* m);
-
+void matrix_print_multiple(Matrix** m, unsigned length);
 
 Matrix* matrix_copy(Matrix* m);
 Matrix* try_get_matrix(Dict* matrix_dict, char** line);
