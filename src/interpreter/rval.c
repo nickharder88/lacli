@@ -14,16 +14,29 @@ void rval_destroy(Rval* val) {
 void rval_print(Rval* val) {
     unsigned i;
 
-    if(val->type == RLITERAL) {
-        printf("%f\n", val->value.literal);
-    } else if(val->type == RMATRIX) {
-        matrix_print(val->value.matrix);
-    } else if(val->type == RLITERAL_ARRAY) {
-        for(i = 0; i < val->value.array.length - 1; i++)
-            printf("%f\t", val->value.array.literal_array[i]);
-        printf("%f\n", val->value.array.literal_array[val->value.array.length - 1]);
-    } else {
-        printf("NULL\n");
+    switch(val->type) {
+        case RLITERAL:
+            printf("%f\n", val->value.literal);
+            break;
+        case RLITERAL_ARRAY:
+            for(i = 0; i < val->value.array.length - 1; i++)
+                printf("%f\t", val->value.array.literal_array[i]);
+            printf("%f\n", val->value.array.literal_array[val->value.array.length - 1]);
+            break;
+        case RMATRIX:
+            matrix_print(val->value.matrix);
+            break;
+        case RNIL:
+            printf("NULL\n");
+            break;
+        case RBOOLEAN:
+            if(val->value.boolean == TRUE)
+                printf("TRUE\n");
+            else
+                printf("FALSE\n");
+            break;
+        default:
+            break;
     }
 }
 
@@ -57,5 +70,12 @@ Rval* rval_make_literal_array(double* arr, unsigned len) {
     for(i = 0; i < len; i++)
         rval->value.array.literal_array[i] = arr[i];
 
+    return rval;
+}
+
+Rval* rval_make_boolean(Boolean boolean) {
+    Rval* rval = malloc(sizeof(struct Rval));
+    rval->type = RBOOLEAN;
+    rval->value.boolean = boolean;
     return rval;
 }

@@ -20,13 +20,11 @@ If a function has the last parameter optional:newname, then it will give the res
 * evec(matrix) - finds the eigenvectors of the matrix
 
 ### Coming soon
-1. Constant multiplication of matrices
-1. Save double values in variables
-1. Assigning result to variables
-1. don't invert 2x2 matrices with 0 determinant
 1. row equivalence
+1. linindep(matrix...)
+1. dim(m)
 1. null(e)
-1. evec(matrix)
+1. nullity(m)
 * diffsolve(matrix) - solves the matrix of form dx/dt = CX
 
 

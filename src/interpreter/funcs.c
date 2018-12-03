@@ -11,6 +11,7 @@
 #include "funcs/transpose.h"
 #include "funcs/eval.h"
 #include "funcs/evec.h"
+#include "funcs/linind.h"
 
 static Dict* func_dict;
 
@@ -28,6 +29,7 @@ void funcs_init(void) {
     dict_add(func_dict, "transpose", transpose_handler);
     dict_add(func_dict, "eval", eval_handler);
     dict_add(func_dict, "evec", evec_handler);
+    dict_add(func_dict, "linind", linind_handler);
 }
 
 void funcs_destroy(void) {

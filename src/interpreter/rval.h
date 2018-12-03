@@ -3,9 +3,13 @@
 
 #include "../matrix.h"
 
+typedef enum {
+    TRUE, FALSE
+} Boolean;
+
 typedef struct Rval {
     enum {
-        RMATRIX, RLITERAL, RLITERAL_ARRAY, RNIL
+        RMATRIX, RLITERAL, RLITERAL_ARRAY, RNIL, RBOOLEAN
     } type;
 
     union {
@@ -16,6 +20,7 @@ typedef struct Rval {
 
         double literal;
         Matrix* matrix;
+        Boolean boolean;
     } value;
 } Rval;
 
@@ -25,5 +30,6 @@ Rval* rval_make_literal(double val);
 Rval* rval_make_matrix(Matrix* m);
 Rval* rval_make_nil(void);
 Rval* rval_make_literal_array(double* vals, unsigned length);
+Rval* rval_make_boolean(Boolean boolean);
 
 #endif
