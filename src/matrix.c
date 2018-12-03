@@ -339,3 +339,42 @@ Matrix* matrix_create_initializer_2D(double** vals, unsigned nrows, unsigned nco
 
     return m;
 }
+
+Matrix* matrix_copy_remove_row_col(Matrix* m, unsigned row, unsigned col) {
+    /* returns copy of matrix with row and col removed */
+    /* row_i/col_i hold index of m, copy_row_i,copy_col_i hold index of copy */
+    Matrix *copy, *rcopy, *mrow;
+    unsigned row_i, col_i, copy_row_i, copy_col_i;
+
+    if(m->nrows == 1 || m->ncols == 1)
+        return NULL;
+
+    copy = matrix_create_dim(m->nrows-1, m->ncols-1);
+
+    if(m->nrows == 2) {
+        for(copy_col_i = col_i = 0; col_i < m->ncols; col_i++) {
+            if(col_i == col)
+                continue;
+            copy->values.literals[copy_col_i] = m->values.rows[1-row]->values.literals[col_i];
+            copy_col_i++;
+        }
+
+    } else {
+        for(copy_row_i = row_i = 0; row_i < m->nrows; row_i++) {
+            if(row_i == row)
+                continue;
+            mrow = m->values.rows[row_i];
+            rcopy = copy->values.rows[copy_row_i];
+            rcopy->values.literals = malloc(copy->ncols * sizeof(double));
+            for(copy_col_i = col_i = 0; col_i < m->ncols; col_i++) {
+                if(col_i == col)
+                    continue;
+                rcopy->values.literals[copy_col_i] = mrow->values.literals[col_i];
+                copy_col_i++;
+            }
+
+            copy_row_i++;
+        }
+    }
+    return copy;
+}

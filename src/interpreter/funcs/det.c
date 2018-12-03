@@ -9,15 +9,30 @@ Rval* det_handler(Rval** args, unsigned nargs) {
     return det(args[0]->value.matrix);
 }
 
+static double _det(Matrix* m) {
+    unsigned i;
+    char sign = -1;
+    double val = 0;
+    Matrix *row, *sub_matrix;
+
+    if(m->nrows == 1)
+        return m->values.literals[0];
+
+    for(i = 0; i < m->ncols; i++) {
+        sign *= -1;
+        row = m->values.rows[0];
+        sub_matrix = matrix_copy_remove_row_col(m, 0, i);
+        val += sign * row->values.literals[i] * _det(sub_matrix);
+        matrix_destroy(sub_matrix);
+    }
+}
+
 Rval* det(Matrix* m) {
-    double val;
-    if(m->nrows != 2 || m->ncols != 2) {
-        printf("Usage: can only get determinant of 2x2 matrices.\n");
+    if(m->nrows != m->ncols) {
+        printf("Cannot calculate determinant of non square matrix.\n");
         return NULL;
     }
 
-    val = (m->values.rows[0]->values.literals[0] * m->values.rows[1]->values.literals[1])
-        - (m->values.rows[0]->values.literals[1] * m->values.rows[1]->values.literals[0]);
-
+    double val = _det(m);
     return rval_make_literal(val);
 }
