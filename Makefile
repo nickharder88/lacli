@@ -1,5 +1,5 @@
 CFLAGS := -Wall
-CC := cc -g -lm
+CC := cc -g
 
 OBJDIR := obj
 SRCDIR := src 
@@ -8,7 +8,7 @@ SRCFILES := $(shell find src/ -name '*.c')
 OBJFILES := $(patsubst $(shell find src/ -name '*.c')/%.c, $(OBJ)/%.o, $(SRCFILES))
 
 main : $(OBJFILES)
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -lm
 
 $(OBJDIR)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
