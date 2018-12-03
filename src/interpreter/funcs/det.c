@@ -29,7 +29,7 @@ static double _det(Matrix* m) {
 
 Rval* det(Matrix* m) {
     if(m->nrows != m->ncols) {
-        printf("Cannot calculate determinant of non square matrix.\n");
+        printf("Matrix must be square to calculate determinant.\n");
         return NULL;
     }
 

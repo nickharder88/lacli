@@ -50,7 +50,7 @@ static void make_pivot(Matrix* row, unsigned cur_col) {
 unsigned get_pivot(Matrix* row) {
     unsigned col;
     for(col = 0; col < row->ncols; col++) {
-        if(row->values.literals[col] > 0)
+        if(row->values.literals[col] != 0)
             return col;
     }
 }
@@ -101,14 +101,12 @@ static Matrix* ref(Matrix* m) {
     unsigned cur_row, cur_col, move_row;
     Matrix *row, *copy = matrix_copy(m);
 
-    // TODO what if its only one row?
-
     for(cur_row = 0;
             (move_row = left_most_nz_row(copy, cur_row, &cur_col)) < copy->nrows;
             cur_row++) {
         /* place left most row in next highest position */
         if(cur_row != move_row)
-            swap(m, cur_row, move_row);
+            swap(copy, cur_row, move_row);
 
         /* don't operate on a zero row */
         if(cur_col == copy->ncols)
