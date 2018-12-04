@@ -6,7 +6,7 @@
 
 #include "matrix.h"
 
-#define MAX_DIGITS 10
+#define MAX_DIGITS 80
 
 /*
  * Returns rows by cols Matrix without a name
@@ -181,40 +181,30 @@ int get_number_length(double number) {
     int numDigits;
 
     numDigits = sprintf(str, "%g", number);
-
+    printf("The number %f has a length of %d\n", number, numDigits);
     return numDigits;
 }
 
-int get_largest_number_length(Matrix* m) {
+int get_largest_column_number_length(Matrix* m, int columnNumber) {
     int largestNum, row_i, col_i, tempNumLength;
     Matrix* row;
     
     largestNum = 0;
-    if(m->nrows == 1) {
-        // 1 Dimensional
-        for(col_i = 0; col_i < m->ncols; col_i++) {
-            tempNumLength = get_number_length(m->values.literals[col_i]);
-            if(largestNum < tempNumLength)
-                largestNum = tempNumLength;
-        }
-    } else {
-        for(row_i = 0; row_i < m->nrows; row_i++) {
-            row = m->values.rows[row_i];
-            for(col_i = 0; col_i < m->ncols; col_i++) {
-                tempNumLength = get_number_length(row->values.literals[col_i]);
-                if(largestNum < tempNumLength)
-                    largestNum = tempNumLength;
-            }
-        }
+    
+    for(row_i = 0; row_i < m->nrows; row_i++) {
+      row = m->values.rows[row_i];
+      tempNumLength = get_number_length(row->values.literals[columnNumber]);
+      if(largestNum < tempNumLength)
+            largestNum = tempNumLength;
     }
-
+      
     return largestNum;
 }
 
 void print_spaces(int numSpaces) {
     int i;
     for(i = 0; i < numSpaces; i++)
-        putchar(' ');
+        putchar('c');
 }
 
 void matrix_print(Matrix* m) {
@@ -227,30 +217,23 @@ void matrix_print(Matrix* m) {
         return;
     }
 
-    largestNumLength = get_largest_number_length(row); 
-
     if(m->nrows == 1) {
         // 1 Dimensional
         putchar('\t');
-        for(col_i = 0; col_i < m->ncols - 1; col_i++) {
+        for(col_i = 0; col_i < m->ncols - 1; col_i++) 
             printf("%g\t", m->values.literals[col_i]);
-            if(get_number_length(m->values.literals[col_i]) < largestNumLength)
-                print_spaces(largestNumLength);
-        }
         printf("%g\n", m->values.literals[col_i]);
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
             row = m->values.rows[row_i];
-            putchar('\t');
-            for(col_i = 0; col_i < row->ncols - 1; col_i++) {
-                printf("%g\t", row->values.literals[col_i]);
-                if(get_number_length(m->values.literals[col_i]) < largestNumLength)
+            //putchar('\t');
+            for(col_i = 0; col_i < row->ncols; col_i++) {
+                largestNumLength = get_largest_column_number_length(m, col_i);
+                //printf("%g\t", row->values.literals[col_i]);
+                if(get_number_length(row->values.literals[col_i]) < largestNumLength)
                     print_spaces(largestNumLength);
             }
-            printf("%g", row->values.literals[col_i]);
-            if(get_number_length(m->values.literals[col_i]) < largestNumLength)
-                    print_spaces(largestNumLength);
-            printf("\n");
+            //printf("%g\n", row->values.literals[col_i]);
         }
     }
 }
