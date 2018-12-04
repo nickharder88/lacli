@@ -181,7 +181,6 @@ int get_number_length(double number) {
     int numDigits;
 
     numDigits = sprintf(str, "%g", number);
-    printf("The number %f has a length of %d\n", number, numDigits);
     return numDigits;
 }
 
@@ -204,11 +203,11 @@ int get_largest_column_number_length(Matrix* m, int columnNumber) {
 void print_spaces(int numSpaces) {
     int i;
     for(i = 0; i < numSpaces; i++)
-        putchar('c');
+        putchar(' ');
 }
 
 void matrix_print(Matrix* m) {
-    int largestNumLength;
+    int largestNumLength, tempNumber;
     unsigned row_i, col_i;
     Matrix* row;
 
@@ -226,14 +225,15 @@ void matrix_print(Matrix* m) {
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
             row = m->values.rows[row_i];
-            //putchar('\t');
+            putchar('\t');
             for(col_i = 0; col_i < row->ncols; col_i++) {
                 largestNumLength = get_largest_column_number_length(m, col_i);
-                //printf("%g\t", row->values.literals[col_i]);
-                if(get_number_length(row->values.literals[col_i]) < largestNumLength)
-                    print_spaces(largestNumLength);
+                printf("%g    ", row->values.literals[col_i]);
+                tempNumber = get_number_length(row->values.literals[col_i]);
+                if(tempNumber < largestNumLength)
+                    print_spaces(largestNumLength - tempNumber);
             }
-            //printf("%g\n", row->values.literals[col_i]);
+            printf("\n");
         }
     }
 }
