@@ -30,6 +30,7 @@ Rval* null(Matrix* m) {
      */
 
     val = rref(m);
+    m = val->value.matrix;
     mrank = rank_rref(val->value.matrix);
     len = m->ncols - mrank;
 
@@ -48,13 +49,17 @@ Rval* null(Matrix* m) {
         row = m->values.rows[row_i];
         pivot = get_pivot(row);
 
-        for(i = 0; i < len; i++) {
-            nspace[i]->values.rows[pivot]->values.literals[0] = -1 * row->values.literals[mrank + row_i];
-        }
+        /*
+         * e = [[1,0,-2,-1], [0,1,8,2]]
+         * x1 = 2x3 + x4
+         * x2 = -8x3 -2x4
+         *
+         * [[2],[-8],[1],[0]]
+         * [[1],[-2],[0],[1]]
+         */
 
-        for(col_i = pivot+1; col_i < m->ncols; col_i++) {
-            nspace[i]->values.literals[pivot] = -1 * row->values.literals[col_i];
-        }
+        for(i = 0; i < len; i++)
+            nspace[i]->values.rows[pivot]->values.literals[0] = -1 * row->values.literals[mrank + i];
     }
     return rval_make_matrix_array(nspace, len);
 }

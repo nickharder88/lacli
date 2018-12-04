@@ -32,8 +32,8 @@ void funcs_init(void) {
     dict_add(func_dict, "eval", eval_handler);
     dict_add(func_dict, "evec", evec_handler);
     dict_add(func_dict, "linind", linind_handler);
-    dict_add(func_dict, "span", linind_handler);
-    dict_add(func_dict, "null", linind_handler);
+    dict_add(func_dict, "span", span_handler);
+    dict_add(func_dict, "null", null_handler);
 }
 
 void funcs_destroy(void) {
