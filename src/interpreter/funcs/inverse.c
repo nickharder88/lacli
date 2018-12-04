@@ -16,7 +16,7 @@ Rval* inverse_handler(Rval** args, unsigned nargs) {
 }
 
 Rval* inverse(Matrix* m) {
-    Matrix *copy;
+    Matrix *copy, *marr[2];
     Rval *m_aug, *In, *m_aug_rref, *m_det;
 
     if(m->ncols != m->nrows) {
@@ -32,7 +32,9 @@ Rval* inverse(Matrix* m) {
     copy = matrix_copy(m);
     In = I(m->nrows);
 
-    m_aug = aug(copy, In->value.matrix);
+    marr[0] = copy;
+    marr[1] = In->value.matrix;
+    m_aug = aug(marr, 2);
     m_aug_rref = rref(m_aug->value.matrix);
     matrix_slice_after(m_aug_rref->value.matrix, m->ncols);
 

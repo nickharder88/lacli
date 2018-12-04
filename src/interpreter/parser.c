@@ -186,8 +186,10 @@ static Expr* primary(void) {
                         printf("Error: matrix rows have different column lengths\n");
                         return NULL;
                     }
-                } else
+                } else {
                     ncols = expr->matrix.ncols;
+                    ncol_checked = 1;
+                }
 
                 if((tkn = tokens_peek(0)) == NULL) {
                     printf("Error: unexpected end of line\n");

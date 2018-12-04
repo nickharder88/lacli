@@ -41,5 +41,6 @@ char matrix_cmp(Matrix* m1, Matrix* m2);
 void matrix_slice_before(Matrix *m, unsigned col);
 void matrix_slice_after(Matrix *m, unsigned col);
 Matrix* matrix_copy_remove_row_col(Matrix* m, unsigned row, unsigned col);
+Matrix* matrix_slice_below(Matrix* m, unsigned row);
 
 #endif

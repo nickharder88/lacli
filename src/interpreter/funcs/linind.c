@@ -4,6 +4,7 @@
 #include "rref.h"
 #include "I.h"
 #include "aug.h"
+#include "rank.h"
 
 Rval* linind_handler(Rval** args, unsigned nargs) {
     unsigned i;
@@ -20,6 +21,7 @@ Rval* linind_handler(Rval** args, unsigned nargs) {
     for(i = 0; i < nargs; i++) {
         if(args[i]->type != RMATRIX) {
             printf("Usage: lindind(matrix, ...)\n");
+            free(col_vectors);
             return NULL;
         }
 
@@ -35,43 +37,27 @@ Rval* linind(Matrix** col_vectors, unsigned ncols) {
     char is_dep;
     unsigned char col_checked = 0;
     unsigned i;
-    Matrix *m = NULL, *col, *col_copy;
-    Rval *m_rref, *In, *m_aug;
+    Rval *m_rref, *In, *m_aug, *m_rank;
+    Matrix* m_cmp;
 
     for(i = 0; i < ncols; i++) {
-        if((col = col_vectors[i])->ncols != 1) {
+        if(col_vectors[i]->ncols != 1) {
             printf("Error: can only check linear dependence on column vectors\n");
-            matrix_destroy(m);
             return NULL;
-        }
-
-        if(m == NULL) {
-            m = matrix_copy(col);
-        } else {
-            col_copy = matrix_copy(col);
-            if((m_aug = aug(m, col_copy)) == NULL) {
-                printf("Error: could not augment matrices while checking linear independence\n");
-                matrix_destroy(col_copy);
-                matrix_destroy(m);
-                return NULL;
-            }
-
-            matrix_destroy(m);
-            matrix_destroy(col_copy);
-
-            m = m_aug->value.matrix;
-
-            m_aug->type = RNIL;
-            rval_destroy(m_aug);
         }
     }
 
-    m_rref = rref(m);
+    m_aug = aug(col_vectors, ncols);
+    m_rref = rref(m_aug->value.matrix);
+    m_rank = rank(m_rref->value.matrix);
+    m_cmp = matrix_slice_below(m_rref->value.matrix, m_rank->value.literal);
     In = I(ncols);
-    is_dep = matrix_cmp(m_rref->value.matrix, In->value.matrix) != 0;
 
-    matrix_destroy(m);
+    is_dep = matrix_cmp(m_cmp, In->value.matrix) != 0;
+
+    rval_destroy(m_aug);
     rval_destroy(In);
     rval_destroy(m_rref);
+    matrix_destroy(m_cmp);
     return rval_make_boolean(is_dep ? FALSE : TRUE);
 }

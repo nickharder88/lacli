@@ -211,17 +211,14 @@ unsigned matrix_max_row(Matrix** m, unsigned length) {
 }
 
 void matrix_print_multiple(Matrix** m, unsigned length) {
-    unsigned row_i, col_i, nrows;
+    unsigned i;
     /*
      * 1 | 0
      * 0 | 1
      */
-    nrows = matrix_max_row(m, length);
-
-    for(row_i = 0; row_i < nrows; row_i++) {
-
+    for(i = 0; i < length; i++) {
+        matrix_print(m[i]);
     }
-
 }
 
 /* deep copies the matrix. if identifier is null, it uses the name
@@ -402,5 +399,16 @@ Matrix* matrix_copy_remove_row_col(Matrix* m, unsigned row, unsigned col) {
             copy_row_i++;
         }
     }
+    return copy;
+}
+
+Matrix* matrix_slice_below(Matrix* m, unsigned row) {
+    unsigned i, row_i;
+    Matrix** rows;
+    Matrix* copy = matrix_create_dim(row, m->ncols);
+
+    for(row_i = 0; row_i < row; row_i++)
+        copy->values.rows[row_i] = matrix_copy(m->values.rows[row_i]);
+
     return copy;
 }

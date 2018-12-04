@@ -14,15 +14,17 @@ Rval* rank_handler(Rval** args, unsigned nargs) {
 
 unsigned rank_rref(Matrix *m) {
     Matrix* row;
-    unsigned mrank = 0, i, pivot;
+    unsigned mrank = 0, row_i, col_i, pivot;
 
-    for(i = 0; i < m->nrows; i++) {
-        row = m->values.rows[i];
+    for(row_i = 0; row_i < m->nrows; row_i++) {
+        row = m->values.rows[row_i];
         pivot = get_pivot(row);
-        if(row->values.literals[i] < m->ncols)
-            mrank++;
+        for(col_i = pivot; col_i < row->ncols; col_i++)
+            if(row->values.literals[col_i] != 0) {
+                mrank++;
+                break;
+            }
     }
-
     return mrank;
 }
 

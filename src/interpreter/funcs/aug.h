@@ -4,6 +4,6 @@
 #include "../rval.h"
 
 Rval* aug_handler(Rval** args, unsigned nargs);
-Rval* aug(Matrix* m1, Matrix* m2);
+Rval* aug(Matrix** marr, unsigned nmatrices);
 
 #endif

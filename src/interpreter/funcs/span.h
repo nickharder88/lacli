@@ -1,6 +1,8 @@
 #ifndef SPAN_H
 #define SPAN_H
 
+#include "../rval.h"
+
 /*
  * Let w1,...,wk and v be vectos in Rn.
  * Then v is in span{w1,...,wk} iff the system of
@@ -9,6 +11,6 @@
  */
 
 Rval* span_handler(Rval** args, unsigned nargs);
-Rval* span(Matrix* v, Matrix** columns);
+Rval* span(Matrix* v, Matrix** columns, unsigned ncols);
 
 #endif

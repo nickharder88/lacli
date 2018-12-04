@@ -26,9 +26,10 @@ If a function has the last parameter optional:newname, then it will give the res
 1. nullity(m)
 * diffsolve(matrix) - solves the matrix of form dx/dt = CX
 
-
 ### Dev notes
 http://www.craftinginterpreters.com/
+
+Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
 
 ### Valgrind
 ```bash
