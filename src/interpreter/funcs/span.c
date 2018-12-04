@@ -5,29 +5,48 @@
 #include "rref.h"
 
 Rval* span_handler(Rval** args, unsigned nargs) {
-    unsigned i;
-    Matrix **col_vectors, *v;
-    Rval* val;
+    unsigned i, m_i, length, ncols;
+    Matrix **col_vectors, *v, **marr;
+    Rval *val, *arg;
 
     if(nargs < 2 || args[0]->type != RMATRIX) {
         printf("Usage: span(vector, vector...)\n");
         return NULL;
     }
 
-    v = args[i]->value.matrix;
-    col_vectors = malloc(nargs * sizeof(struct Matrix *));
+    ncols = 0;
+    for(i = 1; i < nargs; i++) {
+        arg = args[i];
+        if(arg->type == RMATRIX) {
+            ncols++;
+        } else if(arg->type == RMATRIX_ARRAY) {
+            ncols += arg->value.array.length;
+        } else {
+            printf("Usage: span(matrix, ...)\n");
+            return NULL;
+        }
+    }
+
+    v = args[0]->value.matrix;
+    col_vectors = malloc(ncols * sizeof(struct Matrix *));
 
     for(i = 1; i < nargs; i++) {
-        if(args[i]->type != RMATRIX) {
+        arg = args[i];
+        if(arg->type == RMATRIX) {
+            col_vectors[i] = args[i]->value.matrix;
+        } else if(arg->type == RMATRIX_ARRAY) {
+            length = arg->value.array.length;
+            marr = arg->value.array.matrix_array;
+            for(m_i = 0; m_i < length; m_i++)
+                col_vectors[m_i] = marr[m_i];
+        } else {
             printf("Usage: span(matrix, ...)\n");
             free(col_vectors);
             return NULL;
         }
-
-        col_vectors[i] = args[i]->value.matrix;
     }
 
-    val = span(v, col_vectors, nargs-1);
+    val = span(v, col_vectors, ncols);
     free(col_vectors);
     return val;
 }
@@ -35,7 +54,7 @@ Rval* span_handler(Rval** args, unsigned nargs) {
 Rval* span(Matrix* v, Matrix** columns, unsigned ncols) {
     unsigned row_i, col_i, nvals;
     Rval *m_aug, *v_aug, *v_rref;
-    Matrix *m, *marr[2], *sol, *row;
+    Matrix *m, *marr[2], *sol, *row, *mmult;
 
     m_aug = aug(columns, ncols);
 

@@ -31,6 +31,8 @@ http://www.craftinginterpreters.com/
 
 Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
 
+span doesnt work because it row reduces the | augmented side of the matrix
+
 ### Valgrind
 ```bash
 valgrind --leak-check=yes debug
