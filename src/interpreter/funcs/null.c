@@ -3,6 +3,7 @@
 #include "null.h"
 #include "rref.h"
 #include "rank.h"
+#include "../../util.h"
 
 /*
  * null space is the set of solutions to the homogeneous
@@ -19,7 +20,9 @@ Rval* null_handler(Rval** args, unsigned nargs) {
 }
 
 Rval* null(Matrix* m) {
-    unsigned mrank, len, i, row_i, col_i, pivot, vec_i, j;
+    char is_pivot;
+    unsigned mrank, len, i, j, row_i, col_i, pivot, vec_i;
+    unsigned *pivots, *nonpivots;
     double value;
     Matrix** nspace, *vec, *row;
     Rval* val;
@@ -34,20 +37,37 @@ Rval* null(Matrix* m) {
     mrank = rank_rref(val->value.matrix);
     len = m->ncols - mrank;
 
+    nonpivots = malloc(len * sizeof(unsigned));
+    pivots = malloc(mrank * sizeof(unsigned));
+    j = 0;
+    col_i = 0;
+    for(i = 0; i < mrank; i++, j++) {
+        row = m->values.rows[i];
+        pivot = get_pivot(row);
+        pivots[i] = pivot;
+        if(j == pivot) {
+            continue;
+        }
+
+        while(j < pivot)
+            nonpivots[col_i++] = j++;
+    }
+    for(; col_i < len; col_i++)
+        nonpivots[col_i] = j++;
+
+    /* make 0 and 1s in matrices */
     nspace = malloc(len * sizeof(struct Matrix *));
     for(i = 0; i < len; i++) {
         nspace[i] = vec = matrix_create_dim(m->ncols, 1);
 
-        for(j = 0; j < m->ncols; j++) {
-            vec->values.rows[j]->values.literals[0] = 0;
-        }
-
-        vec->values.rows[mrank+i]->values.literals[0] = 1;
+        for(row_i = 0; row_i < m->ncols; row_i++)
+            vec->values.rows[row_i]->values.literals[0] = 0;
+        vec->values.rows[nonpivots[i]]->values.literals[0] = 1;
     }
 
     for(row_i = 0; row_i < mrank; row_i++) {
         row = m->values.rows[row_i];
-        pivot = get_pivot(row);
+        pivot = pivots[row_i];
 
         /*
          * e = [[1,0,-2,-1], [0,1,8,2]]
@@ -59,7 +79,10 @@ Rval* null(Matrix* m) {
          */
 
         for(i = 0; i < len; i++)
-            nspace[i]->values.rows[pivot]->values.literals[0] = -1 * row->values.literals[mrank + i];
+            nspace[i]->values.rows[pivot]->values.literals[0] = round_if_insignificant(-1 * row->values.literals[nonpivots[i]]);
     }
+
+    free(nonpivots);
+    free(pivots);
     return rval_make_matrix_array(nspace, len);
 }

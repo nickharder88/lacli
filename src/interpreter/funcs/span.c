@@ -56,13 +56,13 @@ Rval* span(Matrix* v, Matrix** columns, unsigned ncols) {
     Rval *m_aug, *v_aug, *v_rref;
     Matrix *m, *marr[2], *sol, *row, *mmult;
 
+    // TODO if columns == 1
     m_aug = aug(columns, ncols);
-
     marr[0] = m_aug->value.matrix;
     marr[1] = v;
 
     v_aug = aug(marr, 2);
-    v_rref = rref(v_aug->value.matrix);
+    v_rref = rref_aug(v_aug->value.matrix);
     sol = v_rref->value.matrix;
 
     for(row_i = 0; row_i < sol->nrows; row_i++) {
@@ -94,5 +94,5 @@ Rval* span(Matrix* v, Matrix** columns, unsigned ncols) {
     rval_destroy(m_aug);
     rval_destroy(v_aug);
     rval_destroy(v_rref);
-    return rval_make_boolean(FALSE);
+    return rval_make_boolean(TRUE);
 }

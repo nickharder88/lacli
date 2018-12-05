@@ -14,6 +14,9 @@
 #include "funcs/linind.h"
 #include "funcs/span.h"
 #include "funcs/null.h"
+#include "funcs/nullity.h"
+#include "funcs/dim.h"
+#include "funcs/basis.h"
 
 static Dict* func_dict;
 
@@ -31,9 +34,15 @@ void funcs_init(void) {
     dict_add(func_dict, "transpose", transpose_handler);
     dict_add(func_dict, "eval", eval_handler);
     dict_add(func_dict, "evec", evec_handler);
+
+    /* vector space functions */
     dict_add(func_dict, "linind", linind_handler);
     dict_add(func_dict, "span", span_handler);
     dict_add(func_dict, "null", null_handler);
+    dict_add(func_dict, "nullity", nullity_handler);
+    dict_add(func_dict, "dim", dim_handler);
+    dict_add(func_dict, "basis", basis_handler);
+    dict_add(func_dict, "is_basis", is_basis_handler);
 }
 
 void funcs_destroy(void) {

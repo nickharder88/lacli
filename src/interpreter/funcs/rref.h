@@ -5,6 +5,8 @@
 
 unsigned get_pivot(Matrix* row);
 Rval* rref_handler(Rval** args, unsigned nargs);
+
 Rval* rref(Matrix* m);
+Rval* rref_aug(Matrix* m);
 
 #endif

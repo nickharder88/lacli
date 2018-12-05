@@ -218,6 +218,7 @@ void matrix_print_multiple(Matrix** m, unsigned length) {
      */
     for(i = 0; i < length; i++) {
         matrix_print(m[i]);
+        printf("\n");
     }
 }
 

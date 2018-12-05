@@ -20,11 +20,11 @@ If a function has the last parameter optional:newname, then it will give the res
 * evec(matrix) - finds the eigenvectors of the matrix
 
 ### Coming soon
-1. row equivalence
+1. span(m)
 1. dim(m)
-1. null(e)
-1. nullity(m)
-* diffsolve(matrix) - solves the matrix of form dx/dt = CX
+1. basis(m)
+
+1. diffsolve(matrix) - solves the matrix of form dx/dt = CX
 
 ### Dev notes
 http://www.craftinginterpreters.com/
@@ -32,6 +32,7 @@ http://www.craftinginterpreters.com/
 Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
 
 span doesnt work because it row reduces the | augmented side of the matrix
+span fails, work on proble from page 145
 
 ### Valgrind
 ```bash

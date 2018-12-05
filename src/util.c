@@ -3,6 +3,7 @@
 #include "util.h"
 
 #define EPSILON 0.0001
+#define SIG 0.00000001
 
 /* returns 0 if approximately equal */
 int cmp_double(double d1, double d2) {
@@ -19,4 +20,13 @@ int cmp_double(double d1, double d2) {
     }
 
     return 1;
+}
+
+/* rounds to closest integer if value */
+double round_if_insignificant(double val) {
+    if(val == 0)
+        return 0;
+    if(fabs(val - round(val)) < SIG)
+        return round(val);
+    return val;
 }
