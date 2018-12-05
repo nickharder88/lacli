@@ -5,49 +5,68 @@
 #include "rref.h"
 
 Rval* span_handler(Rval** args, unsigned nargs) {
-    unsigned i, m_i, length, ncols;
-    Matrix **col_vectors, *v, **marr;
-    Rval *val, *arg;
+    char row_checked;
+    unsigned i, nmatrices, col_i, row_check;
+    Matrix *arg, *v;
+    Matrix **cols, **arr;
+    Rval* val;
 
     if(nargs < 2 || args[0]->type != RMATRIX) {
-        printf("Usage: span(vector, vector...)\n");
+        printf("Usage: span(v, matrices...)\n");
         return NULL;
     }
 
-    ncols = 0;
+    nmatrices = 0;
     for(i = 1; i < nargs; i++) {
-        arg = args[i];
-        if(arg->type == RMATRIX) {
-            ncols++;
-        } else if(arg->type == RMATRIX_ARRAY) {
-            ncols += arg->value.array.length;
+        if(args[i]->type == RMATRIX) {
+            if(row_checked) {
+                if(args[i]->value.matrix->nrows != row_check) {
+                    printf("Error: matrices must have the same number of rows\n");
+                    return NULL;
+                }
+            } else {
+                row_check = args[i]->value.matrix->nrows;
+                row_checked = 1;
+            }
+            nmatrices++;
+        } else if(args[i]->type == RMATRIX_ARRAY) {
+            arr = args[i]->value.array.matrix_array;
+            for(col_i = 0; col_i < args[i]->value.array.length; col_i++) {
+                if(row_checked) {
+                    if(arr[col_i]->nrows != row_check) {
+                        printf("Error: matrices must have the same number of rows\n");
+                        return NULL;
+                    }
+                } else {
+                    row_check = arr[col_i]->nrows;
+                    row_checked = 1;
+                }
+            }
+            nmatrices += args[i]->value.array.length;
         } else {
-            printf("Usage: span(matrix, ...)\n");
+            printf("Usage: span(v, matrix...)\n");
             return NULL;
         }
     }
 
     v = args[0]->value.matrix;
-    col_vectors = malloc(ncols * sizeof(struct Matrix *));
+    cols = malloc(nmatrices * sizeof(struct Matrix *));
 
+    nmatrices = 0;
     for(i = 1; i < nargs; i++) {
-        arg = args[i];
-        if(arg->type == RMATRIX) {
-            col_vectors[i] = args[i]->value.matrix;
-        } else if(arg->type == RMATRIX_ARRAY) {
-            length = arg->value.array.length;
-            marr = arg->value.array.matrix_array;
-            for(m_i = 0; m_i < length; m_i++)
-                col_vectors[m_i] = marr[m_i];
+        if(args[i]->type == RMATRIX) {
+            cols[nmatrices++] = args[i]->value.matrix;
         } else {
-            printf("Usage: span(matrix, ...)\n");
-            free(col_vectors);
-            return NULL;
+            arr = args[i]->value.array.matrix_array;
+            for(col_i = 0; col_i < args[i]->value.array.length; col_i++) {
+                cols[nmatrices] = arr[nmatrices];
+                nmatrices++;
+            }
         }
     }
 
-    val = span(v, col_vectors, ncols);
-    free(col_vectors);
+    val = span(v, cols, nmatrices);
+    free(cols);
     return val;
 }
 
@@ -56,7 +75,6 @@ Rval* span(Matrix* v, Matrix** columns, unsigned ncols) {
     Rval *m_aug, *v_aug, *v_rref;
     Matrix *m, *marr[2], *sol, *row, *mmult;
 
-    // TODO if columns == 1
     m_aug = aug(columns, ncols);
     marr[0] = m_aug->value.matrix;
     marr[1] = v;
@@ -71,15 +89,6 @@ Rval* span(Matrix* v, Matrix** columns, unsigned ncols) {
         for(col_i = 0; col_i < sol->ncols - 1; col_i++) {
             if(row->values.literals[col_i] != 0)
                 nvals++;
-
-            /* TODO is this necessary?
-            if(nvals > 1) {
-                rval_destroy(m_aug);
-                rval_destroy(v_aug);
-                rval_destroy(v_rref);
-                return rval_make_boolean(TRUE);
-            }
-            */
         }
 
         /* inconsistent system of linear equations */

@@ -1,0 +1,8 @@
+var a = [[2,2],[0,-1],[-1,0],[4,2]]
+var b = [[-2],[4],[-3],[4.01]]
+print span(b,a)
+quit
+
+Taken from page 145
+Example 5.3.5
+Expected FALSE

@@ -4,3 +4,6 @@ var c = [[1], [10], [-19]]
 var d = [[-1], [12], [-25]]
 print dim(a,b,c,d)
 quit
+
+Taken from page 151
+Example 5.5.4

@@ -1,0 +1,6 @@
+var a = [[2,1,4,0],[-1,0,2,1]]
+var na = null(a)
+print na
+quit
+
+Taken from page 140

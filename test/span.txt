@@ -1,0 +1,8 @@
+var a = [[1],[1]]
+var b = [[1],[-1]]
+var c = [[2],[1]]
+print span(c, a, b)
+quit
+
+Taken from page 145
+Expected TRUE

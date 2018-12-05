@@ -11,6 +11,7 @@ Rval* basis_handler(Rval** args, unsigned nargs) {
     unsigned i, nmatrices, col_i, row_check;
     Matrix* arg;
     Matrix **cols, **arr;
+    Rval* val;
 
     if(nargs < 1) {
         printf("Usage: basis(matrix...)\n");
@@ -45,7 +46,7 @@ Rval* basis_handler(Rval** args, unsigned nargs) {
             }
             nmatrices += args[i]->value.array.length;
         } else {
-            printf("Usage: basis(col_matrix, col_matrix...)\n");
+            printf("Usage: basis(col_matrix...)\n");
             return NULL;
         }
     }
@@ -65,7 +66,10 @@ Rval* basis_handler(Rval** args, unsigned nargs) {
         }
     }
 
-    return basis(cols, nmatrices);
+    
+    val = basis(cols, nmatrices);
+    free(cols);
+    return val;
 }
 
 Rval* is_basis_handler(Rval** args, unsigned nargs) {

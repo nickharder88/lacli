@@ -31,6 +31,9 @@ Rval* aug(Matrix** marr, unsigned nmatrices) {
     Matrix *m, *row, *m_row, *copy_row, *m_cur;
     unsigned m_i, row_i, col_i, i, m_col_i, nrows, ncols = 0;
 
+    if(nmatrices == 1)
+        return rval_make_matrix(matrix_copy(marr[0]));
+
     nrows = marr[0]->nrows;
 
     for(i = 0; i < nmatrices; i++) {
