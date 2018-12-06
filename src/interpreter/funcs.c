@@ -17,23 +17,30 @@
 #include "funcs/nullity.h"
 #include "funcs/dim.h"
 #include "funcs/basis.h"
+#include "funcs/equal.h"
+#include "funcs/diffsolve.h"
 
 static Dict* func_dict;
 
 void funcs_init(void) {
     func_dict = dict_create(NULL);
 
-    /* Rval* (*func)(Rval* args, unsigned nargs) */
-    dict_add(func_dict, "rref", rref_handler);
-    dict_add(func_dict, "aug", aug_handler);
-    dict_add(func_dict, "I", I_handler);
+
+    /* matrix functions*/
+    dict_add(func_dict, "equal", equal_handler);
+    dict_add(func_dict, "transpose", transpose_handler);
     dict_add(func_dict, "inverse", inverse_handler);
+    dict_add(func_dict, "I", I_handler);
+
+    /* diff eq functions */
+    dict_add(func_dict, "aug", aug_handler);
+    dict_add(func_dict, "rref", rref_handler);
     dict_add(func_dict, "rank", rank_handler);
     dict_add(func_dict, "det", det_handler);
     dict_add(func_dict, "trace", trace_handler);
-    dict_add(func_dict, "transpose", transpose_handler);
     dict_add(func_dict, "eval", eval_handler);
     dict_add(func_dict, "evec", evec_handler);
+    dict_add(func_dict, "diffsolve", diffsolve_handler);
 
     /* vector space functions */
     dict_add(func_dict, "linind", linind_handler);

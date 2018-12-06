@@ -6,7 +6,7 @@
 #define SIG 0.00000001
 
 /* returns 0 if approximately equal */
-int cmp_double(double d1, double d2) {
+int double_cmp(double d1, double d2) {
     int val = fabs(d1 - d2) < EPSILON;
 
     double max = 1;

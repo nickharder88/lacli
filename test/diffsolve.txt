@@ -1,0 +1,8 @@
+var a = [[3,-1], [4,-2]]
+var b = [[2],[-3]]
+var c = diffsolve(a, b)
+print c
+quit
+
+Taken from page 123
+Example 4.9.11

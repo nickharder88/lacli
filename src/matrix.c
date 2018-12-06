@@ -5,11 +5,9 @@
 #include <limits.h>
 
 #include "matrix.h"
+#include "util.h"
 
-/*
- * Returns rows by cols Matrix without a name
- */
-Matrix* matrix_create() {
+Matrix* matrix_create(void) {
     Matrix* matrix;
 
     matrix = (Matrix*)malloc(sizeof(Matrix));
@@ -320,15 +318,14 @@ char matrix_cmp(Matrix* m1, Matrix* m2) {
 
     if(m1->nrows == 1) {
         for(col_i = 0; col_i < m1->ncols; col_i++)
-            if(m1->values.literals[col_i] != row2->values.literals[col_i]) {
+            if(double_cmp(m1->values.literals[col_i], row2->values.literals[col_i]))
                 return -1;
-            }
     } else {
         for(row_i = 0; row_i < m1->nrows; row_i++) {
             row1 = m1->values.rows[row_i];
             row2 = m2->values.rows[row_i];
             for(col_i = 0; col_i < m1->ncols; col_i++)
-                if(row1->values.literals[col_i] != row2->values.literals[col_i])
+                if(double_cmp(row1->values.literals[col_i], row2->values.literals[col_i]))
                     return -1;
         }
     }

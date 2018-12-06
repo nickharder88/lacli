@@ -73,44 +73,69 @@ Rval* basis_handler(Rval** args, unsigned nargs) {
 }
 
 Rval* is_basis_handler(Rval** args, unsigned nargs) {
-    unsigned i, ncols, col_i;
-    Matrix *arg, *space;
+    char row_checked;
+    unsigned i, nmatrices, col_i, row_check;
+    Matrix *arg, *v;
     Matrix **cols, **arr;
+    Rval* val;
 
     if(nargs < 2 || args[0]->type != RMATRIX) {
-        printf("Usage: is_basis(vspace, col_matrix...)\n");
+        printf("Usage: is_basis(v, matrices...)\n");
         return NULL;
     }
 
-    ncols = 0;
+    nmatrices = 0;
     for(i = 1; i < nargs; i++) {
         if(args[i]->type == RMATRIX) {
-            ncols++;
+            if(row_checked) {
+                if(args[i]->value.matrix->nrows != row_check) {
+                    printf("Error: matrices must have the same number of rows\n");
+                    return NULL;
+                }
+            } else {
+                row_check = args[i]->value.matrix->nrows;
+                row_checked = 1;
+            }
+            nmatrices++;
         } else if(args[i]->type == RMATRIX_ARRAY) {
-            ncols += args[i]->value.array.length;
+            arr = args[i]->value.array.matrix_array;
+            for(col_i = 0; col_i < args[i]->value.array.length; col_i++) {
+                if(row_checked) {
+                    if(arr[col_i]->nrows != row_check) {
+                        printf("Error: matrices must have the same number of rows\n");
+                        return NULL;
+                    }
+                } else {
+                    row_check = arr[col_i]->nrows;
+                    row_checked = 1;
+                }
+            }
+            nmatrices += args[i]->value.array.length;
         } else {
-            printf("Usage: is_basis(vspace, col_matrix...)\n");
+            printf("Usage: is_basis(v, matrix...)\n");
             return NULL;
         }
     }
 
-    space = args[0]->value.matrix;
-    cols = malloc(ncols * sizeof(struct Matrix *));
+    v = args[0]->value.matrix;
+    cols = malloc(nmatrices * sizeof(struct Matrix *));
 
-    ncols = 0;
+    nmatrices = 0;
     for(i = 1; i < nargs; i++) {
         if(args[i]->type == RMATRIX) {
-            cols[ncols++] = args[i]->value.matrix;
+            cols[nmatrices++] = args[i]->value.matrix;
         } else {
             arr = args[i]->value.array.matrix_array;
             for(col_i = 0; col_i < args[i]->value.array.length; col_i++) {
-                cols[ncols] = arr[ncols];
-                ncols++;
+                cols[nmatrices] = arr[nmatrices];
+                nmatrices++;
             }
         }
     }
 
-    return is_basis(space, cols, ncols);
+    val = is_basis(v, cols, nmatrices);
+    free(cols);
+    return val;
 }
 
 Rval* basis(Matrix** cols, unsigned ncols) {
@@ -119,36 +144,6 @@ Rval* basis(Matrix** cols, unsigned ncols) {
     Matrix **basis_cols, *row, *m_rref, *vec;
 
     col_aug = aug(cols, ncols);
-
-/* Possible copy of null(matrix)
-    col_rref = rref(col_aug->value.matrix);
-    m_rref = col_rref->value.matrix;
-
-    col_rank = rank(col_rref->value.matrix);
-
-    col_rank_val = col_rank->value.literal;
-    nrows = col_rref->value.matrix->nrows;
-
-    basis_cols = malloc(nrows * sizeof(struct Matrix *));
-    for(i = 0; i < nrows; i++) {
-        basis_cols[i] = vec = matrix_create_dim(ncols, 1);
-
-        for(j = 0; j < vec->nrows; j++) {
-            vec->values.rows[j]->values.literals[0] = 0;
-        }
-
-        vec->values.rows[col_rank_val+i]->values.literals[0] = 1;
-    }
-
-    for(i = 0; i < col_rank_val; i++) {
-        row = m_rref->values.rows[i];
-        pivot = get_pivot(row);
-
-        for(j = 0; j < nrows; j++)
-            basis_cols[j]->values.rows[pivot]->values.literals[0] = -1 * row->values.literals[col_rank_val+j];
-    }
-
-*/
     return null(col_aug->value.matrix);
 }
 

@@ -57,8 +57,8 @@ Rval* evec_eig(Matrix* m, Rval* evals) {
         evec = matrix_create_dim_uninitialized(m->nrows);
         evec->ncols = 2;
 
-        evecs[1] = evec_solve(m, evals->value.array.literal_array[0]);
-        evecs[0] = evec_solve(m, evals->value.array.literal_array[1]);
+        evecs[0] = evec_solve(m, evals->value.array.literal_array[0]);
+        evecs[1] = evec_solve(m, evals->value.array.literal_array[1]);
 
         return rval_make_matrix_array(evecs, 2);
     } else {

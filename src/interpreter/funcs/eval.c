@@ -30,7 +30,7 @@ static Rval* eval_2_x_2(Matrix* m) {
     ac4 = 4 * mdet->value.literal;
     m_disc = discriminant_solve(mtrace_val, mdet->value.literal);
 
-    if(cmp_double(m_disc, 0) == 0) {
+    if(double_cmp(m_disc, 0) == 0) {
         /* real and equal eigenvalues */
         eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
         rval_destroy(mtrace);
@@ -56,6 +56,8 @@ static Rval* eval_2_x_2(Matrix* m) {
 Rval* eval(Matrix* m) {
     if(m->nrows == 2 && m->ncols == 2) {
         return eval_2_x_2(m);
+    } else {
+        // TODO
     }
     printf("Cannot solve for eigenvalues of non 2x2 matrices.\n");
     return NULL;
