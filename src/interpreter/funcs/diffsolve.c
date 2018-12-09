@@ -28,6 +28,7 @@ Rval* diffsolve(Matrix *m, Matrix *init) {
     // ic stands for initial condition
     Rval *evals, *evecs, *ic, *ic_rref;
     Matrix **marr, **evec_arr;
+    Cplx **carr, **cevec_arr;
     Equation *equ;
 
     // eigenvalues
@@ -43,17 +44,20 @@ Rval* diffsolve(Matrix *m, Matrix *init) {
         marr[0] = evecs->value.matrix;
         marr[1] = init;
     } else if(evecs->type == RMATRIX_ARRAY){
-        nmatrices = 1 + evecs->value.array.length;
-        evec_arr = evecs->value.array.matrix_array;
+        nmatrices = 1 + evecs->value.array->length;
+        evec_arr = evecs->value.array->matrices;
         marr = malloc(nmatrices * sizeof(struct Matrix *));
         for(i = 0; i < nmatrices - 1; i++)
             marr[i] = evec_arr[i];
         marr[i] = init;
-    } else {
-        printf("Error: diffsolve needs matrix eigenvectors\n");
-        rval_destroy(evecs);
-        rval_destroy(evals);
-        return NULL;
+    } else if(evecs->type == RCPLX_ARRAY) {
+        carr = malloc(nmatrices * sizeof(struct Cplx *));
+        nmatrices = 1 + evecs->value.array->length;
+        cevec_arr = evecs->value.array->cplxs;
+        marr = malloc(nmatrices * sizeof(struct Matrix *));
+        for(i = 0; i < nmatrices - 1; i++)
+            marr[i] = evec_arr[i];
+        marr[i] = init;
     }
 
     ic = aug(marr, nmatrices);
@@ -63,10 +67,10 @@ Rval* diffsolve(Matrix *m, Matrix *init) {
     for(i = 0; i < nmatrices - 1; i++)
         consts[i] = ic_rref->value.matrix->values.rows[i]->values.literals[nmatrices - 1];
 
-    equ = equation_create(consts, evals->value.array.literal_array, evecs->value.array.matrix_array, nmatrices - 1);
+    equ = equation_create_real(consts, evals->value.array->literals, evecs->value.array->matrices, nmatrices - 1);
 
-    evals->value.array.literal_array = NULL;
-    evecs->value.array.literal_array = NULL;
+    evals->value.array->literals = NULL;
+    evecs->value.array->literals = NULL;
     rval_destroy(evals);
     rval_destroy(evecs);
     rval_destroy(ic);

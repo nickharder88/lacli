@@ -3,6 +3,7 @@
 #include "I.h"
 #include "rref.h"
 #include "aug.h"
+#include "null.h"
 
 Rval* evec_handler(Rval** args, unsigned nargs) {
     if(nargs != 1 || args[0]->type != RMATRIX) {
@@ -15,15 +16,20 @@ Rval* evec_handler(Rval** args, unsigned nargs) {
 
 static Matrix* evec_solve(Matrix* m, double eval) {
     /* can only solve 2x2 matrices */
-    Rval *eval_ident, *sub_rref;
-    Matrix *evec, *m_eval_ident, *sub, *m_sub_rref;
+    Rval *eval_ident, *evec_null;
+    Matrix *m_eval_ident, *ret, *sub;
     /* Av = yv */
     /* (A - yI)v = 0 */
 
     /* one eigenvalue */
     eval_ident = I(m->nrows);
-    m_eval_ident =  matrix_multiply_constant(eval_ident->value.matrix, eval);
+    m_eval_ident = matrix_multiply_constant(eval_ident->value.matrix, eval);
     sub = matrix_subtract(m, m_eval_ident);
+
+    evec_null = null(sub);
+    ret = evec_null->value.matrix;
+    evec_null->value.matrix = NULL;
+/*
     sub_rref = rref(sub);
     m_sub_rref = sub_rref->value.matrix;
     evec = matrix_create_dim(m->nrows, 1);
@@ -39,7 +45,11 @@ static Matrix* evec_solve(Matrix* m, double eval) {
     rval_destroy(eval_ident);
     rval_destroy(sub_rref);
     matrix_destroy(sub);
-    return evec;
+*/
+    rval_destroy(eval_ident);
+    matrix_destroy(m_eval_ident);
+    matrix_destroy(sub);
+    return ret;
 }
 
 Rval* evec_eig(Matrix* m, Rval* evals) {

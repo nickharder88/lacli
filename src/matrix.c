@@ -13,6 +13,7 @@ Matrix* matrix_create(void) {
     matrix = (Matrix*)malloc(sizeof(Matrix));
 
     matrix->values.literals = NULL;
+    matrix->type = MLITERAL;
     matrix->nrows = 0;
     matrix->ncols = 0;
 
@@ -35,7 +36,7 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
     m->nrows = nrows;
     m->ncols = ncols;
     if(nrows == 1) {
-        m->values.literals = malloc(ncols * sizeof(double));
+        m->values.literals = malloc(ncols * sizeof(Literal *));
     } else {
         m->values.rows = malloc(nrows * sizeof(struct Matrix *));
 
@@ -43,7 +44,7 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
             row = m->values.rows[row_i] = malloc(sizeof(struct Matrix));
             row->nrows = 1;
             row->ncols = ncols;
-            row->values.literals = malloc(ncols * sizeof(double));
+            row->values.literals = malloc(ncols * sizeof(Literal *));
         }
     }
     return m;
@@ -52,17 +53,18 @@ Matrix* matrix_create_dim(unsigned nrows, unsigned ncols) {
 Matrix* matrix_create_zero(unsigned nrows, unsigned ncols) {
     unsigned row_i, col_i;
     Matrix* row;
+    Literal* literal;
     Matrix* m = matrix_create_dim(nrows, ncols);
 
     if(nrows == 1) {
         for(col_i = 0; col_i < ncols; col_i++) {
-            m->values.literals[col_i] = 0;
+            m->values.literals[col_i] = literal_create_real(0);
         }
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
             row = m->values.rows[row_i];
             for(col_i = 0; col_i < m->ncols; col_i++)
-                row->values.literals[col_i] = 0;
+                row->values.literals[col_i] = literal_create_real(0);
         }
     }
     
@@ -70,7 +72,7 @@ Matrix* matrix_create_zero(unsigned nrows, unsigned ncols) {
 }
 
 void matrix_destroy(void* data) {
-    unsigned i;
+    unsigned i, j;
     Matrix *row, *m = (Matrix*)data;
 
     if(m->nrows == 1) {
@@ -82,7 +84,6 @@ void matrix_destroy(void* data) {
             for(i = 0; i < m->nrows; i++) {
                 row = m->values.rows[i];
                 if(row->values.literals != NULL) {
-                    free(row->values.literals);
                 }
                 free(row);
              }
@@ -182,18 +183,11 @@ void matrix_print(Matrix* m) {
     }
 
     if(m->nrows == 1) {
-        // 1 Dimensional
-        putchar('\t');
-        for(col_i = 0; col_i < m->ncols - 1; col_i++)
-            printf("%g\t", m->values.literals[col_i]);
-        printf("%g\n", m->values.literals[col_i]);
+        double_print(m->values.literals, m->ncols);
     } else {
         for(row_i = 0; row_i < m->nrows; row_i++) {
             row = m->values.rows[row_i];
-            putchar('\t');
-            for(col_i = 0; col_i < row->ncols - 1; col_i++)
-                printf("%g\t", row->values.literals[col_i]);
-            printf("%g\n", row->values.literals[col_i]);
+            double_print(row->values.literals, row->ncols);
         }
     }
 }

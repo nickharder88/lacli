@@ -5,6 +5,7 @@
 #include "eval.h"
 #include "disc.h"
 #include "../../util.h"
+#include "../cplx.h"
 
 Rval* eval_handler(Rval** args, unsigned nargs) {
     if(nargs != 1 || args[0]->type != RMATRIX) {
@@ -17,7 +18,8 @@ Rval* eval_handler(Rval** args, unsigned nargs) {
  
 static Rval* eval_2_x_2(Matrix* m) {
     Rval *mtrace, *mdet;
-    double eig, ac4, mtrace_val, m_disc;
+    Cplx *cplxs[2], *cplx;
+    double eig, ac4, mtrace_val, m_disc, tau, sigma, factor;
     double eigs[2];
 
     /* pc = y^2 - tr(c)+det(c)*/
@@ -31,7 +33,7 @@ static Rval* eval_2_x_2(Matrix* m) {
     m_disc = discriminant_solve(mtrace_val, mdet->value.literal);
 
     if(double_cmp(m_disc, 0) == 0) {
-        /* real and equal eigenvalues */
+        /* real and equal eigenvalue */
         eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
         rval_destroy(mtrace);
         rval_destroy(mdet);
@@ -46,11 +48,22 @@ static Rval* eval_2_x_2(Matrix* m) {
         return rval_make_literal_array(eigs, 2);
     }
 
-    /* complex eigenvalues*/
-    printf("Complex eigenvalues unsolvable\n");
+    /* complex eigenvalues */
+    // y^2+1 = (0 +- sqrt(0^2 - 4)) = +-2sqrt(i)/2
+    sigma = mtrace->value.literal;
+    tau = sqrt(ac4) / 2;
+    factor = gcf(sigma, tau);
+    sigma /= factor;
+    tau /= factor;
+
+    cplx = cplx_create(sigma, tau);
+    cplxs[0] = cplx;
+    cplx = cplx_create(sigma, -1 * tau);
+    cplxs[1] = cplx;
+
     rval_destroy(mtrace);
     rval_destroy(mdet);
-    return NULL;
+    return rval_make_cplx_array(cplxs, 2);
 }
  
 Rval* eval(Matrix* m) {

@@ -9,21 +9,18 @@ void rval_destroy(Rval* val) {
 
     switch(val->type) {
         case RMATRIX:
-            matrix_destroy(val->value.matrix);
+            if(val->value.matrix)
+                matrix_destroy(val->value.matrix);
             break;
         case RMATRIX_ARRAY:
-            if(val->value.array.matrix_array != NULL) {
-                for(i = 0; i < val->value.array.length; i++)
-                    matrix_destroy(val->value.array.matrix_array[i]);
-                free(val->value.array.matrix_array);
-            }
-            break;
         case RLITERAL_ARRAY:
-            if(val->value.array.literal_array != NULL)
-                free(val->value.array.literal_array);
+            if(val->value.array != NULL)
+                array_destroy(val->value.array);
             break;
         case REQU:
             equation_destroy(val->value.equation);
+            break;
+        case RCPLX:
             break;
         default:
             break;
@@ -39,15 +36,11 @@ void rval_print(Rval* val) {
             printf("%g\n", val->value.literal);
             break;
         case RLITERAL_ARRAY:
-            for(i = 0; i < val->value.array.length - 1; i++)
-                printf("%g\t", val->value.array.literal_array[i]);
-            printf("%g\n", val->value.array.literal_array[val->value.array.length - 1]);
+        case RMATRIX_ARRAY:
+            array_print(val->value.array);
             break;
         case RMATRIX:
             matrix_print(val->value.matrix);
-            break;
-        case RMATRIX_ARRAY:
-            matrix_print_multiple(val->value.array.matrix_array, val->value.array.length);
             break;
         case RNIL:
             printf("NULL\n");
@@ -69,39 +62,26 @@ char rval_cmp(Rval* val1, Rval* val2) {
     unsigned i;
     Matrix **marr1, **marr2;
     double *darr1, *darr2;
+    Array* arr;
 
     if(val1->type != val2->type)
         return 1;
 
     switch(val1->type) {
         case RMATRIX:
-            return matrix_cmp(val1->value.matrix, val1->value.matrix);
+            return matrix_cmp(val1->value.matrix, val2->value.matrix);
         case RMATRIX_ARRAY:
-            if(val1->value.array.length != val2->value.array.length)
-                return 1;
+        case RLITERAL_ARRAY:
+            return array_cmp(val1->value.array, val2->value.array);
 
-            marr1 = val1->value.array.matrix_array;
-            marr2 = val2->value.array.matrix_array;
-            for(i = 0; i < val1->value.array.length; i++)
-                if(matrix_cmp(marr1[i], marr2[i]))
-                    return 1;
-            return 0;
         case RLITERAL:
             return double_cmp(val1->value.literal, val2->value.literal);
-        case RLITERAL_ARRAY:
-            if(val1->value.array.length != val2->value.array.length)
-                return 1;
-
-            darr1 = val1->value.array.literal_array;
-            darr2 = val2->value.array.literal_array;
-            for(i = 0; i < val1->value.array.length; i++)
-                if(darr1[i] != darr2[i])
-                    return 1;
-            return 0;
         case RBOOLEAN:
             return val1->value.boolean != val2->value.boolean;
         case REQU:
             return equation_cmp(val1->value.equation, val2->value.equation);
+        case RCPLX:
+            break;
         default:
             break;
     }
@@ -129,16 +109,16 @@ Rval* rval_make_nil(void) {
     return rval;
 }
 
-Rval* rval_make_literal_array(double* arr, unsigned len) {
+Rval* rval_make_literal_array(double* darr, unsigned len) {
     unsigned i;
-    Rval* rval = malloc(sizeof(struct Rval));
+    Rval* rval;
+    Array* arr;
+
+    rval = malloc(sizeof(struct Rval));
+    arr = array_create_literal(darr, len);
+
     rval->type = RLITERAL_ARRAY;
-
-    rval->value.array.length = len;
-    rval->value.array.literal_array = malloc(len * sizeof(double));
-    for(i = 0; i < len; i++)
-        rval->value.array.literal_array[i] = arr[i];
-
+    rval->value.array = arr;
     return rval;
 }
 
@@ -151,14 +131,14 @@ Rval* rval_make_boolean(Boolean boolean) {
 
 Rval* rval_make_matrix_array(Matrix** marr, unsigned length) {
     unsigned i;
-    Rval* rval = malloc(sizeof(struct Rval));
+    Array* arr;
+    Rval* rval;
+
+    rval = malloc(sizeof(struct Rval));
+    arr = array_create_matrix(marr, length);
+    /* TODO shallow or deep copy ?*/
     rval->type = RMATRIX_ARRAY;
-
-    rval->value.array.length = length;
-    rval->value.array.matrix_array = malloc(length * sizeof(struct Matrix *));
-    for(i = 0; i < length; i++)
-        rval->value.array.matrix_array[i] = marr[i];
-
+    rval->value.array = arr;
     return rval;
 }
 
@@ -168,3 +148,25 @@ Rval* rval_make_equ(Equation* equ) {
     rval->value.equation = equ;
     return rval;
 }
+
+Rval* rval_make_cplx(Cplx* cplx) {
+    Rval* rval = malloc(sizeof(struct Rval));
+    rval->type = RCPLX;
+    rval->value.cplx = cplx;
+    return rval;
+}
+
+Rval* rval_make_cplx_array(Cplx** cplxs, unsigned length) {
+    unsigned i;
+    Array* arr;
+    Rval* rval;
+
+    rval = malloc(sizeof(struct Rval));
+    arr = array_create_cplx(cplxs, length);
+    /* TODO shallow or deep copy ?*/
+    rval->type = RCPLX_ARRAY;
+    rval->value.array = arr;
+    return rval;
+
+}
+

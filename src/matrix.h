@@ -4,14 +4,19 @@
 #include <stdio.h>
 #include "defs.h"
 #include "dict.h"
+#include "literal.h"
 
 typedef struct Matrix {
     unsigned nrows;
     unsigned ncols;
 
+    enum {
+        MLITERAL, MMATRIX;
+    } type;
+
     union {
         struct Matrix** rows;
-        double* literals;
+        Literal** literals;
     } values;
 } Matrix;
 

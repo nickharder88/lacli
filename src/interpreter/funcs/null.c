@@ -84,5 +84,8 @@ Rval* null(Matrix* m) {
 
     free(nonpivots);
     free(pivots);
+
+    if(len == 1)
+        return rval_make_matrix(nspace[0]);
     return rval_make_matrix_array(nspace, len);
 }

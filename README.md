@@ -31,6 +31,12 @@ http://www.craftinginterpreters.com/
 Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
 
 TODO 6.1
+TODO complex eigenvalues/eigenvectors
+TODO 6.2
+TODO add diffsolve tests when working on them
+
+TODO History -> up arrow to go back
+TODO tab complete
 
 ### Valgrind
 ```bash
