@@ -32,6 +32,11 @@ static Rval* eval_2_x_2(Matrix* m) {
 
     if(double_cmp(m_disc, 0) == 0) {
         /* real and equal eigenvalues */
+        /* 
+         * 6.2 
+         * There are two types of 2x2 matrices that have real and equal eigenvalues
+         * Those that are scalar multiples of the identity and those that are not.
+         */
         eigs[0] = (mtrace->value.literal + sqrt(mtrace_val * mtrace_val - ac4)) / 2;
         rval_destroy(mtrace);
         rval_destroy(mdet);
@@ -52,12 +57,27 @@ static Rval* eval_2_x_2(Matrix* m) {
     rval_destroy(mdet);
     return NULL;
 }
+
+/*
+ * Definition 7.2.1
+ *
+ * Let A be an nxn matrix. The characteristic polynomial of A is
+ * p(lamda) = det(A - lamda*In)
+ *
+ * Thm 7.2.3
+ * Let A be an nxn matrix. The p is a polynomial of degree n of the form
+ * p(lamda) = (-1)^n*lamda^n + b(n-1)*lamda^(n-1)+...+b(0)
+ * for some real constants b0...b(n-1)
+ */
+static Rval* eval_n_x_n(Matrix *m) {
+    return NULL;
+}
  
 Rval* eval(Matrix* m) {
     if(m->nrows == 2 && m->ncols == 2) {
         return eval_2_x_2(m);
     } else {
-        // TODO
+        return eval_n_x_n(m);
     }
     printf("Cannot solve for eigenvalues of non 2x2 matrices.\n");
     return NULL;

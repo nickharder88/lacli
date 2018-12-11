@@ -41,13 +41,14 @@ static void swap(Matrix* m, unsigned i, unsigned j) {
     m->values.rows[j] = tmp;
 }
 
-static void make_pivot(Matrix* row, unsigned cur_col) {
+static void make_pivot(Matrix* row, unsigned cur_col, double* det) {
     unsigned i;
     double val;
     for(i = cur_col + 1; i < row->ncols; i++) {
         val = row->values.literals[i] /= row->values.literals[cur_col];
         row->values.literals[i] = round_if_insignificant(val);
     }
+    *det *= row->values.literals[cur_col];
     row->values.literals[cur_col] = 1;
 }
 
@@ -99,7 +100,7 @@ static void reduce_above(Matrix* m, unsigned row_i) {
     }
 }
 
-static Matrix* ref(Matrix* m, unsigned ncols) {
+static Matrix* ref(Matrix* m, unsigned ncols, double* det) {
     /* cur_row -> index of row we are interested in swapping 
      * mov_row -> index or row we want to swap into cur_row
      *
@@ -113,8 +114,10 @@ static Matrix* ref(Matrix* m, unsigned ncols) {
             cur_row++) {
 
         /* place left most row in next highest position */
-        if(cur_row != move_row)
+        if(cur_row != move_row) {
             swap(copy, cur_row, move_row);
+            *det *= -1;
+        }
 
         /* don't operate on a zero row or past augmentation */
         if(cur_col >= copy->ncols - ncols)
@@ -122,7 +125,7 @@ static Matrix* ref(Matrix* m, unsigned ncols) {
 
         row = copy->values.rows[cur_row];
         /* make first element a pivot */
-        make_pivot(row, cur_col);
+        make_pivot(row, cur_col, det);
 
         /* reduce all the rows below to 0 */
         if(cur_col < copy->ncols - ncols)
@@ -138,7 +141,8 @@ static Matrix* ref(Matrix* m, unsigned ncols) {
  */
 Rval* rref(Matrix* m) {
     unsigned row_i, pivot;
-    Matrix *row, *copy = ref(m, 0);
+    double det = 0;
+    Matrix *row, *copy = ref(m, 0, &det);
     for(row_i = 0; row_i < copy->nrows; row_i++) {
         row = copy->values.rows[row_i];
         pivot = get_pivot(row);
@@ -150,7 +154,8 @@ Rval* rref(Matrix* m) {
 
 Rval* rref_aug(Matrix* m) {
     unsigned row_i, pivot;
-    Matrix *row, *copy = ref(m, 1);
+    double det = 0;
+    Matrix *row, *copy = ref(m, 1, &det);
     for(row_i = 0; row_i < copy->nrows; row_i++) {
         row = copy->values.rows[row_i];
         pivot = get_pivot(row);
@@ -158,4 +163,17 @@ Rval* rref_aug(Matrix* m) {
             reduce_above(copy, row_i);
     }
     return rval_make_matrix(copy);
+}
+
+Rval* rref_det(Matrix *m) {
+    unsigned row_i, pivot;
+    double det = 1;
+    Matrix *row, *copy = ref(m, 0, &det);
+    for(row_i = 0; row_i < copy->nrows; row_i++) {
+        row = copy->values.rows[row_i];
+        pivot = get_pivot(row);
+        if(pivot < copy->ncols) /* is this a non zero row */
+            reduce_above(copy, row_i);
+    }
+    return rval_make_literal(det);
 }

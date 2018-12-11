@@ -10,7 +10,7 @@ typedef enum {
 
 typedef struct Rval {
     enum {
-        RMATRIX, RMATRIX_ARRAY, RLITERAL, RLITERAL_ARRAY, RNIL, RBOOLEAN, REQU
+        RMATRIX, RMATRIX_ARRAY, RLITERAL, RLITERAL_ARRAY, RNIL, RBOOLEAN, REQU, RSTR
     } type;
 
     union {
@@ -23,6 +23,7 @@ typedef struct Rval {
         } array;
 
         double literal;
+        char* str;
         Matrix* matrix;
         Boolean boolean;
         Equation* equation;
@@ -40,5 +41,6 @@ Rval* rval_make_literal_array(double* vals, unsigned length);
 Rval* rval_make_boolean(Boolean boolean);
 Rval* rval_make_matrix_array(Matrix** marr, unsigned length);
 Rval* rval_make_equ(Equation* equ);
+Rval* rval_make_str(char* str);
 
 #endif

@@ -1,0 +1,9 @@
+var a = [[-2, 1], [-1, 0]]
+var expected = [[-1,1], [0,-1]]
+var jnfa = jnform(a)
+print jnfa
+print equal(a, expected)
+quit
+
+Taken from lecture Nov 14
+Expected for the two to be equal

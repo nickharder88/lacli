@@ -9,7 +9,8 @@ void rval_destroy(Rval* val) {
 
     switch(val->type) {
         case RMATRIX:
-            matrix_destroy(val->value.matrix);
+            if(val->value.matrix != NULL)
+                matrix_destroy(val->value.matrix);
             break;
         case RMATRIX_ARRAY:
             if(val->value.array.matrix_array != NULL) {
@@ -24,6 +25,10 @@ void rval_destroy(Rval* val) {
             break;
         case REQU:
             equation_destroy(val->value.equation);
+            break;
+        case RSTR:
+            if(val->value.str != NULL)
+                free(val->value.str);
             break;
         default:
             break;
@@ -60,6 +65,9 @@ void rval_print(Rval* val) {
             break;
         case REQU:
             equation_print(val->value.equation);
+            break;
+        case RSTR:
+            printf("%s\n", val->value.str);
         default:
             break;
     }
@@ -102,6 +110,8 @@ char rval_cmp(Rval* val1, Rval* val2) {
             return val1->value.boolean != val2->value.boolean;
         case REQU:
             return equation_cmp(val1->value.equation, val2->value.equation);
+        case RSTR:
+            return strcmp(val1->value.str, val1->value.str);
         default:
             break;
     }
@@ -166,5 +176,12 @@ Rval* rval_make_equ(Equation* equ) {
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = REQU;
     rval->value.equation = equ;
+    return rval;
+}
+
+Rval* rval_make_str(char* str) {
+    Rval* rval = malloc(sizeof(struct Rval));
+    rval->type = RSTR;
+    rval->value.str = strdup(str);
     return rval;
 }

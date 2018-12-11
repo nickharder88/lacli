@@ -129,10 +129,13 @@ static Token* token_next(unsigned char* err) {
             } else if(isalpha(c)) {
                 str = scan_identifier(c);
                 if(strcmp(VARSTR, str) == 0) {
+                    free(str);
                     return token_create(VAR);
                 } else if(strcmp(PRINTSTR, str) == 0) {
+                    free(str);
                     return token_create(PRINT);
                 } else if(strcmp(QUITSTR, str) == 0) {
+                    free(str);
                     return token_create(QUIT);
                 }
                 tkn = token_create_lex(IDENTIFIER, str);

@@ -16,6 +16,21 @@ Equation* equation_create(double* consts, double* evals, Matrix** evecs, unsigne
     return equ;
 }
 
+Equation* equation_create_single(double constant, double eval, Matrix* evec) {
+    Equation* equ = malloc(sizeof(struct Equation));
+    equ->consts = malloc(sizeof(double));
+    equ->consts[0] = constant;
+
+    equ->evals = malloc(sizeof(double));
+    equ->evals[0] = eval;
+
+    equ->evecs = malloc(sizeof(struct Matrix *));
+    equ->evecs[0] = evec;
+
+    equ->nparts = 1;
+    return equ;
+}
+
 char equation_cmp(Equation* equ1, Equation* equ2) {
     // TODO
 }

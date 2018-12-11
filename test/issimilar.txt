@@ -1,0 +1,12 @@
+var a = [[1,2], [3,4]]
+var b = [[2,-2], [-3,8]]
+print issimilar(a,b)
+
+a = [[2,-3], [1,-2]]
+b = [[1,0], [0,-1]]
+print issimilar(a, b)
+quit
+
+Taken from 6.3 Exercise 3
+Expected not similar since traces are not equal
+The second problem is expected to be similar

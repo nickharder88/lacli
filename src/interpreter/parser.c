@@ -108,7 +108,7 @@ static Expr* primary(void) {
     unsigned char ncol_checked = 0;
     unsigned size, nrows, ncols, i;
     Token* tkn;
-    Expr *expr, **expr_list;
+    Expr *expr, **expr_list, **tmp;
 
     if((tkn = tokens_peek(0)) == NULL) {
         printf("Error: unexpected end of line\n");
@@ -150,7 +150,7 @@ static Expr* primary(void) {
 
         nrows = ncols = 0;
         size = MATRIXBASESIZE;
-        expr_list = malloc(size * sizeof(struct Expr *));
+        expr_list = calloc(size, sizeof(struct Expr *));
 
         if(tkn->type == LEFT_BRACE) {
             // 2 dimensional matrix

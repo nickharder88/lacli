@@ -4,6 +4,11 @@ var c = [[1], [10], [-19]]
 var d = [[-1], [12], [-25]]
 var e = basis(a,b,c,d)
 print e
+
+var expected1 = [[-1.4706], [-1.7059], [1], [0]]
+var expected2 = [[-1.1176], [-2.1765], [0], [1]]
+var expected = aug(expected1, expected2)
+print equal(e, expected)
 quit
 
 Taken from page 151

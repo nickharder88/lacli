@@ -86,11 +86,11 @@ void expr_free(Expr* expr) {
             if(expr->matrix.nrows > 1) {
                 for(i = 0; i < expr->matrix.nrows; i++)
                     expr_free(expr->matrix.expr_list[i]);
-                free(expr->call.expr_list);
+                free(expr->matrix.expr_list);
             } else {
                 for(i = 0; i < expr->matrix.ncols; i++)
                     expr_free(expr->matrix.expr_list[i]);
-                free(expr->call.expr_list);
+                free(expr->matrix.expr_list);
             }
             break;
         case VARIABLE:

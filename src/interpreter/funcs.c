@@ -19,12 +19,17 @@
 #include "funcs/basis.h"
 #include "funcs/equal.h"
 #include "funcs/diffsolve.h"
+#include "funcs/sss.h"
+#include "funcs/issimilar.h"
+#include "funcs/stableorbit.h"
+#include "funcs/isstable.h"
+#include "funcs/classifyjnf.h"
+#include "funcs/jnform.h"
 
 static Dict* func_dict;
 
 void funcs_init(void) {
     func_dict = dict_create(NULL);
-
 
     /* matrix functions*/
     dict_add(func_dict, "equal", equal_handler);
@@ -37,6 +42,7 @@ void funcs_init(void) {
     dict_add(func_dict, "rref", rref_handler);
     dict_add(func_dict, "rank", rank_handler);
     dict_add(func_dict, "det", det_handler);
+    dict_add(func_dict, "detrr", detrr_handler);
     dict_add(func_dict, "trace", trace_handler);
     dict_add(func_dict, "eval", eval_handler);
     dict_add(func_dict, "evec", evec_handler);
@@ -50,6 +56,15 @@ void funcs_init(void) {
     dict_add(func_dict, "dim", dim_handler);
     dict_add(func_dict, "basis", basis_handler);
     dict_add(func_dict, "is_basis", is_basis_handler);
+
+    /* */
+    dict_add(func_dict, "issimilar", issimilar_handler);
+    dict_add(func_dict, "classifyjnf", classifyjnf_handler);
+    dict_add(func_dict, "jnform", jnform_handler);
+
+    dict_add(func_dict, "isstable", isstable_handler);
+    dict_add(func_dict, "stableorbit", stableorbit_handler);
+    dict_add(func_dict, "sss", sss_handler);
 }
 
 void funcs_destroy(void) {

@@ -190,6 +190,7 @@ static Matrix* evaluate_row(Expr* rexpr) {
         }
 
         m->values.literals[i] = val->value.literal;
+        rval_destroy(val);
     }
 
     return m;
@@ -202,7 +203,7 @@ static Rval* evaluate_matrix(Expr* mexpr) {
         if((m = evaluate_row(mexpr)) == NULL)
             return NULL;
     } else {
-        m = matrix_create_dim(mexpr->matrix.nrows, mexpr->matrix.ncols);
+        m = matrix_create_dim_uninitialized(mexpr->matrix.nrows);
         for(i = 0; i < mexpr->matrix.nrows; i++) {
             if((row = evaluate_row(mexpr->matrix.expr_list[i])) == NULL) {
                 matrix_destroy(m);
@@ -263,6 +264,7 @@ static void evaluate_print_statement(Stmt* print) {
         return;
     }
     rval_print(val);
+    /* rval_destroy(val); */
 }
 
 static void evaluate_assign_statement(Stmt* assign) {

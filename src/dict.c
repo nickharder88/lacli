@@ -19,15 +19,21 @@ struct Dict {
 };
 
 Dict* dict_create(void (*destroy)(void*)) {
+    unsigned i;
+
     Dict* d = malloc(sizeof(struct Dict));
     d->destroy = destroy;
+
+    for(i = 0; i < HASHSIZE; i++)
+        d->table[i] = NULL;
+
     return d;
 }
 
 void* _dict_next(Dict* d, char restart) {
     static unsigned i = 0;
     static nlist *np = NULL;
-    Matrix* m;
+    Matrix* m = NULL;
 
     if(restart) {
         i = 0;
@@ -66,7 +72,8 @@ unsigned hash(char* s) {
 }
 
 nlist* dict_lookup(Dict* d, char* key) {
-    for(nlist* np = d->table[hash(key)]; np != NULL; np = np->next)
+    nlist *np = NULL;
+    for(np = d->table[hash(key)]; np != NULL; np = np->next)
         if(strcmp(key, np->key) == 0)
             return np; /* found */
     return NULL; /* not found */
@@ -80,7 +87,7 @@ void* dict_get(Dict* d, char* key) {
 }
 
 void* dict_add(Dict* d, char* key, void* val) {
-    nlist *np, *next;
+    nlist *np = NULL, *next = NULL;
     unsigned hashval;
 
     if((np = dict_lookup(d, key)) == NULL) {
@@ -104,12 +111,6 @@ void* dict_add(Dict* d, char* key, void* val) {
         np->data = val;
     }
 
-    /* if strdup fails */
-    if((np->key = strdup(key)) == NULL) {
-        free(np);
-        return NULL;
-    }
-
     return np->data;
 }
 
@@ -120,9 +121,9 @@ void dict_add_range(Dict* d, char* keys, void* vals, unsigned len) {
 }
 
 void* dict_remove(Dict* d, char* key) {
-    nlist *np, *prev, *next;
+    nlist *np = NULL, *prev = NULL, *next = NULL;
     unsigned hashval;
-    void* data;
+    void* data = NULL;
 
     /* not in Dict* */
     if((np = dict_lookup(d, key)) == NULL) {
@@ -149,12 +150,8 @@ void* dict_remove(Dict* d, char* key) {
 }
 
 void dict_destroy(Dict* d) {
-    nlist *np, *next;
+    nlist *np = NULL, *next = NULL;
     unsigned i;
-
-    if(d->destroy == NULL) {
-        return;
-    }
 
     for(i = 0; i < HASHSIZE; i++) {
         np = d->table[i];
@@ -168,4 +165,6 @@ void dict_destroy(Dict* d) {
             np = next;
         }
     }
+
+    free(d);
 }

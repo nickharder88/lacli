@@ -1,0 +1,11 @@
+var sink = [[-2, 2], [0, -1]]
+print sss(sink)
+
+var saddle = [[3, 5], [0, -2]]
+print sss(saddle)
+
+var source = [[8, 0], [-5, 3]]
+print sss(source)
+quit
+
+Taken from Exercises 4,5,6 on page 179

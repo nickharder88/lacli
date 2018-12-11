@@ -1,5 +1,4 @@
 # Synopsis
-
 Linear Algebra CLI that computes functions based off of matrices input by the user.
 
 ### Functions
@@ -22,15 +21,26 @@ If a function has the last parameter optional:newname, then it will give the res
 ### Coming soon
 1. diffsolve(matrix) - solves the matrix of form dx/dt = CX
 1. Chapter 6
+    1. issimilar
+    1. jnf solutions using 6.3.2
 1. Chapter 7
+    1. nxn eigenvalues
 1. Chapter 8
+    1. linearmap(a, b)
+    1. nullspace(lmap)
+    1. range(lmap)
+    1. coordinates(matrix)
 
 ### Dev notes
+
 http://www.craftinginterpreters.com/
 
 Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
 
-TODO 6.1
+test all the functions made
+-> check that det = y1*...*yn
+
+autotab commands
 
 ### Valgrind
 ```bash

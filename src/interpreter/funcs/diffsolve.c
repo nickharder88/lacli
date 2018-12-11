@@ -22,6 +22,28 @@ Rval* diffsolve_handler(Rval** args, unsigned nargs) {
     return diffsolve(args[0]->value.matrix, args[1]->value.matrix);
 }
 
+/* 6.3 Direct Method 
+ *
+ * a)
+ * equation
+ * X* = [[y1, 0], [0, y2]]X
+ * closed form solution
+ * X(t) = [[e^(y1t), 0], [0, e^(y2t)]]
+ *
+ * b)
+ * complex
+ *
+ * c)
+ * equation
+ * X* = [[y1, 1], [0, y1]]X
+ * closed form solution
+ * X(t) = e^(y1t)[[1, t],[0, 1]]X0
+ */
+
+static Equation* diffsolve_direct(const Matrix *m, const Matrix* init) {
+
+}
+
 Rval* diffsolve(Matrix *m, Matrix *init) {
     double *consts;
     unsigned i, nmatrices;
