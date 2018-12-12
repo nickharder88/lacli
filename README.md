@@ -16,6 +16,10 @@ To see examples of code, check the tests folder. Each test can be run with
 ```
 ./main test/example.txt
 ```
+To run the program without file input
+```
+./main
+```
 To quit the program at any point, type
 ```
 quit
