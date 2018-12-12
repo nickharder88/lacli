@@ -7,10 +7,18 @@ Linear Algebra CLI is an interpreter, written in C, that manipulates matrices to
 1. If there are any errors, report it in the issues section
     1. Frequent build error involves ld not linking math.h. Try editing the Makefile so that -lm is in a different location.
 
+### How to contribute
+1. If you run into a seg fault or inaccurate calculations, report the error in the issues section
+1. Submit pull requests that will be reviewed and possibly accepted
+
 ### General Usage
 To see examples of code, check the tests folder. Each test can be run with
 ```
 ./main test/example.txt
+```
+To quit the program at any point, type
+```
+quit
 ```
 
 #### Variables
