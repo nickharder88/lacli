@@ -4,6 +4,7 @@ var c = [[1], [10], [-19]]
 var d = [[-1], [12], [-25]]
 var e = basis(a,b,c,d)
 print e
+quit
 
 Taken from page 151
 Example 5.5.4
