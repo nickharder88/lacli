@@ -1,5 +1,5 @@
 # Synopsis
-Linear Algebra CLI that computes functions based off of matrices input by the user.
+Linear Algebra CLI is an interpreter, written in C, that manipulates matrices to calculate properties such as eigenvalues and determinants, which are then used to solve differential equations. The project was inspired as a way to study for two classes at Ohio State, CSE 2421 and MATH 2568. It also provided an opportunity to learn about interpreters as well as to architect a small program.
 
 ### How to install
 1. Clone this repository
