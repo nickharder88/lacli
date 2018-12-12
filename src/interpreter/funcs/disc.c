@@ -19,6 +19,9 @@ Rval* discriminant(Matrix* m) {
     m_det = det(m);
 
     disc = discriminant_solve(m_trace->value.literal, m_det->value.literal);
+
+    rval_destroy(m_trace);
+    rval_destroy(m_det);
     return rval_make_literal(disc);
 }
 

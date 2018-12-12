@@ -25,6 +25,8 @@
 #include "funcs/isstable.h"
 #include "funcs/classifyjnf.h"
 #include "funcs/jnform.h"
+#include "funcs/disc.h"
+#include "funcs/linearmap.h"
 
 static Dict* func_dict;
 
@@ -42,6 +44,7 @@ void funcs_init(void) {
     dict_add(func_dict, "rref", rref_handler);
     dict_add(func_dict, "rank", rank_handler);
     dict_add(func_dict, "det", det_handler);
+    dict_add(func_dict, "disc", discriminant_handler);
     dict_add(func_dict, "detrr", detrr_handler);
     dict_add(func_dict, "trace", trace_handler);
     dict_add(func_dict, "eval", eval_handler);
@@ -61,6 +64,7 @@ void funcs_init(void) {
     dict_add(func_dict, "issimilar", issimilar_handler);
     dict_add(func_dict, "classifyjnf", classifyjnf_handler);
     dict_add(func_dict, "jnform", jnform_handler);
+    dict_add(func_dict, "linearmap", linearmap_handler);
 
     dict_add(func_dict, "isstable", isstable_handler);
     dict_add(func_dict, "stableorbit", stableorbit_handler);

@@ -7,7 +7,7 @@
 #include "null.h"
 
 Rval* basis_handler(Rval** args, unsigned nargs) {
-    char row_checked;
+    char row_checked = 0;
     unsigned i, nmatrices, col_i, row_check;
     Matrix* arg;
     Matrix **cols, **arr;
@@ -140,11 +140,13 @@ Rval* is_basis_handler(Rval** args, unsigned nargs) {
 
 Rval* basis(Matrix** cols, unsigned ncols) {
     unsigned i, j, col_rank_val, nrows, pivot;
-    Rval *col_aug, *col_rref, *col_rank;
+    Rval *col_aug, *col_rref, *col_rank, *ret;
     Matrix **basis_cols, *row, *m_rref, *vec;
 
     col_aug = aug(cols, ncols);
-    return null(col_aug->value.matrix);
+    ret = null(col_aug->value.matrix);
+    rval_destroy(col_aug);
+    return ret;
 }
 
 /*

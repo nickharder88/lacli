@@ -56,8 +56,9 @@ Rval* linind(Matrix** col_vectors, unsigned ncols) {
     is_dep = matrix_cmp(m_cmp, In->value.matrix) != 0;
 
     rval_destroy(m_aug);
-    rval_destroy(In);
     rval_destroy(m_rref);
+    rval_destroy(m_rank);
     matrix_destroy(m_cmp);
+    rval_destroy(In);
     return rval_make_boolean(is_dep ? FALSE : TRUE);
 }

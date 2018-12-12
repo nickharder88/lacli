@@ -28,6 +28,8 @@ typedef struct Rval {
         Boolean boolean;
         Equation* equation;
     } value;
+
+    char in_env;
 } Rval;
 
 void rval_destroy(Rval* val);

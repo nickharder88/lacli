@@ -36,21 +36,45 @@ Rval* issimilar(Matrix* m1, Matrix* m2) {
     /* determinants of similar matrices are equal */
     det1 = det(m1);
     det2 = det(m2);
-    if(double_cmp(det1->value.literal, det2->value.literal) != 0)
+    if(double_cmp(det1->value.literal, det2->value.literal) != 0) {
+        rval_destroy(det1);
+        rval_destroy(det2);
         return rval_make_boolean(FALSE);
+    }
 
     /* trace of similar matrices are equal */
     tr1 = trace(m1);
     tr2 = trace(m2);
-    if(double_cmp(tr1->value.literal, tr2->value.literal) != 0)
+    if(double_cmp(tr1->value.literal, tr2->value.literal) != 0) {
+        rval_destroy(det1);
+        rval_destroy(det2);
+        rval_destroy(tr1);
+        rval_destroy(tr2);
         return rval_make_boolean(FALSE);
+    }
 
     /* Similar if matrices have same jordan normal form */
     evals = eval(m1);
 
     jnf1 = jnform_eval(m1, evals);
     jnf2 = jnform_eval(m2, evals);
-    if(rval_cmp(jnf1, jnf2) == 0)
+    if(rval_cmp(jnf1, jnf2) == 0) {
+        rval_destroy(det1);
+        rval_destroy(det2);
+        rval_destroy(tr1);
+        rval_destroy(tr2);
+        rval_destroy(evals);
+        rval_destroy(jnf1);
+        rval_destroy(jnf2);
         return rval_make_boolean(TRUE);
+    }
+
+    rval_destroy(det1);
+    rval_destroy(det2);
+    rval_destroy(tr1);
+    rval_destroy(tr2);
+    rval_destroy(evals);
+    rval_destroy(jnf1);
+    rval_destroy(jnf2);
     return rval_make_boolean(FALSE);
 }

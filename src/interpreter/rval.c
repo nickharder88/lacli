@@ -7,6 +7,10 @@
 void rval_destroy(Rval* val) {
     unsigned i;
 
+    /* don't destroy values in the environment */
+    if(val->in_env)
+        return;
+
     switch(val->type) {
         case RMATRIX:
             if(val->value.matrix != NULL)
@@ -83,7 +87,7 @@ char rval_cmp(Rval* val1, Rval* val2) {
 
     switch(val1->type) {
         case RMATRIX:
-            return matrix_cmp(val1->value.matrix, val1->value.matrix);
+            return matrix_cmp(val1->value.matrix, val2->value.matrix);
         case RMATRIX_ARRAY:
             if(val1->value.array.length != val2->value.array.length)
                 return 1;
@@ -111,7 +115,7 @@ char rval_cmp(Rval* val1, Rval* val2) {
         case REQU:
             return equation_cmp(val1->value.equation, val2->value.equation);
         case RSTR:
-            return strcmp(val1->value.str, val1->value.str);
+            return strcmp(val1->value.str, val2->value.str);
         default:
             break;
     }
@@ -123,6 +127,7 @@ Rval* rval_make_literal(double val) {
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = RLITERAL;
     rval->value.literal = val;
+    rval->in_env = 0;
     return rval;
 }
 
@@ -130,12 +135,14 @@ Rval* rval_make_matrix(Matrix* m) {
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = RMATRIX;
     rval->value.matrix = m;
+    rval->in_env = 0;
     return rval;
 }
 
 Rval* rval_make_nil(void) {
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = RNIL;
+    rval->in_env = 0;
     return rval;
 }
 
@@ -143,6 +150,7 @@ Rval* rval_make_literal_array(double* arr, unsigned len) {
     unsigned i;
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = RLITERAL_ARRAY;
+    rval->in_env = 0;
 
     rval->value.array.length = len;
     rval->value.array.literal_array = malloc(len * sizeof(double));
@@ -156,6 +164,7 @@ Rval* rval_make_boolean(Boolean boolean) {
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = RBOOLEAN;
     rval->value.boolean = boolean;
+    rval->in_env = 0;
     return rval;
 }
 
@@ -163,6 +172,7 @@ Rval* rval_make_matrix_array(Matrix** marr, unsigned length) {
     unsigned i;
     Rval* rval = malloc(sizeof(struct Rval));
     rval->type = RMATRIX_ARRAY;
+    rval->in_env = 0;
 
     rval->value.array.length = length;
     rval->value.array.matrix_array = malloc(length * sizeof(struct Matrix *));
@@ -174,6 +184,7 @@ Rval* rval_make_matrix_array(Matrix** marr, unsigned length) {
 
 Rval* rval_make_equ(Equation* equ) {
     Rval* rval = malloc(sizeof(struct Rval));
+    rval->in_env = 0;
     rval->type = REQU;
     rval->value.equation = equ;
     return rval;
@@ -181,6 +192,7 @@ Rval* rval_make_equ(Equation* equ) {
 
 Rval* rval_make_str(char* str) {
     Rval* rval = malloc(sizeof(struct Rval));
+    rval->in_env = 0;
     rval->type = RSTR;
     rval->value.str = strdup(str);
     return rval;

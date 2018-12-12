@@ -53,6 +53,9 @@ int main(int argc, char** argv) {
 
             rc = repl(line, nchar);
         }
+
+        /* close opened file */
+        fclose(ifile);
     } else {
         while(rc != REPL_QUIT && !feof(ifile)) {
             promptf("", 0);

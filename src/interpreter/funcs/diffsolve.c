@@ -91,6 +91,7 @@ Rval* diffsolve(Matrix *m, Matrix *init) {
     evecs->value.array.literal_array = NULL;
     rval_destroy(evals);
     rval_destroy(evecs);
+    free(marr);
     rval_destroy(ic);
     rval_destroy(ic_rref);
     return rval_make_equ(equ);

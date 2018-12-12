@@ -39,6 +39,7 @@ Rval* inverse(Matrix* m) {
     matrix_slice_after(m_aug_rref->value.matrix, m->ncols);
 
     matrix_destroy(copy);
+    rval_destroy(m_det);
     rval_destroy(In);
     rval_destroy(m_aug);
     return m_aug_rref;

@@ -5,7 +5,7 @@
 #include "rref.h"
 
 Rval* span_handler(Rval** args, unsigned nargs) {
-    char row_checked;
+    char row_checked = 0;
     unsigned i, nmatrices, col_i, row_check;
     Matrix *arg, *v;
     Matrix **cols, **arr;

@@ -24,8 +24,11 @@ Matrix* matrix_create_dim_uninitialized(unsigned nrows) {
     Matrix *row, *m = malloc(sizeof(Matrix));
     m->nrows = nrows;
     m->ncols = 1;
-    if(nrows > 1)
+    if(nrows > 1) {
         m->values.rows = malloc(nrows * sizeof(struct Matrix *));
+        for(row_i = 0; row_i < nrows; row_i++)
+            m->values.rows[row_i] = NULL;
+    }
     return m;
 }
 
@@ -81,10 +84,12 @@ void matrix_destroy(void* data) {
         if(m->values.rows != NULL) {
             for(i = 0; i < m->nrows; i++) {
                 row = m->values.rows[i];
-                if(row->values.literals != NULL) {
-                    free(row->values.literals);
+                if(row != NULL) {
+                    if(row->values.literals != NULL) {
+                        free(row->values.literals);
+                    }
+                    free(row);
                 }
-                free(row);
              }
              free(m->values.rows);
         }
@@ -146,9 +151,10 @@ Matrix* matrix_subtract(Matrix* a, Matrix* b) {
 
 
 Matrix* matrix_multiply(Matrix* a, Matrix* b) {
-    Matrix *m, *row;
+    Matrix *m;
+    double *lita, *litb, *litm;
     unsigned row_i, col_i, col_j;
-    int sum;
+    double sum;
 
     if(a->ncols != b->nrows) {
         printf("Error: matrices cannot be multiplied\n");
@@ -158,14 +164,24 @@ Matrix* matrix_multiply(Matrix* a, Matrix* b) {
     m = matrix_create_dim(a->nrows, b->ncols);
 
     for(row_i = 0; row_i < a->nrows; row_i++) {
-        row = m->values.rows[row_i];
+        /* row we are calculating values for */
+        litm = m->values.rows[row_i]->values.literals;
+
+        /* row from a we are multiplying with b columns */
+        lita = a->values.rows[row_i]->values.literals;
+
+        /* col_i holds position in litm to place sum */
         for(col_i = 0; col_i < m->ncols; col_i++) {
+
             sum = 0;
+            for(col_j = 0; col_j < a->ncols; col_j++) {
+                /* row from b we are multiplying by a rows */
+                litb = b->values.rows[col_j]->values.literals;
 
-            for(col_j = 0; col_j < a->ncols; col_j++)
-                sum += a->values.rows[row_i]->values.literals[col_j] * b->values.rows[col_j]->values.literals[col_i];
+                sum += lita[col_j] * litb[col_i];
+            }
 
-            row->values.literals[col_i] = sum;
+            litm[col_i] = round_if_insignificant(sum);
         }
     }
 
@@ -235,7 +251,6 @@ Matrix* matrix_copy(Matrix* m) {
     else
         for(row_i = 0; row_i < m->nrows; row_i++) {
             rcopy = copy->values.rows[row_i];
-            rcopy->values.literals = malloc(copy->ncols * sizeof(double));
             for(col_i = 0; col_i < m->ncols; col_i++)
                 copy->values.rows[row_i]->values.literals[col_i] = m->values.rows[row_i]->values.literals[col_i];
 
@@ -299,12 +314,18 @@ Matrix* matrix_multiply_constant(Matrix* m, double val) {
     unsigned col_i, row_i;
     Matrix* row;
     Matrix* copy = matrix_copy(m);
-    for(row_i = 0; row_i < copy->nrows; row_i++) {
-        row = copy->values.rows[row_i];
-        for(col_i = 0; col_i < copy->ncols; col_i++)
-            row->values.literals[col_i] *= val;
-    }
 
+    if(m->nrows == 1) {
+        for(col_i = 0; col_i < copy->ncols; col_i++)
+            m->values.literals[col_i] *= val;
+    } else {
+        for(row_i = 0; row_i < copy->nrows; row_i++) {
+            row = copy->values.rows[row_i];
+            for(col_i = 0; col_i < copy->ncols; col_i++)
+                row->values.literals[col_i] *= val;
+        }
+    }
+    
     return copy;
 }
 
@@ -318,14 +339,14 @@ char matrix_cmp(Matrix* m1, Matrix* m2) {
 
     if(m1->nrows == 1) {
         for(col_i = 0; col_i < m1->ncols; col_i++)
-            if(double_cmp(m1->values.literals[col_i], row2->values.literals[col_i]))
+            if(double_cmp(m1->values.literals[col_i], row2->values.literals[col_i]) != 0)
                 return -1;
     } else {
         for(row_i = 0; row_i < m1->nrows; row_i++) {
             row1 = m1->values.rows[row_i];
             row2 = m2->values.rows[row_i];
             for(col_i = 0; col_i < m1->ncols; col_i++)
-                if(double_cmp(row1->values.literals[col_i], row2->values.literals[col_i]))
+                if(double_cmp(row1->values.literals[col_i], row2->values.literals[col_i]) != 0)
                     return -1;
         }
     }
@@ -403,7 +424,8 @@ Matrix* matrix_copy_remove_row_col(Matrix* m, unsigned row, unsigned col) {
 Matrix* matrix_slice_below(Matrix* m, unsigned row) {
     unsigned i, row_i;
     Matrix** rows;
-    Matrix* copy = matrix_create_dim(row, m->ncols);
+    Matrix* copy = matrix_create_dim_uninitialized(row);
+    copy->ncols = m->ncols;
 
     for(row_i = 0; row_i < row; row_i++)
         copy->values.rows[row_i] = matrix_copy(m->values.rows[row_i]);

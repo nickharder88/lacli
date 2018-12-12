@@ -33,7 +33,7 @@ static char scan_next() {
 }
 
 static double scan_dig(char c) {
-    char has_fraction;
+    char has_fraction = 0;
     unsigned i, power = 1;
     double dig = c - '0';
 

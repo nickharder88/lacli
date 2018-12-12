@@ -5,14 +5,12 @@
 
 Rval* aug_handler(Rval** args, unsigned nargs) {
     unsigned i;
-    Matrix** marr;
+    Matrix *marr[nargs];
 
     if(nargs < 2) {
         printf("Usage: aug(matrix, matrix...)\n");
         return NULL;
     }
-
-    marr = malloc(nargs * sizeof(struct Matrix *));
 
     for(i = 0; i < nargs; i++) {
         if(args[i]->type != RMATRIX) {
@@ -23,6 +21,7 @@ Rval* aug_handler(Rval** args, unsigned nargs) {
 
         marr[i] = args[i]->value.matrix;
     }
+
 
     return aug(marr, nargs);
 }

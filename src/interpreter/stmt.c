@@ -36,18 +36,18 @@ Stmt* stmt_make_assign(char* name, Expr* initializer) {
 void stmt_destroy(Stmt* stmt) {
     switch(stmt->type) {
         case PRINT_S:
-            expr_free(stmt->value.expr.expr);
+            expr_destroy(stmt->value.expr.expr);
             break;
         case EXPR_S:
-            expr_free(stmt->value.expr.expr);
+            expr_destroy(stmt->value.expr.expr);
             break;
         case VAR_S:
             free(stmt->value.var.name);
-            expr_free(stmt->value.var.initializer);
+            expr_destroy(stmt->value.var.initializer);
             break;
         case ASSIGN_S:
             free(stmt->value.var.name);
-            expr_free(stmt->value.var.initializer);
+            expr_destroy(stmt->value.var.initializer);
             break;
         default:
             break;

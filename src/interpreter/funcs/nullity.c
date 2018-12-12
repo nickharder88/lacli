@@ -22,5 +22,6 @@ Rval* nullity(Matrix* m) {
     mrank = rank(m);
     mnullity = m->ncols - mrank->value.literal;
 
+    rval_destroy(mrank);
     return rval_make_literal(mnullity);
 }

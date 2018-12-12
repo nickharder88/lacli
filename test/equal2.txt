@@ -1,0 +1,8 @@
+var a = [[1,2], [1,2]]
+var b = [[1,2], [1,2]]
+print equal(a,b)
+b = [[1,0], [1,0]]
+print equal(a,b)
+quit
+
+Expected TRUE then FALSE

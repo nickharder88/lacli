@@ -15,9 +15,11 @@ Rval* jnform_handler(Rval** args, unsigned nargs) {
 
 /* B = P^(-1)*M*P */
 Rval* jnform(Matrix* m) {
-    Rval *evals, *jnf;
+    Rval *evals, *jnf, *ret;
     evals = eval(m);
-    return jnform_eval(m, evals);
+    ret = jnform_eval(m, evals);
+    rval_destroy(evals);
+    return ret;
 }
 
 Rval* jnform_eval(Matrix *m, Rval* evals) {
@@ -30,15 +32,19 @@ Rval* jnform_eval(Matrix *m, Rval* evals) {
     }
 
     evecs = evec_eig(m, evals);
-    if(evecs->type == RMATRIX) {
-        /* TODO */
-    } else if(evecs->type == RMATRIX_ARRAY) {
+    if(evecs->type == RMATRIX_ARRAY) {
         p = aug(evecs->value.array.matrix_array, 2);
         pinv = inverse(p->value.matrix);
         pinvm = matrix_multiply(pinv->value.matrix, m);
         m = matrix_multiply(pinvm, p->value.matrix);
+
+        rval_destroy(evecs);
+        rval_destroy(p);
+        rval_destroy(pinv);
+        matrix_destroy(pinvm);
         return rval_make_matrix(m);
     }
 
+    rval_destroy(evecs);
     return NULL;
 }

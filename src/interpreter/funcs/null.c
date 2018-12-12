@@ -25,7 +25,7 @@ Rval* null(Matrix* m) {
     unsigned *pivots, *nonpivots;
     double value;
     Matrix** nspace, *vec, *row;
-    Rval* val;
+    Rval *val, *ret;
 
     /*
      * Let A be an mxn matrix with rank l.
@@ -82,7 +82,12 @@ Rval* null(Matrix* m) {
             nspace[i]->values.rows[pivot]->values.literals[0] = round_if_insignificant(-1 * row->values.literals[nonpivots[i]]);
     }
 
+
+    ret = rval_make_matrix_array(nspace, len);
+
     free(nonpivots);
     free(pivots);
-    return rval_make_matrix_array(nspace, len);
+    free(nspace);
+    rval_destroy(val);
+    return ret;
 }

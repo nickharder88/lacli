@@ -17,11 +17,10 @@ static Rval* evaluate_literal(Expr* literal) {
 static Rval* evaluate_call(Expr* call) {
     unsigned i, j;
     Expr **expr_list, *expr;
-    Rval *val, **args = malloc(call->call.nargs * sizeof(struct Rval *));
+    Rval *val, **args = malloc(call->call.nargs * sizeof(struct Rval *)), *ret;
 
     expr_list = call->call.expr_list;
     for(i = 0; i < call->call.nargs; i++) {
-
         if((val = evaluate_expression(expr_list[i])) == NULL) {
             for(j = 0; j < i; j++) {
                 rval_destroy(args[j]);
@@ -33,7 +32,14 @@ static Rval* evaluate_call(Expr* call) {
         args[i] = val;
     }
 
-    return func_call(call->call.name, args, call->call.nargs);
+    ret = func_call(call->call.name, args, call->call.nargs);
+
+    for(i = 0; i < call->call.nargs; i++) {
+        if(args[i]->in_env == 0)
+            rval_destroy(args[i]);
+    }
+    free(args);
+    return ret;
 }
 
 static Rval* evaluate_unary(Expr* unary) {
@@ -96,6 +102,8 @@ static Rval* evaluate_binary(Expr* expr) {
                     return NULL;
                 }
 
+                rval_destroy(left);
+                rval_destroy(right);
                 return rval_make_matrix(m);
             }
             break;
@@ -115,6 +123,9 @@ static Rval* evaluate_binary(Expr* expr) {
                     rval_destroy(right);
                     return NULL;
                 }
+
+                rval_destroy(left);
+                rval_destroy(right);
                 return rval_make_matrix(m);
             }
             break;
@@ -128,9 +139,8 @@ static Rval* evaluate_binary(Expr* expr) {
                     return NULL;
                 }
 
-                tmp = left;
-                left = right;
-                right = tmp;
+                rval_destroy(left);
+                rval_destroy(right);
                 return rval_make_matrix(m);
             } else if(left->type == RMATRIX && right->type == RLITERAL) {
                 if((m = matrix_multiply_constant(left->value.matrix, right->value.literal)) == NULL) {
@@ -138,6 +148,9 @@ static Rval* evaluate_binary(Expr* expr) {
                     rval_destroy(right);
                     return NULL;
                 }
+
+                rval_destroy(left);
+                rval_destroy(right);
                 return rval_make_matrix(m);
             } else {
                 if((m = matrix_multiply(left->value.matrix, right->value.matrix)) == NULL){
@@ -145,6 +158,9 @@ static Rval* evaluate_binary(Expr* expr) {
                     rval_destroy(right);
                     return NULL;
                 }
+
+                rval_destroy(left);
+                rval_destroy(right);
                 return rval_make_matrix(m);
             }
             break;
@@ -160,9 +176,12 @@ static Rval* evaluate_binary(Expr* expr) {
             break;
         default:
             // ERR
+            rval_destroy(left);
+            rval_destroy(right);
             return NULL;
     }
 
+    rval_destroy(right);
     return left;
 }
 
@@ -204,6 +223,7 @@ static Rval* evaluate_matrix(Expr* mexpr) {
             return NULL;
     } else {
         m = matrix_create_dim_uninitialized(mexpr->matrix.nrows);
+        m->ncols = mexpr->matrix.ncols;
         for(i = 0; i < mexpr->matrix.nrows; i++) {
             if((row = evaluate_row(mexpr->matrix.expr_list[i])) == NULL) {
                 matrix_destroy(m);
@@ -259,12 +279,15 @@ static void evaluate_expr_statement(Stmt* expr) {
 
 static void evaluate_print_statement(Stmt* print) {
     Rval* val;
+    Expr* expr = print->value.expr.expr;
+
     if((val = evaluate_expression(print->value.expr.expr)) == NULL) {
         printf("Error: cannot print this expression\n");
         return;
     }
+
     rval_print(val);
-    /* rval_destroy(val); */
+    rval_destroy(val);
 }
 
 static void evaluate_assign_statement(Stmt* assign) {

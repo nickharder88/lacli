@@ -26,14 +26,20 @@ Rval* isstable(Matrix* m) {
     if(m->nrows == 2 && m->ncols == 2) {
         evals = eval(m);
         if(evals->type == RLITERAL) {
-            if(evals->value.literal < 0)
+            if(evals->value.literal < 0) {
+                rval_destroy(evals);
                 return rval_make_boolean(TRUE);
+            }
+            rval_destroy(evals);
             return rval_make_boolean(FALSE);
         }
 
         devals = evals->value.array.literal_array;
-        if(devals[0] > 0 || devals[1] > 0)
+        if(devals[0] >= 0 || devals[1] >= 0) {
+            rval_destroy(evals);
             return rval_make_boolean(FALSE);
+        }
+        rval_destroy(evals);
         return rval_make_boolean(TRUE);
     }
 

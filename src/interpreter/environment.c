@@ -5,6 +5,7 @@ static Dict* var_dict;
 
 static void var_destroy(void* rval) {
     Rval* val = (Rval*)rval;
+    val->in_env = 0;
     rval_destroy(val);
 }
 
@@ -21,7 +22,12 @@ void env_define(char* identifier, Rval* val) {
         //err
     }
 
-    dict_add(var_dict, identifier, val);
+    if(dict_add(var_dict, identifier, val) == NULL) {
+        printf("Error saving value\n");
+        return;
+    }
+
+    val->in_env = 1;
 }
 
 Rval* env_get(char* identifier) {

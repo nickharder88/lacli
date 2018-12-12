@@ -1,0 +1,14 @@
+var a = 1
+var b = 1
+var c = equal(a,b)
+print a
+print b
+print c
+a = 2
+c = equal(a, b)
+print a
+print b
+print c
+quit
+
+Expected TRUE and then FALSE
