@@ -1,28 +1,76 @@
 # Synopsis
 Linear Algebra CLI that computes functions based off of matrices input by the user.
 
-### Functions
-If a function has the last parameter optional:newname, then it will give the resulting matrix the name supplied in the parameter list if given, otherwise it will use the FIRST matrix in the argument list's name.  
+###How to install
+1. Clone this repository
+1. Run make on the root directory(may only work on linux)
+1. If there are any errors, report it in the issues section
+    1. Frequent build error involves ld not linking math.h. Try editing the Makefile so that -lm is in a different location.
+
+###General Usage
+####Variables
+To define a constant  
+```
+var a = 1
+```  
+To define a matrix
+```
+var b = [[1,2], [1,2]]
+```  
+
+To print the value of a variable
+```
+var a = 1
+print a
+```
+
+#####Arithmetic
+The program can do most simple arithmetic such as
+```
+var a = 1
+var b = a + 2
+var c = (b+a)/b
+```
+
+####Functions
+To call a function  
+```
+var a = [[1,2],[1,2]]
+var arref = rref(a)
+```
 
 #####Matrix functions
-* rref(matrix, optional:newname) - transforms to reduced row echelon form
-* inverse(matrix, optional:newname) - inverses the matrix
-* I(n, name) - produces an identity matrix with dimension nxn
-* aug(matrix1, matrix2, optional:newname) - creates an augmented matrix by combining matrix1 and matrix 2 
-* transpose(matrix1, optional:newname) - flips values around diagonal to get transpose. must be a square matrix.
+* rref(matrix) - transforms to reduced row echelon form
+* inverse(matrix) - inverses the matrix
+* I(n) - produces an identity matrix with dimension nxn
+* aug(matrix...) - creates an augmented matrix by combining a set of matrices
+* transpose(matrix1) - the transpose of a matrix
+* evec(matrix) - calculates eigenvectors of the matrix
+* basis(v1,...,v2) - calculates a basis for a set of vectors
+* null(matrix) - calculates the null space of a matrix
+* jnform(matrix) - calculates the jordan normal form of a matrix
 
 #####Value functions
 * rank(matrix) - the rank of the matrix. First reduces to rref.
 * det(matrix) - the determinant of the 2x2 matrix
 * trace(matrix) - the trace of the matrix
 * eval(matrix) - finds the eigenvalues of the matrix
-* evec(matrix) - finds the eigenvectors of the matrix
+* dim(cols, ncols) - the dimension of a set of column vectors
+* disc(matrix) - the discriminant of a matrix
+* linind(cols) - determines whether a set of column vectors are linearly independent
+* nullity(matrix) - the nullity of a matrix
+* sss(matrix) - determines whether a 2x2 matrix is a Sink, Saddle, or Source
+* isstable(matrix) - determines whether a 2x2 matrix is linearly stable
+* diffsolve(matrix) - solves a 2x2 differential equation
+
+* equal(val, val) - determines whether two values are equal
+
 
 ### Coming soon
 1. diffsolve(matrix) - solves the matrix of form dx/dt = CX
 1. Chapter 6
     1. issimilar
-    1. jnf solutions using 6.3.2
+    1. classifyjnf
 1. Chapter 7
     1. nxn eigenvalues
 1. Chapter 8
@@ -30,19 +78,12 @@ If a function has the last parameter optional:newname, then it will give the res
     1. nullspace(lmap)
     1. range(lmap)
     1. coordinates(matrix)
+1. Help menu
+1. Autotab functions
+1. History
 
 ### Dev notes
 
 http://www.craftinginterpreters.com/
 
 Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
-
-test all the functions made
--> check that det = y1*...*yn
-
-autotab commands
-
-### Valgrind
-```bash
-valgrind --leak-check=yes debug
-```

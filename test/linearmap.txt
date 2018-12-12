@@ -1,8 +1,0 @@
-var va = [1,4,1]
-var vb = [-1,1,1]
-var vc = [0,1,0]
-var wa = [2,0]
-var wb = [1,1]
-var wc = [1,-1]
-var a = linearmap(3,va,vb,vc,wa,wb,wc)
-print a
