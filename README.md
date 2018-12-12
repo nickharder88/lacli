@@ -1,14 +1,14 @@
 # Synopsis
 Linear Algebra CLI that computes functions based off of matrices input by the user.
 
-###How to install
+### How to install
 1. Clone this repository
 1. Run make on the root directory(may only work on linux)
 1. If there are any errors, report it in the issues section
     1. Frequent build error involves ld not linking math.h. Try editing the Makefile so that -lm is in a different location.
 
-###General Usage
-####Variables
+### General Usage
+#### Variables
 To define a constant  
 ```
 var a = 1
@@ -24,7 +24,7 @@ var a = 1
 print a
 ```
 
-#####Arithmetic
+##### Arithmetic
 The program can do most simple arithmetic such as
 ```
 var a = 1
@@ -32,14 +32,14 @@ var b = a + 2
 var c = (b+a)/b
 ```
 
-####Functions
+#### Functions
 To call a function  
 ```
 var a = [[1,2],[1,2]]
 var arref = rref(a)
 ```
 
-#####Matrix functions
+##### Matrix functions
 * rref(matrix) - transforms to reduced row echelon form
 * inverse(matrix) - inverses the matrix
 * I(n) - produces an identity matrix with dimension nxn
@@ -50,8 +50,8 @@ var arref = rref(a)
 * null(matrix) - calculates the null space of a matrix
 * jnform(matrix) - calculates the jordan normal form of a matrix
 
-#####Value functions
-* rank(matrix) - the rank of the matrix. First reduces to rref.
+##### Value functions
+* rank(matrix) - the rank of the matrix. First reduces to rref
 * det(matrix) - the determinant of the 2x2 matrix
 * trace(matrix) - the trace of the matrix
 * eval(matrix) - finds the eigenvalues of the matrix
@@ -62,7 +62,6 @@ var arref = rref(a)
 * sss(matrix) - determines whether a 2x2 matrix is a Sink, Saddle, or Source
 * isstable(matrix) - determines whether a 2x2 matrix is linearly stable
 * diffsolve(matrix) - solves a 2x2 differential equation
-
 * equal(val, val) - determines whether two values are equal
 
 
@@ -83,7 +82,8 @@ var arref = rref(a)
 1. History
 
 ### Dev notes
-
+The REPL was inspired and mostly designed off of this tutorial
 http://www.craftinginterpreters.com/
 
-Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
+##### Bugs
+1. Currently cannot have a [[x1, x2, x3]] matrix since 1 row will not read the rows property of a matrix, instead it will read the literals property of the matrix
