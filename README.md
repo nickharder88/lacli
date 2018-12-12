@@ -32,7 +32,7 @@ var b = a + 2
 var c = (b+a)/b
 ```
 
-#### Functions
+##### Functions
 To call a function  
 ```
 var a = [[1,2],[1,2]]
