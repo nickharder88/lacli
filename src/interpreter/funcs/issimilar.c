@@ -5,7 +5,6 @@
 #include "jnform.h"
 #include "eval.h"
 
-
 Rval* issimilar_handler(Rval** args, unsigned nargs) {
     if(nargs != 2 || args[0]->type != RMATRIX || args[1]->type != RMATRIX) {
         printf("Usage: is_similar(matrix, matrix)\n");
@@ -55,10 +54,9 @@ Rval* issimilar(Matrix* m1, Matrix* m2) {
 
     /* Similar if matrices have same jordan normal form */
     evals = eval(m1);
-
     jnf1 = jnform_eval(m1, evals);
-    jnf2 = jnform_eval(m2, evals);
-    if(rval_cmp(jnf1, jnf2) == 0) {
+
+    if(matrix_cmp(jnf1->value.matrix, m2) == 0) {
         rval_destroy(det1);
         rval_destroy(det2);
         rval_destroy(tr1);

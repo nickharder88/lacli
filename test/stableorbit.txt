@@ -1,0 +1,6 @@
+var a = [[2,1],[-1,-3]]
+print stableorbit(a)
+quit
+
+Taken from 6.5.4
+Page 178

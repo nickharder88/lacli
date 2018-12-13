@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include "../util.h"
 
 #include "equation.h"
 
@@ -40,7 +41,11 @@ void equation_print(Equation* equ) {
     double const_val;
     char *str, *part;
 
-    printf("%.6g*e^(%.6gt)v%d", equ->consts[0], equ->evals[0], 0);
+    if(double_cmp(equ->consts[0], 1) == 0)
+        printf("e^(%.6gt)v%d", equ->evals[0], 1);
+    else
+        printf("%.6g*e^(%.6gt)v%d", equ->consts[0], equ->evals[0], 1);
+
     for(i = 1; i < equ->nparts; i++) {
         const_val = equ->consts[i];
         if(const_val > 0)
@@ -49,12 +54,15 @@ void equation_print(Equation* equ) {
             const_val *= -1;
             printf(" - ");
         }
-        printf("%.6g*e^(%.6gt)v%d", const_val, equ->evals[i], i);
+        if(double_cmp(equ->consts[i], 1) == 0)
+            printf("e^(%.6gt)v%d", equ->evals[i], i+1);
+        else
+            printf("%.6g*e^(%.6gt)v%d", const_val, equ->evals[i], i+1);
     }
     printf("\n");
 
     for(i = 0; i < equ->nparts; i++) {
-        printf("v%d\n", i);
+        printf("v%d\n", i+1);
         matrix_print(equ->evecs[i]);
     }
     printf("\n");

@@ -8,6 +8,8 @@ Rval* stableorbit_handler(Rval** args, unsigned nargs) {
         printf("Usage: stableorbit(matrix)\n");
         return NULL;
     }
+
+    return stableorbit(args[0]->value.matrix);
 }
 
 /*
