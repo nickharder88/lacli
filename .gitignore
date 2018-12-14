@@ -1,0 +1,6 @@
+*.o
+obj
+main
+prof
+*.txt
+*.out

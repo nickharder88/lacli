@@ -7,6 +7,9 @@ SRCDIR := src
 SRCFILES := $(shell find src/ -name '*.c')
 OBJFILES := $(patsubst $(shell find src/ -name '*.c')/%.c, $(OBJ)/%.o, $(SRCFILES))
 
+prof : $(OBJFILES)
+	$(CC) $^ -o $@ -pg
+
 main : $(OBJFILES)
 	$(CC) $^ -o $@
 
@@ -19,4 +22,4 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 clean :
-	rm -rf main $(OBJDIR)
+	rm -rf main prof $(OBJDIR)

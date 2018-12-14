@@ -55,8 +55,9 @@ Rval* issimilar(Matrix* m1, Matrix* m2) {
     /* Similar if matrices have same jordan normal form */
     evals = eval(m1);
     jnf1 = jnform_eval(m1, evals);
+    jnf2 = jnform_eval(m2, evals);
 
-    if(matrix_cmp(jnf1->value.matrix, m2) == 0) {
+    if(matrix_cmp(jnf1->value.matrix, jnf2->value.matrix) == 0) {
         rval_destroy(det1);
         rval_destroy(det2);
         rval_destroy(tr1);

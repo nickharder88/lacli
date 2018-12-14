@@ -97,6 +97,8 @@ var arref = rref(a)
 1. Help menu
 1. Autotab functions
 1. History
+1. Multithreading for REPL
+    1. Make data(matrices) immutable, add const to function definitions
 
 ### Dev notes
 The REPL was inspired and mostly designed off of this tutorial

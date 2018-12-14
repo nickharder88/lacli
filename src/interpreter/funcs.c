@@ -23,7 +23,6 @@
 #include "funcs/issimilar.h"
 #include "funcs/stableorbit.h"
 #include "funcs/isstable.h"
-#include "funcs/classifyjnf.h"
 #include "funcs/jnform.h"
 #include "funcs/disc.h"
 #include "funcs/linearmap.h"
@@ -62,7 +61,6 @@ void funcs_init(void) {
 
     /* */
     dict_add(func_dict, "issimilar", issimilar_handler);
-    dict_add(func_dict, "classifyjnf", classifyjnf_handler);
     dict_add(func_dict, "jnform", jnform_handler);
     dict_add(func_dict, "linearmap", linearmap_handler);
 
