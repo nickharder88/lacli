@@ -1,10 +1,13 @@
+#include <stdlib.h>
+
 #include "linearmap.h"
 #include "transpose.h"
 #include "aug.h"
 #include "inverse.h"
 
 Rval* linearmap_handler(Rval** args, unsigned nargs) {
-    unsigned nrow_vectors, i;
+    unsigned nrow_vectors, i, j;
+    Rval* ret;
     Matrix **vrows, **wrows;
 
     if(nargs == 0 || args[0]->type != RLITERAL) {
@@ -13,25 +16,31 @@ Rval* linearmap_handler(Rval** args, unsigned nargs) {
     }
 
     nrow_vectors = (unsigned) args[0]->value.literal;
-    if(nargs - 1 != nrow_vectors) {
+    if(nargs - 1 != nrow_vectors * 2) {
         printf("Usage: linearmap(nrow_vectors, v1,...,vn, w1,...,wn)\n");
         return NULL;
     }
 
-    for(i = 1; i < nargs; i++) {
+    vrows = malloc(nrow_vectors * sizeof(struct Matrix *));
+    wrows = malloc(nrow_vectors * sizeof(struct Matrix *));
+
+    for(j = 0, i = 1; i < nargs; i++, j++) {
         if(args[i]->type != RMATRIX || args[i]->value.matrix->nrows != 1) {
             printf("Usage: linearmap(nrow_vectors, v1,...,vn, w1,...,wn)\n"
                     "Where v1,...,vn and w1,...,wn are row vectors\n");
             return NULL;
         }
 
-        if(i < nrow_vectors)
+        if(i-1 < nrow_vectors)
             vrows[i-1] = args[i]->value.matrix;
         else
-            wrows[i-1] = args[i]->value.matrix;
+            wrows[i-nrow_vectors-1] = args[i]->value.matrix;
     }
 
-    return linearmap(vrows, wrows, nrow_vectors);
+    ret = linearmap(vrows, wrows, nrow_vectors);
+    free(vrows);
+    free(wrows);
+    return ret;
 }
 
 /*
@@ -74,7 +83,7 @@ Rval* linearmap(Matrix** vrows, Matrix** wrows, unsigned nrow_vectors) {
     map = matrix_multiply(waug->value.matrix, vinv->value.matrix);
 
     rval_destroy(vaug);
-    rval_destroy(vinv);
+    rval_destroy(waug);
     rval_destroy(vinv);
     for(i = 0; i < nrow_vectors; i++) {
         matrix_destroy(vtranspi[i]);

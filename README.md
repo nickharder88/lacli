@@ -66,6 +66,7 @@ var arref = rref(a)
 * basis(v1,...,v2) - calculates a basis for a set of vectors
 * null(matrix) - calculates the null space of a matrix
 * jnform(matrix) - calculates the jordan normal form of a matrix
+* linearmap(nrvectors, v1,...,vn,w1,...,wn) - creates a linear map from v1...vn to w1...wn
 
 ##### Value functions
 * rank(matrix) - the rank of the matrix. First reduces to rref
@@ -84,13 +85,9 @@ var arref = rref(a)
 
 ### Coming soon
 1. diffsolve(matrix) - solves the matrix of form dx/dt = CX
-1. Chapter 6
-    1. issimilar
-    1. classifyjnf
 1. Chapter 7
     1. nxn eigenvalues
 1. Chapter 8
-    1. linearmap(a, b)
     1. nullspace(lmap)
     1. range(lmap)
     1. coordinates(matrix)

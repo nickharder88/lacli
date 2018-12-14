@@ -306,8 +306,9 @@ void matrix_slice_after(Matrix *m, unsigned col) {
             row->values.literals = vals;
             row->ncols = ncols;
         }
-        m->ncols = ncols;
     }
+
+    m->ncols = ncols;
 }
 
 Matrix* matrix_multiply_constant(Matrix* m, double val) {
@@ -407,7 +408,6 @@ Matrix* matrix_copy_remove_row_col(Matrix* m, unsigned row, unsigned col) {
                 continue;
             mrow = m->values.rows[row_i];
             rcopy = copy->values.rows[copy_row_i];
-            rcopy->values.literals = malloc(copy->ncols * sizeof(double));
             for(copy_col_i = col_i = 0; col_i < m->ncols; col_i++) {
                 if(col_i == col)
                     continue;

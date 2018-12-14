@@ -4,7 +4,7 @@
 #include "../matrix.h"
 
 #define MATRIXBASESIZE 2
-#define MAXARGLIST 4
+#define MAXARGLIST 10
 
 static Expr* expression(void);
 
