@@ -84,13 +84,6 @@ var arref = rref(a)
 
 
 ### Coming soon
-1. diffsolve(matrix) - solves the matrix of form dx/dt = CX
-1. Chapter 7
-    1. nxn eigenvalues
-1. Chapter 8
-    1. nullspace(lmap)
-    1. range(lmap)
-    1. coordinates(matrix)
 1. Help menu
 1. Autotab functions
 1. History

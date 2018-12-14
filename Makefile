@@ -11,7 +11,7 @@ prof : $(OBJFILES)
 	$(CC) $^ -o $@ -pg
 
 main : $(OBJFILES)
-	$(CC) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 $(OBJDIR)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
