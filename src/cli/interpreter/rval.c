@@ -77,6 +77,42 @@ void rval_print(Rval* val) {
     }
 }
 
+char* rval_str(Rval* val) {
+    unsigned i;
+    char *str;
+
+    switch(val->type) {
+        case RLITERAL:
+            str = malloc(MAXDIGIT * sizeof(char));
+            sprintf(str, "%g\n", val->value.literal);
+            return str;
+        case RLITERAL_ARRAY:
+            str = malloc(val->value.array.length * MAXDIGIT * sizeof(char));
+            for(i = 0; i < val->value.array.length - 1; i++)
+                sprintf(str, "%g\t", val->value.array.literal_array[i]);
+            sprintf(str, "%g\n", val->value.array.literal_array[val->value.array.length - 1]);
+            return str;
+        case RMATRIX:
+            return matrix_str(val->value.matrix);
+        case RMATRIX_ARRAY:
+            return matrix_str_multiple(val->value.array.matrix_array, val->value.array.length);
+        case RNIL:
+            return "NULL\n";
+        case RBOOLEAN:
+            if(val->value.boolean == TRUE)
+                return "TRUE\n";
+            else
+                return "FALSE\n";
+            break;
+        case REQU:
+            return equation_str(val->value.equation);
+        case RSTR:
+            return val->value.str;
+        default:
+            return NULL;
+    }
+}
+
 char rval_cmp(Rval* val1, Rval* val2) {
     unsigned i;
     Matrix **marr1, **marr2;

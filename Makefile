@@ -1,8 +1,8 @@
 CFLAGS := -Wall
 CC := cc -g -lm
 
-OBJDIR := obj
-SRCDIR := src 
+OBJDIR := obj/cli
+SRCDIR := src/cli
 
 SRCFILES := $(shell find src/ -name '*.c')
 OBJFILES := $(patsubst $(shell find src/ -name '*.c')/%.c, $(OBJ)/%.o, $(SRCFILES))
@@ -22,4 +22,4 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 clean :
-	rm -rf main prof $(OBJDIR)
+	rm -rf main prof gmon.out $(OBJDIR)

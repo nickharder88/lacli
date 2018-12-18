@@ -188,6 +188,16 @@ Matrix* matrix_multiply(Matrix* a, Matrix* b) {
     return m;
 }
 
+unsigned matrix_max_row(Matrix** m, unsigned length) {
+    unsigned i, max = 0;
+
+    for(i = 0; i < length; i++)
+        if(m[i]->nrows > max)
+            max = m[i]->nrows;
+    
+    return max;
+}
+
 void matrix_print(Matrix* m) {
     unsigned row_i, col_i;
     Matrix* row;
@@ -214,16 +224,6 @@ void matrix_print(Matrix* m) {
     }
 }
 
-unsigned matrix_max_row(Matrix** m, unsigned length) {
-    unsigned i, max = 0;
-
-    for(i = 0; i < length; i++)
-        if(m[i]->nrows > max)
-            max = m[i]->nrows;
-    
-    return max;
-}
-
 void matrix_print_multiple(Matrix** m, unsigned length) {
     unsigned i;
     /*
@@ -234,6 +234,43 @@ void matrix_print_multiple(Matrix** m, unsigned length) {
         matrix_print(m[i]);
         printf("\n");
     }
+}
+
+char* matrix_str(Matrix *m) {
+    unsigned row_i, col_i;
+    Matrix* row;
+    char *str;
+
+    if(m == NULL) {
+        printf("Error: cannot print matrix. Matrix does not exist.\n");
+        return NULL;
+    }
+
+    if(m->nrows == 1) {
+        str = malloc(m->ncols * MAXDIGIT * sizeof(char));
+
+        // 1 Dimensional
+        str[0] = '\t';
+        for(col_i = 0; col_i < m->ncols - 1; col_i++)
+            sprintf(str, "%g\t", m->values.literals[col_i]);
+        sprintf(str, "%g\n", m->values.literals[col_i]);
+        return str;
+    } else {
+        str = malloc(m->ncols * MAXDIGIT * m->nrows * sizeof(char));
+        for(row_i = 0; row_i < m->nrows; row_i++) {
+            row = m->values.rows[row_i];
+            putchar('\t');
+            for(col_i = 0; col_i < row->ncols - 1; col_i++)
+                printf("%g\t", row->values.literals[col_i]);
+            printf("%g\n", row->values.literals[col_i]);
+        }
+
+        return str;
+    }
+}
+
+char* matrix_str_multiple(Matrix **m, unsigned length) {
+
 }
 
 /* deep copies the matrix. if identifier is null, it uses the name
