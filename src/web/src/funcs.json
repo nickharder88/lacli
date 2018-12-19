@@ -1,0 +1,20 @@
+[
+    {
+        "name": "det",
+        "description": "Returns the determinant of an nxn matrix",
+        "return": "literal",
+        "example": "det([[2,1], [1,2]])"
+    },
+    {
+        "name": "rref",
+        "description": "Returns the reduced row echelon form of a matrix",
+        "return": "matrix",
+        "example": "rref([[1,2], [2,4]])"
+    },
+    {
+        "name": "inverse",
+        "description": "Returns the inverse of a matrix",
+        "return": "matrix",
+        "example": "inverse([[1,2], [1,2]])"
+    }
+]

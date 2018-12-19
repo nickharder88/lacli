@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "LACLI",
+  "name": "Linear Algebra Command Line Interface",
   "icons": [
     {
       "src": "favicon.ico",
