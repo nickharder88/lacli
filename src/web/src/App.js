@@ -76,8 +76,35 @@ class App extends Component {
           </div>
         </div>
         <div className="row">
-          <div className="col list-group">
-            {this.renderFuncRows()}
+          <div className="col">
+            <div id="accordion">
+              <div className="card">
+                <div className="card-header" id="headingFunc">
+                  <h5 className="mb-0">
+                    <button 
+                      className="btn btn-link"
+                      data-toggle="collapse"
+                      data-target="#collapseFunc"
+                      aria-expanded="true"
+                      aria-controls="collapseFunc">
+
+                      Functions
+                    </button>
+                  </h5>
+                </div>
+
+                <div
+                  id="collapseFunc"
+                  className="collapse"
+                  aria-labelledby="headingFunc"
+                  data-parent="#accordion">
+
+                  <div className="list-group">
+                    {this.renderFuncRows()}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
