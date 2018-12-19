@@ -20,6 +20,7 @@ class App extends Component {
 
     this.state = {
       activeKey: null,
+      example: null,
     };
 
     this.funcs = funcs;
@@ -27,7 +28,36 @@ class App extends Component {
   }
 
   setActiveFunc(key) {
-    this.setState({activeKey: key});
+    if(key == null) {
+      this.setState({
+        activeKey: null,
+        example: null,
+      });
+      return;
+    }
+
+    let func = this.funcs[key];
+    if(func == null) {
+      console.log("Error: tried to get invalid function name");
+      this.setState({
+        activeKey: null,
+        example: null,
+      });
+      return;
+    }
+
+    this.setState({
+      activeKey: key,
+      example: func.example,
+    });
+  }
+
+  /* No active function since we changed the input */
+  onInputChange(value) {
+    this.setState({
+      activeKey: null,
+      example: value,
+    });
   }
 
   renderFuncRows() {
@@ -55,13 +85,7 @@ class App extends Component {
   }
 
   render() {
-    let example = null;
-    if(this.state.activeKey) {
-      let func = this.funcs[this.state.activeKey];
-      console.log(this.state.activeKey);
-      console.log(func);
-      example = func.example;
-    }
+    let output = null;
 
     return (
       <div className="App container">
@@ -70,14 +94,54 @@ class App extends Component {
             <h1>Linear Algebra CLI</h1>
           </div>
         </div>
+
+        {/* Terminal */}
         <div className="row">
-          <div className="col">
-            <p>{example}</p>
+          <form className="col-sm-8">
+            <input 
+              type="text"
+              class="form-control text-white bg-dark termi card"
+              id="input"
+              value={this.state.example}
+              onChange={e => this.onInputChange(e.target.value)}/>
+          </form>
+        </div>
+        <div className="row">
+          <div className="col-sm-8 card termo bg-dark">
+            <p className="text-white">{output}</p>
           </div>
         </div>
+
+        {/* Accordion */}
         <div className="row">
           <div className="col">
             <div id="accordion">
+              {/* Basic Information */}
+              <div class="card">
+                <div class="card-header" id="headingBasicInfo">
+                  <h5 class="mb-0">
+                    <button
+                      className="btn btn-link"
+                      data-toggle="collapse"
+                      aria-expanded="true"
+                      aria-controls="collapseBasicInfo">
+                      Basic Information
+                    </button>
+                  </h5>
+                </div>
+
+                <div
+                  id="collapseBasicInfo"
+                  className="collapse"
+                  aria-labelledby="headingBasicInfo"
+                  data-parent="#accordion">
+
+                  <div class="card-body">
+                  </div>
+                </div>
+              </div>
+
+              {/* Functions */}
               <div className="card">
                 <div className="card-header" id="headingFunc">
                   <h5 className="mb-0">
@@ -87,7 +151,6 @@ class App extends Component {
                       data-target="#collapseFunc"
                       aria-expanded="true"
                       aria-controls="collapseFunc">
-
                       Functions
                     </button>
                   </h5>

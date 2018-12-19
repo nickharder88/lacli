@@ -1,3 +1,16 @@
 .App {
   text-align: center;
 }
+
+.termi, .termo {
+    width: 80%;
+    margin: 0 auto 2% auto;
+}
+
+.termi {
+    height: 45px;
+}
+
+.termo {
+    height: 90px;
+}
