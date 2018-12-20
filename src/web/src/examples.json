@@ -1,0 +1,11 @@
+[
+    {
+        "id": 1,
+        "description": "Create an array, calculate the determinant, and print the result",
+        "example": [
+            "var a = [[2,1], [1,2]]",
+            "var deta = det(a)",
+            "print a"
+        ]
+    }
+]

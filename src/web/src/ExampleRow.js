@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class FuncButton extends Component {
+class FuncRow extends Component {
   render() {
     let className = this.props.active ? "btn btn-primary active" : "btn btn-primary";
 
@@ -8,17 +8,14 @@ class FuncButton extends Component {
       <div className="list-group-item card">
         <div className="card-body container-fluid">
           <div className="row text-left">
-            <div className="col-sm-3">
-              <h3>{this.props.func.name}</h3>
+            <div className="col-sm-9">
+              <p className="card-text">{this.props.example.description}</p>
             </div>
-            <div className="col-sm-7">
-              <p className="card-text">{this.props.func.description}</p>
-            </div>
-            <div className="col-sm-2 d-flex justify-content-end">
+            <div className="col-sm-3 d-flex justify-content-end">
               <button 
                 type="button" 
                 className={className}
-                onClick={() => this.props.onClick(this.props.func.name)}>
+                onClick={() => this.props.onClick(this.props.example.id)}>
                 Example
               </button>
             </div>
@@ -29,4 +26,4 @@ class FuncButton extends Component {
   }
 }
 
-export default FuncButton;
+export default FuncRow;

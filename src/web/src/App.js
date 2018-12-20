@@ -1,71 +1,93 @@
 import React, { Component } from 'react';
 import './App.css';
+
+import FuncRow from './FuncRow';
+import ExampleRow from './ExampleRow';
+import InputForm from './InputForm';
+
 import funcsRaw from './funcs.json';
-import FuncButton from './FuncButton';
+import examplesRaw from './examples.json';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     let funcs = {};
-    let order = [];
+    let fOrder = [];
 
     for(let i = 0; i < funcsRaw.length; i++) {
       let func = funcsRaw[i];
       let key = func.name;
 
-      order.push(key);
+      fOrder.push(key);
       funcs[key] = func;
     }
 
+    this.funcs = funcs;
+    this.fOrder = fOrder;
+
+    let examples = {};
+    let exOrder = [];
+
+    for(let i = 0; i < examplesRaw.length; i++) {
+      let example = examplesRaw[i];
+      let key = example.id;
+
+      exOrder.push(key);
+      examples[key] = example;
+    }
+
+    this.examples = examples;
+    this.exOrder = exOrder;
+
+    // activeKey = null, setExample = false  => don't change output
+    // activeKey = null, setExample = true   => change output to ""
+    // activeKey = !null, setExample = false => don't change ouput
+    // activeKey = !null, setExample = true  => change output to example in activeKey
     this.state = {
       activeKey: null,
-      example: null,
+      setExample: false,
     };
-
-    this.funcs = funcs;
-    this.order = order;
   }
 
-  setActiveFunc(key) {
+  setActiveItem(key) {
     if(key == null) {
       this.setState({
         activeKey: null,
-        example: null,
+        setExample: false,
       });
       return;
     }
 
-    let func = this.funcs[key];
-    if(func == null) {
-      console.log("Error: tried to get invalid function name");
+    // Key not found
+    if(!(key in this.funcs) && !(key in this.examples)) {
       this.setState({
         activeKey: null,
-        example: null,
+        setExample: false,
       });
       return;
     }
 
     this.setState({
       activeKey: key,
-      example: func.example,
+      setExample: true,
     });
   }
 
-  /* No active function since we changed the input */
-  onInputChange(value) {
+  onExampleChange() {
+    // don't change the output. User is typing
     this.setState({
       activeKey: null,
-      example: value,
+      setExample: false,
     });
   }
-
+  
   renderFuncRows() {
     let funcRows = [];
 
-    for(let i = 0; i < this.order.length; i++) {
+    for(let i = 0; i < this.fOrder.length; i++) {
       // Guarentee the same order
-      let key = this.order[i];
+      let key = this.fOrder[i];
       let func = this.funcs[key];
 
       let active = false;
@@ -74,18 +96,52 @@ class App extends Component {
         active = true;
       }
 
-      funcRows.push(<FuncButton 
+      funcRows.push(<FuncRow
         key={key}
         func={func}
         active={active}
-        onClick={this.setActiveFunc.bind(this)}/>);
+        onClick={this.setActiveItem.bind(this)}/>);
     }
 
     return funcRows;
   }
 
+  renderExampleRows() {
+    let exampleRows = [];
+
+    for(let i = 0; i < this.exOrder.length; i++) {
+      let key = this.exOrder[i];
+      let example = this.examples[key];
+
+      let active = false;
+      if(example.id === this.state.activeKey) {
+        active = true;
+      }
+
+      exampleRows.push(<ExampleRow
+        key={key}
+        example={example}
+        active={active}
+        onClick={this.setActiveItem.bind(this)}/>);
+    } 
+
+    return exampleRows;
+  }
+
   render() {
     let output = null;
+    let example = null;
+
+    /* 
+     * only change text if we haven't set the example
+     * and the activeKey is not null
+     */
+    if(this.state.setExample && this.state.activeKey != null) {
+      if(this.state.activeKey in this.funcs) {
+        example = this.funcs[this.state.activeKey].example;
+      }
+      // TODO this.state.activeKey in this.examples
+    }
 
     return (
       <div className="App container">
@@ -97,14 +153,7 @@ class App extends Component {
 
         {/* Terminal */}
         <div className="row">
-          <form className="col-sm-8">
-            <input 
-              type="text"
-              class="form-control text-white bg-dark termi card"
-              id="input"
-              value={this.state.example}
-              onChange={e => this.onInputChange(e.target.value)}/>
-          </form>
+          <InputForm onChange={this.onExampleChange.bind(this)} example={example}/>
         </div>
         <div className="row">
           <div className="col-sm-8 card termo bg-dark">
@@ -117,9 +166,9 @@ class App extends Component {
           <div className="col">
             <div id="accordion">
               {/* Basic Information */}
-              <div class="card">
-                <div class="card-header" id="headingBasicInfo">
-                  <h5 class="mb-0">
+              <div className="card">
+                <div className="card-header" id="headingBasicInfo">
+                  <h5 className="mb-0">
                     <button
                       className="btn btn-link"
                       data-toggle="collapse"
@@ -136,7 +185,7 @@ class App extends Component {
                   aria-labelledby="headingBasicInfo"
                   data-parent="#accordion">
 
-                  <div class="card-body">
+                  <div className="card-body">
                   </div>
                 </div>
               </div>
@@ -164,6 +213,36 @@ class App extends Component {
 
                   <div className="list-group">
                     {this.renderFuncRows()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Examples */}
+              <div className="card">
+                <div className="card-header" id="headingExample">
+                  <h5 className="mb-0">
+                    <button
+                      className="btn btn-link"
+                      data-toggle="collapse"
+                      data-target="#collapseExample"
+                      aria-expanded="true"
+                      aria-controls="collapseExample"
+                    >
+                      Examples
+                    </button>
+                  </h5>
+                </div>
+
+                <div
+                  id="collapseExample"
+                  className="collapse"
+                  aria-labelledby="headingExample"
+                  data-parent="#accordion">
+
+                  <div className="list-group">
+                    <div className="list-group">
+                      {this.renderExampleRows()}
+                    </div>
                   </div>
                 </div>
               </div>

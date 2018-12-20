@@ -2,6 +2,11 @@
   text-align: center;
 }
 
+.full {
+    width: 100%;
+    height: 100%;
+}
+
 .termi, .termo {
     width: 80%;
     margin: 0 auto 2% auto;
@@ -13,4 +18,8 @@
 
 .termo {
     height: 90px;
+}
+
+.border {
+    border: 1px;
 }
