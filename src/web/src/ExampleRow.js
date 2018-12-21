@@ -1,6 +1,26 @@
 import React, { Component } from 'react';
 
-class FuncRow extends Component {
+class ExampleRow extends Component {
+
+  async setExample() {
+    this.props.onExampleChange(this.props.item.id, this.props.item.example[0]);
+
+    // wait 1 second
+    let promise = new Promise((resolve, reject) => {
+      setTimeout(() => resolve(), 1000);
+    });
+    await promise;
+
+    this.props.onExampleChange(this.props.item.id, "worked");
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    // just started
+    if(prevProps.active === false && this.props.active === true) {
+      this.setExample();
+    }
+  }
+
   render() {
     let className = this.props.active ? "btn btn-primary active" : "btn btn-primary";
 
@@ -9,13 +29,13 @@ class FuncRow extends Component {
         <div className="card-body container-fluid">
           <div className="row text-left">
             <div className="col-sm-9">
-              <p className="card-text">{this.props.example.description}</p>
+              <p className="card-text">{this.props.item.description}</p>
             </div>
             <div className="col-sm-3 d-flex justify-content-end">
               <button 
                 type="button" 
                 className={className}
-                onClick={() => this.props.onClick(this.props.example.id)}>
+                onClick={() => this.props.onClick(this.props.item.id)}>
                 Example
               </button>
             </div>
@@ -26,4 +46,4 @@ class FuncRow extends Component {
   }
 }
 
-export default FuncRow;
+export default ExampleRow;

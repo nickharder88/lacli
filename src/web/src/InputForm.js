@@ -12,20 +12,20 @@ class InputForm extends Component {
   }
 
   /* No active function since we changed the input */
-  onInputChange(value) {
+  handleInputChange(value) {
     this.setState({
       example: value,
     });
 
-    this.props.onChange();
+    this.props.handleInputChange(value);
   }
 
   render() {
-    let example = this.state.example;
+    let example = this.props.example
 
     // null means don't change value
-    if(this.props.example != null) {
-      example = this.props.example
+    if(example == null) {
+      example = this.state.example;
     }
 
     return (
@@ -35,7 +35,7 @@ class InputForm extends Component {
           className="form-control text-white bg-dark card full"
           id="input"
           value={example}
-          onChange={e => this.onInputChange(e.target.value)}/>
+          onChange={e => this.handleInputChange(e.target.value)}/>
       </form>
     );
   }

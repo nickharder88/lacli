@@ -47,6 +47,7 @@ class App extends Component {
     this.state = {
       activeKey: null,
       setExample: false,
+      example: null,
     };
   }
 
@@ -71,77 +72,58 @@ class App extends Component {
     this.setState({
       activeKey: key,
       setExample: true,
+      example: null,
     });
   }
 
-  onExampleChange() {
-    // don't change the output. User is typing
+  handleInputChange(value) {
     this.setState({
-      activeKey: null,
-      setExample: false,
+      activeKey: this.state.activeKey,
+      setExample: true,
+      example: value,
     });
   }
-  
-  renderFuncRows() {
-    let funcRows = [];
 
-    for(let i = 0; i < this.fOrder.length; i++) {
-      // Guarentee the same order
-      let key = this.fOrder[i];
-      let func = this.funcs[key];
-
-      let active = false;
-
-      if(func.name === this.state.activeKey) {
-        active = true;
-      }
-
-      funcRows.push(<FuncRow
-        key={key}
-        func={func}
-        active={active}
-        onClick={this.setActiveItem.bind(this)}/>);
+  handleExampleChange(key, example) {
+    if(key !== this.state.activeKey) {
+      return;
     }
 
-    return funcRows;
+    this.setState({
+      activeKey: key,
+      setExample: true,
+      example: example,
+    });
   }
 
-  renderExampleRows() {
-    let exampleRows = [];
+  // Renders similar styled rows for functions and examples
+  renderItemRows(ItemTag, items, order) {
+    let rows = [];
 
-    for(let i = 0; i < this.exOrder.length; i++) {
-      let key = this.exOrder[i];
-      let example = this.examples[key];
+    for(let i = 0; i < order.length; i++) {
+      // Guarentee the same order
+      let key = order[i];
+      let item = items[key];
 
       let active = false;
-      if(example.id === this.state.activeKey) {
+
+      if(key === this.state.activeKey) {
         active = true;
       }
 
-      exampleRows.push(<ExampleRow
+      rows.push(<ItemTag
         key={key}
-        example={example}
+        item={item}
         active={active}
-        onClick={this.setActiveItem.bind(this)}/>);
-    } 
+        onClick={this.setActiveItem.bind(this)}
+        onExampleChange={this.handleExampleChange.bind(this)}/>);
+    }
 
-    return exampleRows;
+    return rows;
   }
 
   render() {
     let output = null;
-    let example = null;
-
-    /* 
-     * only change text if we haven't set the example
-     * and the activeKey is not null
-     */
-    if(this.state.setExample && this.state.activeKey != null) {
-      if(this.state.activeKey in this.funcs) {
-        example = this.funcs[this.state.activeKey].example;
-      }
-      // TODO this.state.activeKey in this.examples
-    }
 
     return (
       <div className="App container">
@@ -153,7 +135,7 @@ class App extends Component {
 
         {/* Terminal */}
         <div className="row">
-          <InputForm onChange={this.onExampleChange.bind(this)} example={example}/>
+          <InputForm handleInputChange={this.handleInputChange.bind(this)} example={this.state.example}/>
         </div>
         <div className="row">
           <div className="col-sm-8 card termo bg-dark">
@@ -212,7 +194,7 @@ class App extends Component {
                   data-parent="#accordion">
 
                   <div className="list-group">
-                    {this.renderFuncRows()}
+                    {this.renderItemRows(FuncRow, this.funcs, this.fOrder)}
                   </div>
                 </div>
               </div>
@@ -241,7 +223,7 @@ class App extends Component {
 
                   <div className="list-group">
                     <div className="list-group">
-                      {this.renderExampleRows()}
+                      {this.renderItemRows(ExampleRow, this.examples, this.exOrder)}
                     </div>
                   </div>
                 </div>
