@@ -7,7 +7,7 @@ class ExampleRow extends Component {
 
     // wait 1 second
     let promise = new Promise((resolve, reject) => {
-      setTimeout(() => resolve(), 1000);
+      setTimeout(() => resolve(), 2000);
     });
     await promise;
 

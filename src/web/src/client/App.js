@@ -78,7 +78,7 @@ class App extends Component {
 
   handleInputChange(value) {
     this.setState({
-      activeKey: this.state.activeKey,
+      activeKey: null,
       setExample: true,
       example: value,
     });
